@@ -1,0 +1,21 @@
+# Подключние к БД на linux
+
+# 1. Установить mariaBD
+#     sudo apt-get install mariadb-server
+# 1.1. Создать пользователя без пароля
+#     mysql -u root
+
+
+# 2. Отредактировать 127.0.0.0 на 0.0.0.0
+#       sudo nano /etc/mysql/mariadb.conf.d/50-server.cnf
+
+# 3. Создать суперпользователя
+#       GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '' WITH GRANT OPTION;
+
+# https://stackoverflow.com/a/46323415
+# ~$ sudo /etc/init.d/mysql stop
+# ~$ sudo mysqld_safe --skip-grant-tables &
+# ~$ mysql -u root
+
+
+# 4. Основные команды https://sevo44.ru/mariadb-rabota-iz-konsoli/
