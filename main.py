@@ -4,6 +4,10 @@ from PySide2.QtCore import QSize
 from PySide2.QtSql import QSqlDatabase, QSqlTableModel
 from PySide2.QtWidgets import QApplication, QMainWindow, QTableView
 
+
+
+
+
 db = QSqlDatabase.addDatabase("QMYSQL")
 db.setHostName("server167.hosting.reg.ru")
 db.setDatabaseName("u1082920_docs_db")
