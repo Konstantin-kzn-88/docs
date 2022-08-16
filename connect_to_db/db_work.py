@@ -7,10 +7,10 @@ mysql_conn = mysql.connect(
     database='u1082920_docs_db'
 )
 
-
 with mysql_conn as connection:
     cursor = connection.cursor()
     # vvvvvvvvv___Удаление_таблиц__vvvvvvvvvvvv
+    cursor.execute("""DROP TABLE IF EXISTS Device""")
     cursor.execute("""DROP TABLE IF EXISTS Documents""")
     cursor.execute("""DROP TABLE IF EXISTS Projects""")
     cursor.execute("""DROP TABLE IF EXISTS Objects""")
@@ -36,7 +36,6 @@ with mysql_conn as connection:
                                               Project_description TEXT NOT NULL, Аutomation TEXT NOT NULL,
                                               CONSTRAINT projects_objects_fk FOREIGN KEY (ObjectsId)
                                               REFERENCES Objects (Id) ON DELETE CASCADE)""")
-
     # 4 Наименование томов проекта
     cursor.execute("""CREATE TABLE Documents(Id INT PRIMARY KEY AUTO_INCREMENT, ProjectsId INT NOT NULL,
                                               Section_other_documentation VARCHAR(50) NOT NULL,
@@ -59,8 +58,19 @@ with mysql_conn as connection:
                                               Tom_fire_safety VARCHAR(10) NOT NULL,
                                               CONSTRAINT documents_projects_fk FOREIGN KEY (ProjectsId)
                                               REFERENCES Projects (Id) ON DELETE CASCADE)""")
-
-
+    # 3 Оборудование
+    cursor.execute("""CREATE TABLE Device(Id INT PRIMARY KEY AUTO_INCREMENT, ProjectsId INT NOT NULL,
+                                              Type_device VARCHAR(10) NOT NULL,  
+                                              Pozition VARCHAR(50) NOT NULL, Name VARCHAR(50) NOT NULL,
+                                              Locations VARCHAR(50) NOT NULL, Material VARCHAR(50) NOT NULL,
+                                              Ground VARCHAR(50) NOT NULL, Target VARCHAR(50) NOT NULL, 
+                                              Volume VARCHAR(10) NOT NULL, Completion VARCHAR(5) NOT NULL, 
+                                              Pressure VARCHAR(10) NOT NULL, Temperature VARCHAR(10) NOT NULL, 
+                                              Spill_square VARCHAR(10) NOT NULL,
+                                              Death_person VARCHAR(10) NOT NULL, Injured_person VARCHAR(10) NOT NULL,
+                                              time_person VARCHAR(10) NOT NULL,
+                                              CONSTRAINT device_projects_fk FOREIGN KEY (ProjectsId)
+                                              REFERENCES Projects (Id) ON DELETE CASCADE)""")
 
     # vvvvvvvvv___Заполнение_таблиц__vvvvvvvvvvvv
     #  SQL запрос на вставку
