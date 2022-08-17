@@ -1,4 +1,8 @@
 import mysql.connector as mysql
+from faker import Faker
+
+fake = Faker('ru_RU')
+ITER = 10  # сколько данных нужно сгенерировать
 
 mysql_conn = mysql.connect(
     host='server167.hosting.reg.ru',
@@ -6,6 +10,12 @@ mysql_conn = mysql.connect(
     password='1201kZn1201!',
     database='u1082920_docs_db'
 )
+
+
+def create_insert_sql_request(table: str, fields: tuple) -> str:
+    simbol = ('%s, ' * len(fields))[:-2]
+    return f'INSERT INTO {table} ({str(fields).strip("()")})  VALUES ({simbol})'.replace("'", "")
+
 
 with mysql_conn as connection:
     cursor = connection.cursor()
@@ -93,135 +103,77 @@ with mysql_conn as connection:
 
     # vvvvvvvvv___Заполнение_таблиц__vvvvvvvvvvvv
     #  SQL запрос на вставку
+    field_dict = {
+        "Organizations": (
+            'Name_org', 'Name_org_full', 'Director', 'Name_director', 'Tech_director', 'Name_tech_director',
+            'Jur_adress',
+            'Telephone', 'Fax', 'Email', 'License', 'Date_get_license'),
+        "Objects":
+            ('OrganizationId', 'Name_opo', 'Address_opo', 'Reg_number_opo', 'Class_opo'),
+        "Projects":
+            ('ObjectsId', 'Name_project', 'Project_code', 'Project_description', 'Аutomation'),
+        "Documents":
+            ('ProjectsId', 'Section_other_documentation', 'Part_other_documentation_dpb',
+             'Part_other_documentation_gochs',
+             'Book_dpb', 'Code_dpb', 'Tom_dpb', 'Book_rpz', 'Code_rpz', 'Tom_rpz', 'Book_ifl', 'Code_ifl', 'Tom_ifl',
+             'Book_gochs', 'Code_gochs', 'Tom_gochs', 'Section_fire_safety', 'Code_fire_safety', 'Tom_fire_safety'),
+        "Substances":
+            ('Name_sub', 'Density', 'Density_gas', 'Molecular_weight', 'Steam_pressure', 'Flash_temperature',
+             'Boiling_temperature', 'Class_substance', 'Heat_of_combustion', 'Sigma', 'Energy_level',
+             'Lower_concentration', 'Cost')
+    }
+
     # 1. Организации
-    query = f"INSERT INTO Organizations (Name_org, Name_org_full, Director, Name_director, " \
-            f"Tech_director, Name_tech_director, Jur_adress, " \
-            f"Telephone, Fax, Email, License, Date_get_license) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-    val = ("ООО «Карбон-Ойл»", "Общество с ограниченной ответственностью ООО «Карбон-Ойл»",
-           "Генеральный директор", "Хузин Р.Р.", "", "",
-           "423450, Республика Татарстан, Альметьевский район, город Альметьевск, Сургутская улица, дом 25",
-           "8(8553)37-47-00", "8(8553)37-47-00", "-",
-           'ЭВ-00-007624', '17.07.2007')
-    cursor.execute(query, val)
+    for _ in range(ITER):
+        val = (fake.company(), fake.catch_phrase(),
+               fake.job(), fake.name(), fake.job(), fake.name(),
+               fake.address(), fake.phone_number(), fake.phone_number(),
+               fake.company_email(), fake.random_int(10000, 100000), fake.date_of_birth())
 
-    query2 = f"INSERT INTO Organizations (Name_org, Name_org_full, Director, Name_director, " \
-             f"Tech_director, Name_tech_director, Jur_adress, " \
-             f"Telephone, Fax, Email, License, Date_get_license) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-    val2 = ("АО «Татех»", "Акционерное общество «Татех»",
-            "Генеральный директор", "Хайруллин Ирек Акрамович", "Главный инженер", "Верия Евгений Иванович",
-            "Республика Татарстан, г. Альметьевск, ул. Маяковского, д. 116",
-            "8(8553)39-70-01", "8(8553)39-70-70", "-",
-            'ВП-00-010185', '14.04.2016')
-    cursor.execute(query2, val2)
+        query = create_insert_sql_request("Organizations", field_dict["Organizations"])
+        cursor.execute(query, val)
+
     # 2. Объекты
-    query3 = f"INSERT INTO Objects (OrganizationId, Name_opo, Address_opo, " \
-             f"Reg_number_opo, Class_opo) VALUES (%s, %s, %s, %s, %s)"
-    val3 = (1, "Система промысловых трубопроводов Фомкинского месторождения нефти",
-            "Российская Федерация, Республика Татарстан, Нурлатский муниципальный район", "А43-04735-0015", "III")
-    cursor.execute(query3, val3)
+    for _ in range(ITER):
+        query = create_insert_sql_request("Objects", field_dict["Objects"])
 
-    query4 = f"INSERT INTO Objects (OrganizationId, Name_opo, Address_opo, " \
-             f"Reg_number_opo, Class_opo) VALUES (%s, %s, %s, %s, %s)"
-    val4 = (2, "Система промысловых трубопроводов Демкинского месторождения нефти",
-            "Российская Федерация, Республика Татарстан, Аксубаевский муниципальный район", "А43-00625-0048", "II")
-    cursor.execute(query4, val4)
+        val = (fake.random_int(1, ITER), fake.text(max_nb_chars=50),
+               fake.address(), f"А{fake.random_int(10000, 100000)}", fake.random_int(1, 4))
+        cursor.execute(query, val)
 
     # 3. Проекты
-    query5 = f"INSERT INTO Projects (ObjectsId, Name_project, Project_code, Project_description, Аutomation) " \
-             f"VALUES (%s, %s, %s, %s, %s)"
-    val5 = (1, "Строительство нефтесборного трубопровода от МНС-644 Максимкинского нефтяного "
-               "месторождения до МНС-645 с СПН-250 Фомкинского нефтяного месторождения",
-            "65-20", "Проектом предусмотрено...", "Проектом предусмотрена автоматизация...")
-    cursor.execute(query5, val5)
+    for _ in range(ITER):
+        query = create_insert_sql_request("Projects", field_dict["Projects"])
 
-    query6 = f"INSERT INTO Projects (ObjectsId, Name_project, Project_code, Project_description, Аutomation) " \
-             f"VALUES (%s, %s, %s, %s, %s)"
-    val6 = (2, "Обустройство куста скважин К-Д8 Демкинского нефтяного месторождения АО «Татех",
-            "70-20", "Проектом предусмотрено...", "Проектом предусмотрена автоматизация...")
-    cursor.execute(query6, val6)
+        val = (fake.random_int(1, ITER), fake.text(max_nb_chars=50),
+               f"{fake.random_int(10, 100)}-{fake.random_int(10, 100)}", fake.text(max_nb_chars=200),
+               fake.text(max_nb_chars=200))
+        cursor.execute(query, val)
 
     # 4. Наименование томов проекта
-    query7 = f"INSERT INTO Documents " \
-             f"(ProjectsId, " \
-             f"Section_other_documentation, " \
-             f"Part_other_documentation_dpb, " \
-             f"Part_other_documentation_gochs, " \
-             f"Book_dpb, Code_dpb, Tom_dpb, " \
-             f"Book_rpz, Code_rpz, Tom_rpz, " \
-             f"Book_ifl, Code_ifl, Tom_ifl, " \
-             f"Book_gochs, Code_gochs, Tom_gochs, " \
-             f"Section_fire_safety, " \
-             f"Code_fire_safety, Tom_fire_safety) " \
-             f"VALUES " \
-             f"(%s, %s, %s, " \
-             f"%s, %s, %s, " \
-             f"%s, %s, %s, " \
-             f"%s, %s, %s, " \
-             f"%s, %s, %s, " \
-             f"%s, %s, %s, " \
-             f"%s)"
+    for _ in range(ITER):
+        query = create_insert_sql_request("Documents", field_dict["Documents"])
+        val = (fake.random_int(1, ITER),
+               "Раздел 12 «Иная документация в случаях, предусмотренных федеральными законами»",
+               "Часть 1. Декларация промышленной безопасности",
+               "Часть 2. «Перечень мероприятий по гражданской обороне»",
+               "Книга 1. Декларация промышленной безопасности", "ДПБ1", "12.1.1",
+               "Книга 2. Расчентно-пояснительная записка", "ДПБ2", "12.1.2",
+               "Книга 3. Информационный лист", "ДПБ3", "12.1.3",
+               "", "ГОЧС", "12.2",
+               "Раздел 9 «Мероприятия по обеспечению пожарной безопасности»", "ПБ", "9")
 
-    val7 = (1,
-            "Раздел 12 «Иная документация в случаях, предусмотренных федеральными законами»",
-            "Часть 1. Декларация промышленной безопасности",
-            "Часть 2. «Перечень мероприятий по гражданской обороне»",
-            "Книга 1. Декларация промышленной безопасности", "ДПБ1", "12.1.1",
-            "Книга 2. Расчентно-пояснительная записка", "ДПБ2", "12.1.2",
-            "Книга 3. Информационный лист", "ДПБ3", "12.1.3",
-            "", "ГОЧС", "12.2",
-            "Раздел 9 «Мероприятия по обеспечению пожарной безопасности»", "ПБ", "9")
-
-    cursor.execute(query7, val7)
-
-    query8 = f"INSERT INTO Documents " \
-             f"(ProjectsId, " \
-             f"Section_other_documentation, " \
-             f"Part_other_documentation_dpb, " \
-             f"Part_other_documentation_gochs, " \
-             f"Book_dpb, Code_dpb, Tom_dpb, " \
-             f"Book_rpz, Code_rpz, Tom_rpz, " \
-             f"Book_ifl, Code_ifl, Tom_ifl, " \
-             f"Book_gochs, Code_gochs, Tom_gochs, " \
-             f"Section_fire_safety, " \
-             f"Code_fire_safety, Tom_fire_safety) " \
-             f"VALUES " \
-             f"(%s, %s, %s, " \
-             f"%s, %s, %s, " \
-             f"%s, %s, %s, " \
-             f"%s, %s, %s, " \
-             f"%s, %s, %s, " \
-             f"%s, %s, %s, " \
-             f"%s)"
-
-    val8 = (1,
-            "Раздел 10 «Иная документация в случаях, предусмотренных федеральными законами»",
-            "Часть 1. Декларация промышленной безопасности",
-            "Часть 2. «Перечень мероприятий по гражданской обороне»",
-            "Книга 1. Декларация промышленной безопасности", "ДПБ1", "10.1.1",
-            "Книга 2. Расчентно-пояснительная записка", "ДПБ2", "10.1.2",
-            "Книга 3. Информационный лист", "ДПБ3", "10.1.3",
-            "", "ГОЧС", "10.2",
-            "Раздел 9 «Мероприятия по обеспечению пожарной безопасности»", "ПБ", "9")
-
-    cursor.execute(query8, val8)
+        cursor.execute(query, val)
 
     # 5. Вещества
-    query9 = f"INSERT INTO Substances (" \
-             f"Name_sub, Density, Density_gas, " \
-             f"Molecular_weight, Steam_pressure, Flash_temperature, " \
-             f"Boiling_temperature, Class_substance, Heat_of_combustion, " \
-             f"Sigma, Energy_level, Lower_concentration, " \
-             f"Cost) " \
-             f"VALUES (" \
-             f"%s, %s, %s, " \
-             f"%s, %s, %s, " \
-             f"%s, %s, %s, " \
-             f"%s, %s, %s, " \
-             f"%s)"
-    val9 = ("Нефть", "850", "3,25", "210", "65", "28", "450", "3", "46000", "7", "1", "2.3", "60000")
-    cursor.execute(query9, val9)
+    for _ in range(ITER):
+        query = create_insert_sql_request("Substances", field_dict["Substances"])
 
-
+        val = ("Нефть", fake.random_int(800, 900), fake.random_int(3, 5),
+                fake.random_int(150, 200), fake.random_int(30, 60), fake.random_int(10, 20),
+                fake.random_int(300, 400), fake.random_int(1, 4), fake.random_int(45000, 45500),
+                "4", "1", fake.random_int(3, 5), "60000")
+        cursor.execute(query, val)
 
     connection.commit()
     connection.close()
