@@ -11,6 +11,7 @@ with mysql_conn as connection:
     cursor = connection.cursor()
     # vvvvvvvvv___Удаление_таблиц__vvvvvvvvvvvv
     cursor.execute("""DROP TABLE IF EXISTS Device""")
+    cursor.execute("""DROP TABLE IF EXISTS Substances""")
     cursor.execute("""DROP TABLE IF EXISTS Documents""")
     cursor.execute("""DROP TABLE IF EXISTS Projects""")
     cursor.execute("""DROP TABLE IF EXISTS Objects""")
@@ -58,17 +59,35 @@ with mysql_conn as connection:
                                               Tom_fire_safety VARCHAR(10) NOT NULL,
                                               CONSTRAINT documents_projects_fk FOREIGN KEY (ProjectsId)
                                               REFERENCES Projects (Id) ON DELETE CASCADE)""")
-    # 3 Оборудование
-    cursor.execute("""CREATE TABLE Device(Id INT PRIMARY KEY AUTO_INCREMENT, ProjectsId INT NOT NULL,
+
+    # 5 Вещества
+    cursor.execute("""CREATE TABLE Substances(Id INT PRIMARY KEY AUTO_INCREMENT, 
+                                                Name_sub VARCHAR(50) NOT NULL,
+                                                Density VARCHAR(5) NOT NULL,
+                                                Density_gas VARCHAR(5) NOT NULL,
+                                                Molecular_weight  VARCHAR(5) NOT NULL, 
+                                                Steam_pressure  VARCHAR(5) NOT NULL, 
+                                                Flash_temperature  VARCHAR(5) NOT NULL,
+                                                Boiling_temperature  VARCHAR(5) NOT NULL,
+                                                Class_substance  VARCHAR(5) NOT NULL,
+                                                Heat_of_combustion VARCHAR(10) NOT NULL,
+                                                Sigma VARCHAR(5) NOT NULL,
+                                                Energy_level VARCHAR(5) NOT NULL,
+                                                Lower_concentration VARCHAR(5) NOT NULL,
+                                                Cost VARCHAR(5) NOT NULL)""")
+
+    # 6 Оборудование
+    cursor.execute("""CREATE TABLE Device(Id INT PRIMARY KEY AUTO_INCREMENT, ProjectsId INT NOT NULL, SubID INT,
                                               Type_device VARCHAR(10) NOT NULL,  
                                               Pozition VARCHAR(50) NOT NULL, Name VARCHAR(50) NOT NULL,
                                               Locations VARCHAR(50) NOT NULL, Material VARCHAR(50) NOT NULL,
                                               Ground VARCHAR(50) NOT NULL, Target VARCHAR(50) NOT NULL, 
                                               Volume VARCHAR(10) NOT NULL, Completion VARCHAR(5) NOT NULL, 
                                               Pressure VARCHAR(10) NOT NULL, Temperature VARCHAR(10) NOT NULL, 
-                                              Spill_square VARCHAR(10) NOT NULL,
+                                              Spill_square VARCHAR(10) NOT NULL, View_space VARCHAR(10) NOT NULL,
                                               Death_person VARCHAR(10) NOT NULL, Injured_person VARCHAR(10) NOT NULL,
-                                              time_person VARCHAR(10) NOT NULL,
+                                              Time_person VARCHAR(10) NOT NULL,
+                                              FOREIGN KEY (SubID)  REFERENCES Substances (Id) ON DELETE SET NULL,
                                               CONSTRAINT device_projects_fk FOREIGN KEY (ProjectsId)
                                               REFERENCES Projects (Id) ON DELETE CASCADE)""")
 
@@ -121,7 +140,7 @@ with mysql_conn as connection:
             "70-20", "Проектом предусмотрено...", "Проектом предусмотрена автоматизация...")
     cursor.execute(query6, val6)
 
-    # 4. Документы
+    # 4. Наименование томов проекта
     query7 = f"INSERT INTO Documents " \
              f"(ProjectsId, " \
              f"Section_other_documentation, " \
@@ -185,6 +204,24 @@ with mysql_conn as connection:
             "Раздел 9 «Мероприятия по обеспечению пожарной безопасности»", "ПБ", "9")
 
     cursor.execute(query8, val8)
+
+    # 5. Вещества
+    query9 = f"INSERT INTO Substances (" \
+             f"Name_sub, Density, Density_gas, " \
+             f"Molecular_weight, Steam_pressure, Flash_temperature, " \
+             f"Boiling_temperature, Class_substance, Heat_of_combustion, " \
+             f"Sigma, Energy_level, Lower_concentration, " \
+             f"Cost) " \
+             f"VALUES (" \
+             f"%s, %s, %s, " \
+             f"%s, %s, %s, " \
+             f"%s, %s, %s, " \
+             f"%s, %s, %s, " \
+             f"%s)"
+    val9 = ("Нефть", "850", "3,25", "210", "65", "28", "450", "3", "46000", "7", "1", "2.3", "60000")
+    cursor.execute(query9, val9)
+
+
 
     connection.commit()
     connection.close()
