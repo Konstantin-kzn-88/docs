@@ -20,7 +20,8 @@ def create_insert_sql_request(table: str, fields: tuple) -> str:
 with mysql_conn as connection:
     cursor = connection.cursor()
     # vvvvvvvvv___Удаление_таблиц__vvvvvvvvvvvv
-    cursor.execute("""DROP TABLE IF EXISTS Device""")
+    cursor.execute("""DROP TABLE IF EXISTS Pipelines""")
+    cursor.execute("""DROP TABLE IF EXISTS Devices""")
     cursor.execute("""DROP TABLE IF EXISTS Substances""")
     cursor.execute("""DROP TABLE IF EXISTS Documents""")
     cursor.execute("""DROP TABLE IF EXISTS Projects""")
@@ -87,7 +88,7 @@ with mysql_conn as connection:
                                                 Cost VARCHAR(5) NOT NULL)""")
 
     # 6 Оборудование
-    cursor.execute("""CREATE TABLE Device(Id INT PRIMARY KEY AUTO_INCREMENT, ProjectsId INT NOT NULL, SubID INT,
+    cursor.execute("""CREATE TABLE Devices(Id INT PRIMARY KEY AUTO_INCREMENT, ProjectsId INT NOT NULL, SubId INT,
                                               Type_device VARCHAR(10) NOT NULL,  
                                               Pozition VARCHAR(50) NOT NULL, Name VARCHAR(50) NOT NULL,
                                               Locations VARCHAR(50) NOT NULL, Material VARCHAR(50) NOT NULL,
@@ -99,6 +100,20 @@ with mysql_conn as connection:
                                               Time_person VARCHAR(10) NOT NULL,
                                               FOREIGN KEY (SubID)  REFERENCES Substances (Id) ON DELETE SET NULL,
                                               CONSTRAINT device_projects_fk FOREIGN KEY (ProjectsId)
+                                              REFERENCES Projects (Id) ON DELETE CASCADE)""")
+
+    # 6 Оборудование
+    cursor.execute("""CREATE TABLE Pipelines(Id INT PRIMARY KEY AUTO_INCREMENT, ProjectsId INT NOT NULL, SubId INT,
+                                              Pozition VARCHAR(50) NOT NULL, Name VARCHAR(50) NOT NULL,
+                                              Locations VARCHAR(50) NOT NULL, Material VARCHAR(50) NOT NULL,
+                                              Ground VARCHAR(50) NOT NULL, Target VARCHAR(50) NOT NULL, 
+                                              Length VARCHAR(10) NOT NULL, Diameter VARCHAR(5) NOT NULL, 
+                                              Pressure VARCHAR(10) NOT NULL, Temperature VARCHAR(10) NOT NULL, 
+                                              Flow VARCHAR(10) NOT NULL, View_space VARCHAR(10) NOT NULL,
+                                              Death_person VARCHAR(10) NOT NULL, Injured_person VARCHAR(10) NOT NULL,
+                                              Time_person VARCHAR(10) NOT NULL,
+                                              FOREIGN KEY (SubID)  REFERENCES Substances (Id) ON DELETE SET NULL,
+                                              CONSTRAINT pipeline_projects_fk FOREIGN KEY (ProjectsId)
                                               REFERENCES Projects (Id) ON DELETE CASCADE)""")
 
     # vvvvvvvvv___Заполнение_таблиц__vvvvvvvvvvvv
@@ -120,7 +135,15 @@ with mysql_conn as connection:
         "Substances":
             ('Name_sub', 'Density', 'Density_gas', 'Molecular_weight', 'Steam_pressure', 'Flash_temperature',
              'Boiling_temperature', 'Class_substance', 'Heat_of_combustion', 'Sigma', 'Energy_level',
-             'Lower_concentration', 'Cost')
+             'Lower_concentration', 'Cost'),
+        "Devices":
+            ('ProjectsId', 'SubId', 'Type_device', 'Pozition', 'Name', 'Locations', 'Material', 'Ground', 'Target',
+             'Volume', 'Completion', 'Pressure', 'Temperature', 'Spill_square', 'View_space', 'Death_person',
+             'Injured_person', 'Time_person'),
+        "Pipelines":
+            ('ProjectsId', 'SubId', 'Pozition', 'Name', 'Locations', 'Material', 'Ground', 'Target',
+             'Length', 'Diameter', 'Pressure', 'Temperature', 'Flow', 'View_space', 'Death_person',
+             'Injured_person', 'Time_person')
     }
 
     # 1. Организации
@@ -170,9 +193,33 @@ with mysql_conn as connection:
         query = create_insert_sql_request("Substances", field_dict["Substances"])
 
         val = ("Нефть", fake.random_int(800, 900), fake.random_int(3, 5),
-                fake.random_int(150, 200), fake.random_int(30, 60), fake.random_int(10, 20),
-                fake.random_int(300, 400), fake.random_int(1, 4), fake.random_int(45000, 45500),
-                "4", "1", fake.random_int(3, 5), "60000")
+               fake.random_int(150, 200), fake.random_int(30, 60), fake.random_int(10, 20),
+               fake.random_int(300, 400), fake.random_int(1, 4), fake.random_int(45000, 45500),
+               "4", "1", fake.random_int(3, 5), "60000")
+        cursor.execute(query, val)
+
+    # 6. Оборудование
+    for _ in range(ITER):
+        query = create_insert_sql_request("Devices", field_dict["Devices"])
+
+        val = (
+            fake.random_int(1, ITER), fake.random_int(1, ITER), fake.random_int(0, 1), f'E-{fake.random_int(40, 50)}',
+            'Емкость', 'Ивинское м.н.', 'Сталь, В20', 'Наземное', 'Хранение нефти',
+            fake.random_int(10, 100), fake.random_int(1, 10) / 10, fake.random_int(1, 3), fake.random_int(10, 30),
+            fake.random_int(100, 400), fake.random_int(1, 4), fake.random_int(1, 10),
+            fake.random_int(1, 10), fake.random_int(1, 10) / 10)
+        cursor.execute(query, val)
+
+    # 7. Трубопроводы
+    for _ in range(ITER):
+        query = create_insert_sql_request("Pipelines", field_dict["Pipelines"])
+
+        val = (fake.random_int(1, ITER), fake.random_int(1, ITER),
+               f'Трубопровод от скв.{fake.random_int(1, ITER)} до т.{fake.random_int(1, ITER)}', 'Трубопровод',
+               'Ивинское м.н.', 'Сталь, В20', 'Подземное', 'Транспорт нефти',
+               fake.random_int(100, 1000), fake.random_int(89, 159), fake.random_int(1, 3), fake.random_int(10, 30),
+               fake.random_int(5, 10), fake.random_int(1, 4), fake.random_int(1, 10),
+               fake.random_int(1, 10), fake.random_int(1, 10) / 10)
         cursor.execute(query, val)
 
     connection.commit()
