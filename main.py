@@ -1,8 +1,8 @@
 import sys
 
 from PySide2.QtCore import QSize
-from PySide2.QtSql import QSqlDatabase, QSqlTableModel
-from PySide2.QtWidgets import QApplication, QMainWindow, QTableView
+from PySide2.QtSql import QSqlDatabase, QSqlQuery
+from PySide2.QtWidgets import QApplication, QMainWindow, QComboBox
 
 
 
@@ -28,17 +28,13 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.table = QTableView()
+        self.qbox = QComboBox()
+        query = QSqlQuery()
 
-        self.model = QSqlTableModel(db=db)
 
-        self.table.setModel(self.model)
-
-        self.model.setTable("objects")
-        self.model.select()
 
         self.setMinimumSize(QSize(1024, 600))
-        self.setCentralWidget(self.table)
+        self.setCentralWidget(self.QComboBox)
 
 
 app = QApplication(sys.argv)
