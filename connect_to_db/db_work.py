@@ -2,7 +2,7 @@ import mysql.connector as mysql
 from faker import Faker
 
 fake = Faker('ru_RU')
-ITER = 10  # сколько данных нужно сгенерировать
+ITER = 3  # сколько данных нужно сгенерировать
 
 mysql_conn = mysql.connect(
     host='server167.hosting.reg.ru',
@@ -117,7 +117,7 @@ with mysql_conn as connection:
                                               REFERENCES Projects (Id) ON DELETE CASCADE)""")
 
     # vvvvvvvvv___Заполнение_таблиц__vvvvvvvvvvvv
-    #  SQL запрос на вставку
+    #  Поля таблиц
     field_dict = {
         "Organizations": (
             'Name_org', 'Name_org_full', 'Director', 'Name_director', 'Tech_director', 'Name_tech_director',
@@ -157,26 +157,26 @@ with mysql_conn as connection:
         cursor.execute(query, val)
 
     # 2. Объекты
-    for _ in range(ITER):
+    for _ in range(10):
         query = create_insert_sql_request("Objects", field_dict["Objects"])
 
-        val = (fake.random_int(1, ITER), fake.text(max_nb_chars=50),
+        val = (fake.random_int(1, 3), fake.text(max_nb_chars=50),
                fake.address(), f"А{fake.random_int(10000, 100000)}", fake.random_int(1, 4))
         cursor.execute(query, val)
 
     # 3. Проекты
-    for _ in range(ITER):
+    for _ in range(20):
         query = create_insert_sql_request("Projects", field_dict["Projects"])
 
-        val = (fake.random_int(1, ITER), fake.text(max_nb_chars=50),
+        val = (fake.random_int(1, 10), f"ДНС-{fake.random_int(1, 10)}",
                f"{fake.random_int(10, 100)}-{fake.random_int(10, 100)}", fake.text(max_nb_chars=200),
                fake.text(max_nb_chars=200))
         cursor.execute(query, val)
 
     # 4. Наименование томов проекта
-    for _ in range(ITER):
+    for _ in range(20):
         query = create_insert_sql_request("Documents", field_dict["Documents"])
-        val = (fake.random_int(1, ITER),
+        val = (fake.random_int(1, 20),
                "Раздел 12 «Иная документация в случаях, предусмотренных федеральными законами»",
                "Часть 1. Декларация промышленной безопасности",
                "Часть 2. «Перечень мероприятий по гражданской обороне»",
@@ -187,8 +187,8 @@ with mysql_conn as connection:
                "Раздел 9 «Мероприятия по обеспечению пожарной безопасности»", "ПБ", "9")
 
         cursor.execute(query, val)
-
-    # 5. Вещества
+    #
+    # # 5. Вещества
     for _ in range(ITER):
         query = create_insert_sql_request("Substances", field_dict["Substances"])
 
@@ -199,22 +199,22 @@ with mysql_conn as connection:
         cursor.execute(query, val)
 
     # 6. Оборудование
-    for _ in range(ITER):
+    for _ in range(50):
         query = create_insert_sql_request("Devices", field_dict["Devices"])
 
         val = (
-            fake.random_int(1, ITER), fake.random_int(1, ITER), fake.random_int(0, 1), f'E-{fake.random_int(40, 50)}',
+            fake.random_int(1, 20), fake.random_int(1, ITER), fake.random_int(0, 1), f'E-{fake.random_int(40, 50)}',
             'Емкость', 'Ивинское м.н.', 'Сталь, В20', 'Наземное', 'Хранение нефти',
             fake.random_int(10, 100), fake.random_int(1, 10) / 10, fake.random_int(1, 3), fake.random_int(10, 30),
             fake.random_int(100, 400), fake.random_int(1, 4), fake.random_int(1, 10),
             fake.random_int(1, 10), fake.random_int(1, 10) / 10)
         cursor.execute(query, val)
-
+    #
     # 7. Трубопроводы
-    for _ in range(ITER):
+    for _ in range(50):
         query = create_insert_sql_request("Pipelines", field_dict["Pipelines"])
 
-        val = (fake.random_int(1, ITER), fake.random_int(1, ITER),
+        val = (fake.random_int(1, 20), fake.random_int(1, ITER),
                f'Трубопровод от скв.{fake.random_int(1, ITER)} до т.{fake.random_int(1, ITER)}', 'Трубопровод',
                'Ивинское м.н.', 'Сталь, В20', 'Подземное', 'Транспорт нефти',
                fake.random_int(100, 1000), fake.random_int(89, 159), fake.random_int(1, 3), fake.random_int(10, 30),
