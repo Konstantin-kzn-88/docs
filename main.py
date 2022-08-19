@@ -41,17 +41,17 @@ class MainWindow(QMainWindow):
             "Objects":
                 ('Организация', 'Наименование объекта', 'Адрес объекта', 'Рег. №', 'Класс опасности'),
             "Projects":
-                ('ObjectsId', 'Name_project', 'Project_code', 'Project_description', 'Аutomation'),
+                ('Наименование объекта', 'Наименование проекта', 'Шифр проекта', 'Описание проекта', 'Описание автоматизации'),
             "Documents":
-                ('ProjectsId', 'Section_other_documentation', 'Part_other_documentation_dpb',
-                 'Part_other_documentation_gochs',
-                 'Book_dpb', 'Code_dpb', 'Tom_dpb', 'Book_rpz', 'Code_rpz', 'Tom_rpz', 'Book_ifl', 'Code_ifl',
-                 'Tom_ifl',
-                 'Book_gochs', 'Code_gochs', 'Tom_gochs', 'Section_fire_safety', 'Code_fire_safety', 'Tom_fire_safety'),
+                ('Наименование проекта', 'Раздел', 'Подраздел ДПБ',
+                 'Подраздел ГОЧС',
+                 'Книга ДПБ', 'Шифр ДПБ', 'Том ДПБ', 'Книга РПЗ', 'Код РПЗ', 'Том РПЗ', 'Книга ИФЛ', 'Код ИФЛ',
+                 'Том ИФЛ',
+                 'Книга ГОЧС', 'Код ГОЧС', 'Том ГОЧС', 'Подраздел ПБ', 'Код ПБ', 'Том ПБ'),
             "Substances":
-                ('Name_sub', 'Density', 'Density_gas', 'Molecular_weight', 'Steam_pressure', 'Flash_temperature',
-                 'Boiling_temperature', 'Class_substance', 'Heat_of_combustion', 'Sigma', 'Energy_level',
-                 'Lower_concentration', 'Cost'),
+                ('Наименование', 'Плотность, кг /м3', 'Плотность г.ф., кг/м3', 'Мол. масса, кг/кмоль', 'Давление пара, кПа', 'Температура вспышки, гр.С',
+                 'Температура кипения, гр.С', 'Класс вещества (детонация)', 'Теплота сгорания, кДж/кг', 'sigma, -', 'Энергозапас, -',
+                 'НКПР, % об.', 'Стоимость вещества, т.р./т'),
             "Devices":
                 ('ProjectsId', 'SubId', 'Type_device', 'Pozition', 'Name', 'Locations', 'Material', 'Ground', 'Target',
                  'Volume', 'Completion', 'Pressure', 'Temperature', 'Spill_square', 'View_space', 'Death_person',
@@ -92,15 +92,9 @@ class MainWindow(QMainWindow):
         GB_table = QGroupBox('Данные')
         GB_table.setStyleSheet("QGroupBox { font-weight : bold; }")
         self.table = QTableView()
-        self.model = QSqlRelationalTableModel(db=db)
-        self.table.setModel(self.model)
-        # Делаем не редактируемым первый столбец с id
         self.delegate = ReadOnlyDelegate(self.table)
-        # self.table.setItemDelegateForColumn(0, self.delegate)
-
-        self.model.setTable("Organizations")
-
-        self.model.select()
+        self.model = QSqlRelationalTableModel(db=db)
+        self.show_table(index=0)
         layout_table.addRow("", self.table)
         GB_table.setLayout(layout_table)
 
@@ -122,9 +116,14 @@ class MainWindow(QMainWindow):
         self.show()
 
     def show_table(self, index):
+        # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        # Установка таблицы из модели
+        # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         self.table.setModel(self.model)
         self.model.setTable(self.table_list_eng[index])
-
+        # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        # Запрет редактирования столбцов
+        # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         if index in (0, 4):
             self.table.setItemDelegateForColumn(0, self.delegate)
             self.table.setItemDelegateForColumn(1, None)
@@ -137,18 +136,32 @@ class MainWindow(QMainWindow):
             self.table.setItemDelegateForColumn(0, self.delegate)
             self.table.setItemDelegateForColumn(1, self.delegate)
             self.table.setItemDelegateForColumn(2, self.delegate)
-
+        # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        # Оформление заголовков таблицы
+        # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         if index == 0:
             for i in count(1,1):
                 if i > len(self.field_dict["Organizations"]): break
                 self.model.setHeaderData(i, Qt.Horizontal, self.field_dict["Organizations"][i-1])
-
         if index == 1:
             self.model.setRelation(1, QSqlRelation("Organizations", "Id", "Name_org"))
             for i in count(1,1):
                 if i > len(self.field_dict["Objects"]): break
                 self.model.setHeaderData(i, Qt.Horizontal, self.field_dict["Objects"][i-1])
-
+        if index == 2:
+            self.model.setRelation(1, QSqlRelation("Objects", "Id", "Name_opo"))
+            for i in count(1,1):
+                if i > len(self.field_dict["Projects"]): break
+                self.model.setHeaderData(i, Qt.Horizontal, self.field_dict["Projects"][i-1])
+        if index == 3:
+            self.model.setRelation(1, QSqlRelation("Projects", "Id", "Name_project"))
+            for i in count(1,1):
+                if i > len(self.field_dict["Documents"]): break
+                self.model.setHeaderData(i, Qt.Horizontal, self.field_dict["Documents"][i-1])
+        if index == 4:
+            for i in count(1,1):
+                if i > len(self.field_dict["Substances"]): break
+                self.model.setHeaderData(i, Qt.Horizontal, self.field_dict["Substances"][i-1])
 
         self.model.select()
 
