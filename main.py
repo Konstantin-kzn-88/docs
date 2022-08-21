@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 from PySide2.QtSql import QSqlDatabase, QSqlQuery, QSqlRelationalTableModel, QSqlRelation
 from PySide2.QtWidgets import QApplication, QMainWindow, QComboBox, QMessageBox, QWidget, QGridLayout, \
-    QFormLayout, QGroupBox, QTableView, QStyleFactory, QStyledItemDelegate
+    QFormLayout, QGroupBox, QTableView, QStyleFactory, QStyledItemDelegate, QHeaderView
 from PySide2.QtGui import QIcon
 from PySide2.QtCore import Qt
 from itertools import count
@@ -35,23 +35,23 @@ class MainWindow(QMainWindow):
                                "Pipelines"]
         self.field_dict = {
             "Organizations": (
-                'Организация', 'Полное наименование', 'Должноть руководителя', 'Ф.И.О. руководителя', 'Должность тех.руководителя', 'Ф.И.О. тех.руководителя',
+                'Организация', 'Форма', 'Руководитель', 'Ф.И.О.', 'Тех.руководитель', 'Ф.И.О.',
                 'Юр. адрес',
-                'Телефон', 'Факс', 'Email', 'Лицензия', 'Дата получения лицензии'),
+                'Телефон', 'Факс', 'Email', 'Лицензия', 'Дата лицензии'),
             "Objects":
-                ('Организация', 'Наименование объекта', 'Адрес объекта', 'Рег. №', 'Класс опасности'),
+                ('Организация', 'Объект', 'Адрес объекта', 'Рег. №', 'Класс'),
             "Projects":
-                ('Наименование объекта', 'Наименование проекта', 'Шифр проекта', 'Описание проекта', 'Описание автоматизации'),
+                ('Объект', 'Проект', 'Шифр', 'Описание', 'Автоматизация'),
             "Documents":
-                ('Наименование проекта', 'Раздел', 'Подраздел ДПБ',
+                ('Проект', 'Раздел', 'Подраздел ДПБ',
                  'Подраздел ГОЧС',
                  'Книга ДПБ', 'Шифр ДПБ', 'Том ДПБ', 'Книга РПЗ', 'Код РПЗ', 'Том РПЗ', 'Книга ИФЛ', 'Код ИФЛ',
                  'Том ИФЛ',
                  'Книга ГОЧС', 'Код ГОЧС', 'Том ГОЧС', 'Подраздел ПБ', 'Код ПБ', 'Том ПБ'),
             "Substances":
-                ('Наименование', 'Плотность, кг /м3', 'Плотность г.ф., кг/м3', 'Мол. масса, кг/кмоль', 'Давление пара, кПа', 'Температура вспышки, гр.С',
-                 'Температура кипения, гр.С', 'Класс вещества (детонация)', 'Теплота сгорания, кДж/кг', 'sigma, -', 'Энергозапас, -',
-                 'НКПР, % об.', 'Стоимость вещества, т.р./т'),
+                ('Наименование', 'po, кг /м3', 'po г.ф., кг/м3', 'M, кг/кмоль', 'Pn, кПа', 'Т.всп, гр.С',
+                 'Т.кип, гр.С', 'Класс', 'Qсг, кДж/кг', 'sigma, -', 'Энергозапас, -',
+                 'НКПР, % об.', 'Цена, т.р./т'),
             "Devices":
                 ('ProjectsId', 'SubId', 'Type_device', 'Pozition', 'Name', 'Locations', 'Material', 'Ground', 'Target',
                  'Volume', 'Completion', 'Pressure', 'Temperature', 'Spill_square', 'View_space', 'Death_person',
@@ -92,6 +92,7 @@ class MainWindow(QMainWindow):
         GB_table = QGroupBox('Данные')
         GB_table.setStyleSheet("QGroupBox { font-weight : bold; }")
         self.table = QTableView()
+        self.table.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents) # адаптивный текст в таблице
         self.delegate = ReadOnlyDelegate(self.table)
         self.model = QSqlRelationalTableModel(db=db)
         self.show_table(index=0)
