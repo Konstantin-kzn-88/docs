@@ -4,7 +4,7 @@ from pathlib import Path
 from PySide2.QtSql import QSqlDatabase, QSqlQuery, QSqlRelationalTableModel, QSqlRelation
 from PySide2.QtWidgets import QApplication, QMainWindow, QComboBox, QMessageBox, QWidget, QGridLayout, \
     QFormLayout, QGroupBox, QTableView, QStyleFactory, QStyledItemDelegate, QHeaderView, QMenu, QAction, QDialog, \
-    QDialogButtonBox, QLineEdit, QPushButton, QHBoxLayout, QVBoxLayout
+    QDialogButtonBox, QLineEdit, QPushButton, QHBoxLayout, QVBoxLayout, QTableWidget, QTableWidgetItem
 from PySide2.QtGui import QIcon
 from PySide2.QtCore import Qt
 from itertools import count
@@ -35,6 +35,36 @@ class MainWindow(QMainWindow):
         self.sender_list = ["Организация", "Объект", "Проект", "Документ", "Вещество", "Оборудование", "Трубопровод"]
         self.table_list_eng = ["Organizations", "Objects", "Projects", "Documents", "Substances", "Devices",
                                "Pipelines"]
+
+        self.field_dict_in_db = {
+            "Organizations": (
+                'Name_org', 'Name_org_full', 'Director', 'Name_director', 'Tech_director', 'Name_tech_director',
+                'Jur_adress',
+                'Telephone', 'Fax', 'Email', 'License', 'Date_get_license'),
+            "Objects":
+                ('OrganizationId', 'Name_opo', 'Address_opo', 'Reg_number_opo', 'Class_opo'),
+            "Projects":
+                ('ObjectsId', 'Name_project', 'Project_code', 'Project_description', 'Аutomation'),
+            "Documents":
+                ('ProjectsId', 'Section_other_documentation', 'Part_other_documentation_dpb',
+                 'Part_other_documentation_gochs',
+                 'Book_dpb', 'Code_dpb', 'Tom_dpb', 'Book_rpz', 'Code_rpz', 'Tom_rpz', 'Book_ifl', 'Code_ifl',
+                 'Tom_ifl',
+                 'Book_gochs', 'Code_gochs', 'Tom_gochs', 'Section_fire_safety', 'Code_fire_safety', 'Tom_fire_safety'),
+            "Substances":
+                ('Name_sub', 'Density', 'Density_gas', 'Molecular_weight', 'Steam_pressure', 'Flash_temperature',
+                 'Boiling_temperature', 'Class_substance', 'Heat_of_combustion', 'Sigma', 'Energy_level',
+                 'Lower_concentration', 'Cost'),
+            "Devices":
+                ('ProjectsId', 'SubId', 'Type_device', 'Pozition', 'Name', 'Locations', 'Material', 'Ground', 'Target',
+                 'Volume', 'Completion', 'Pressure', 'Temperature', 'Spill_square', 'View_space', 'Death_person',
+                 'Injured_person', 'Time_person'),
+            "Pipelines":
+                ('ProjectsId', 'SubId', 'Pozition', 'Name', 'Locations', 'Material', 'Ground', 'Target',
+                 'Length', 'Diameter', 'Pressure', 'Temperature', 'Flow', 'View_space', 'Death_person',
+                 'Injured_person', 'Time_person')
+        }
+
         self.field_dict = {
             "Organizations": (
                 'Организация', 'Форма', 'Руководитель', 'Ф.И.О.', 'Тех.руководитель', 'Ф.И.О.',
@@ -207,12 +237,43 @@ class MainWindow(QMainWindow):
     def add_data_in_db(self):
         sender = self.sender()
         if self.sender_list.index(sender.text()) == 0:
-            inputDialog = Add_Dialog(state=sender.text())
+            inputDialog = Add_Dialog(state=sender.text(), header_dict=self.field_dict)
             rez = inputDialog.exec()
             if not rez:
                 _ = QMessageBox.information(self, 'Внимание!', 'Добавление в базу данных отменено')
                 return
-            print(inputDialog.change_str.text())
+
+            data = []
+            for row in range(inputDialog.tableWidget.rowCount()):
+                if inputDialog.tableWidget.item(row, 1) is not None:
+                    data.append(inputDialog.tableWidget.item(row, 1).text())
+                else:
+                    _ = QMessageBox.information(self, 'Внимание!',
+                                                'Данные не заполнены. Добавление в базу данных не возможно!')
+                    return
+
+            print(self.__create_insert_sql_request(table = "Organizations", fields = self.field_dict_in_db["Organizations"]))
+            db.transaction()
+            query = QSqlQuery()
+            query.prepare(
+                "INSERT INTO Organizations (Name_org, Name_org_full, Director, Name_director, Tech_director, Name_tech_director, Jur_adress, Telephone, Fax, Email, License, Date_get_license) "
+                "VALUES (:Name_org, :Name_org_full, :Director, :Name_director, :Tech_director, :Name_tech_director, :Jur_adress, :Telephone, :Fax, :Email, :License, :Date_get_license)")
+            query.bindValue(":Name_org", data[0])
+            query.bindValue(":Name_org_full", data[1])
+            query.bindValue(":Director", data[2])
+            query.bindValue(":Name_director", data[3])
+            query.bindValue(":Tech_director", data[4])
+            query.bindValue(":Name_tech_director", data[5])
+            query.bindValue(":Jur_adress", data[6])
+            query.bindValue(":Telephone", data[7])
+            query.bindValue(":Fax", data[8])
+            query.bindValue(":Email", data[9])
+            query.bindValue(":License", data[10])
+            query.bindValue(":Date_get_license", data[11])
+
+            query.exec_()
+            db.commit()
+
 
     def set_ico(self):
         path_ico = str(Path(os.getcwd()))
@@ -229,6 +290,10 @@ class MainWindow(QMainWindow):
         self.pipeline_ico = QIcon(path_ico + '/ico/pipeline.png')
         self.setWindowIcon(self.main_ico)
 
+    def __create_insert_sql_request(self, table: str, fields: tuple) -> str:
+        simbol = [f':{i}' for i in fields]
+        return f'INSERT INTO {table} ({str(fields).strip("()")})  VALUES ({simbol})'.replace('[', '').replace(']', '')
+
     def closeEvent(self, event):
         reply = QMessageBox.question \
             (self, 'Выход из программы',
@@ -243,24 +308,23 @@ class MainWindow(QMainWindow):
 
 
 class Add_Dialog(QDialog):
-    def __init__(self, state="company", column=0):
+    def __init__(self, state: str, header_dict: dict):
         super().__init__()
+        self.setWindowFlag(Qt.WindowContextHelpButtonHint, False)  # убрать знак вопроса
+
         path_ico = str(Path(os.getcwd()))
         main_ico = QIcon(path_ico + '/ico/main.png')
-        # folder_file = QIcon(str(Path(os.getcwd()).parents[0]) + '/ico/folder_file.png')
         self.setWindowIcon(main_ico)
-        self.setWindowTitle('Изменение информации')
+        self.setWindowTitle('Добавление информации')
         print(f"state={state}")
-        self.change_str = QLineEdit()
-        self.change_str_btn = QPushButton("", objectName="change_str")
-        # self.change_str_btn.setIcon(folder_file)
-        # self.change_str_btn.clicked.connect(self.file_path)
-        change_str_hbox = QHBoxLayout()
-        change_str_hbox.addWidget(self.change_str)
-        change_str_hbox.addWidget(self.change_str_btn)
+        self.tableWidget = QTableWidget()
+        self.tableWidget.setColumnCount(2)
 
-        form_layout = QFormLayout()
-        form_layout.addRow('Изменить иформацию: ', change_str_hbox)
+        if state == 'Организация':
+            row_count = len(header_dict['Organizations'])
+            self.tableWidget.setRowCount(row_count)
+            for i in range(row_count):
+                self.tableWidget.setItem(i, 0, QTableWidgetItem(header_dict['Organizations'][i]))
 
         button_box = QDialogButtonBox(
             QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
@@ -268,7 +332,7 @@ class Add_Dialog(QDialog):
         button_box.rejected.connect(self.reject)
 
         main_layout = QVBoxLayout(self)
-        main_layout.addLayout(form_layout)
+        main_layout.addWidget(self.tableWidget)
         main_layout.addWidget(button_box)
 
 
