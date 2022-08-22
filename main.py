@@ -235,14 +235,24 @@ class MainWindow(QMainWindow):
         self.model.select()
 
     def add_data_in_db(self):
+        """
+        Функция предназначена для добавления данных в базу данных
+        :return
+        """
+        # 1. Кто отправил сигнал
         sender = self.sender()
-        if self.sender_list.index(sender.text()) == 0:
+        # 2. Смотрим в списке sender_list под каким индексом
+        # стоит отправитель сигнала и сравниваем с:
+        if self.sender_list.index(sender.text()) == 0: # 0 - таблица организаций
+            # Вызываем диалог добавления
             inputDialog = Add_Dialog(state=sender.text(), header_dict=self.field_dict)
+            # Получаем ответ от Диалога
             rez = inputDialog.exec()
+            # Если нажата кнопка Отмена
             if not rez:
                 _ = QMessageBox.information(self, 'Внимание!', 'Добавление в базу данных отменено')
                 return
-
+            # Если нажата кнопка Ок, проверим все ли данные введены
             data = []
             for row in range(inputDialog.tableWidget.rowCount()):
                 if inputDialog.tableWidget.item(row, 1) is not None:
@@ -251,29 +261,49 @@ class MainWindow(QMainWindow):
                     _ = QMessageBox.information(self, 'Внимание!',
                                                 'Данные не заполнены. Добавление в базу данных не возможно!')
                     return
-
-            print(self.__create_insert_sql_request(table = "Organizations", fields = self.field_dict_in_db["Organizations"]))
+            # Данные введены целиком открываем транзакцию
             db.transaction()
             query = QSqlQuery()
-            query.prepare(
-                "INSERT INTO Organizations (Name_org, Name_org_full, Director, Name_director, Tech_director, Name_tech_director, Jur_adress, Telephone, Fax, Email, License, Date_get_license) "
-                "VALUES (:Name_org, :Name_org_full, :Director, :Name_director, :Tech_director, :Name_tech_director, :Jur_adress, :Telephone, :Fax, :Email, :License, :Date_get_license)")
-            query.bindValue(":Name_org", data[0])
-            query.bindValue(":Name_org_full", data[1])
-            query.bindValue(":Director", data[2])
-            query.bindValue(":Name_director", data[3])
-            query.bindValue(":Tech_director", data[4])
-            query.bindValue(":Name_tech_director", data[5])
-            query.bindValue(":Jur_adress", data[6])
-            query.bindValue(":Telephone", data[7])
-            query.bindValue(":Fax", data[8])
-            query.bindValue(":Email", data[9])
-            query.bindValue(":License", data[10])
-            query.bindValue(":Date_get_license", data[11])
-
+            placeholder, sql_request = self.__create_insert_sql_request(table="Organizations", fields=self.field_dict_in_db["Organizations"])
+            query.prepare(sql_request)
+            for i in range(len(data)):
+                query.bindValue(placeholder[i], data[i])
+            query.exec_()
+            db.commit()
+        if self.sender_list.index(sender.text()) == 1:  # 1 - таблица объектов
+            # Вызываем диалог добавления
+            inputDialog = Add_Dialog(state=sender.text(), header_dict=self.field_dict)
+            # Получаем ответ от Диалога
+            rez = inputDialog.exec()
+            # Если нажата кнопка Отмена
+            if not rez:
+                _ = QMessageBox.information(self, 'Внимание!', 'Добавление в базу данных отменено')
+                return
+            # Если нажата кнопка Ок, проверим все ли данные введены
+            data = []
+            for row in range(inputDialog.tableWidget.rowCount()):
+                if inputDialog.tableWidget.item(row, 1) is not None:
+                    data.append(inputDialog.tableWidget.item(row, 1).text())
+                else:
+                    _ = QMessageBox.information(self, 'Внимание!',
+                                                'Данные не заполнены. Добавление в базу данных не возможно!')
+                    return
+            # Добавим в список id организации
+            data.insert(0,int(inputDialog.id_company.currentText().split()[0]))
+            # Данные введены целиком открываем транзакцию
+            db.transaction()
+            query = QSqlQuery()
+            placeholder, sql_request = self.__create_insert_sql_request(table="Objects", fields=self.field_dict_in_db["Objects"])
+            query.prepare(sql_request)
+            for i in range(len(data)):
+                query.bindValue(placeholder[i], data[i])
             query.exec_()
             db.commit()
 
+
+
+        # Обновляем таблицу в соответствии с индексом отправителя
+        self.show_table(self.sender_list.index(sender.text()))
 
     def set_ico(self):
         path_ico = str(Path(os.getcwd()))
@@ -290,9 +320,27 @@ class MainWindow(QMainWindow):
         self.pipeline_ico = QIcon(path_ico + '/ico/pipeline.png')
         self.setWindowIcon(self.main_ico)
 
-    def __create_insert_sql_request(self, table: str, fields: tuple) -> str:
-        simbol = [f':{i}' for i in fields]
-        return f'INSERT INTO {table} ({str(fields).strip("()")})  VALUES ({simbol})'.replace('[', '').replace(']', '')
+    def __create_insert_sql_request(self, table: str, fields: tuple):
+        """
+        Функция предназначена для формирования запроса на вставку в базу данных
+        и заполнителей для вставки значений через PyQt5
+
+        :param table - наименование таблицы из базы данных (например: 'Organizations')
+        :param fields - кортеж полей базы данных (например:
+        ('Name_org', 'Name_org_full',
+        'Director', 'Name_director', 'Tech_director', 'Name_tech_director',
+        'Jur_adress', 'Telephone', 'Fax', 'Email', 'License', 'Date_get_license')
+        )
+        :return placeholder - список заполнителей для вставки значений по именованным параметрам
+        :return sql_request - строковый запрос SQL
+        """
+        placeholder = [f":{i}" for i in fields]
+        fields = str(fields).strip("()")
+        fields = fields.replace("'", "")
+        sql_request = f'INSERT INTO {table} ({fields}) VALUES ({placeholder})'.replace('[', '').replace(']',
+                                                                                                        '').replace("'",
+                                                                                                                    "")
+        return placeholder, sql_request
 
     def closeEvent(self, event):
         reply = QMessageBox.question \
@@ -315,25 +363,48 @@ class Add_Dialog(QDialog):
         path_ico = str(Path(os.getcwd()))
         main_ico = QIcon(path_ico + '/ico/main.png')
         self.setWindowIcon(main_ico)
-        self.setWindowTitle('Добавление информации')
-        print(f"state={state}")
+
         self.tableWidget = QTableWidget()
         self.tableWidget.setColumnCount(2)
+        main_layout = QVBoxLayout(self)
 
         if state == 'Организация':
+            self.setWindowTitle('Добавление организации')
             row_count = len(header_dict['Organizations'])
             self.tableWidget.setRowCount(row_count)
             for i in range(row_count):
                 self.tableWidget.setItem(i, 0, QTableWidgetItem(header_dict['Organizations'][i]))
+            main_layout.addWidget(self.tableWidget)
 
+        if state == 'Объект':
+            self.setWindowTitle('Добавление объекта')
+            row_count = len(header_dict['Objects'])-1
+            self.tableWidget.setRowCount(row_count)
+            # заполним комбобокс с организациями
+            list_org = self.fill_combobox(state)
+            self.id_company = QComboBox()
+            self.id_company.addItems(list_org)
+            # таблица с данными
+            for i in range(row_count):
+                self.tableWidget.setItem(i, 0, QTableWidgetItem(header_dict['Objects'][i+1]))
+            main_layout.addWidget(self.id_company)
+            main_layout.addWidget(self.tableWidget)
+
+        # Группа кнопок Ок-Cancel
         button_box = QDialogButtonBox(
             QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         button_box.accepted.connect(self.accept)
         button_box.rejected.connect(self.reject)
-
-        main_layout = QVBoxLayout(self)
-        main_layout.addWidget(self.tableWidget)
         main_layout.addWidget(button_box)
+
+    def fill_combobox(self, state):
+        list_name = []
+        if state == 'Объект':
+            query = QSqlQuery('SELECT * FROM Organizations')
+            while query.next():
+                list_name.append(str(query.value(0)) + " " + query.value(1))
+            query.exec_()
+        return list_name
 
 
 if __name__ == '__main__':
