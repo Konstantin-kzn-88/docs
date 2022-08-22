@@ -300,7 +300,24 @@ class MainWindow(QMainWindow):
             query.exec_()
             db.commit()
 
-
+        if self.sender_list.index(sender.text()) == 2:  # 2 - таблица проектов
+            # Вызываем диалог добавления
+            inputDialog = Add_Dialog(state=sender.text(), header_dict=self.field_dict)
+            # Получаем ответ от Диалога
+            rez = inputDialog.exec()
+            # Если нажата кнопка Отмена
+            if not rez:
+                _ = QMessageBox.information(self, 'Внимание!', 'Добавление в базу данных отменено')
+                return
+            # Если нажата кнопка Ок, проверим все ли данные введены
+            # data = []
+            # for row in range(inputDialog.tableWidget.rowCount()):
+            #     if inputDialog.tableWidget.item(row, 1) is not None:
+            #         data.append(inputDialog.tableWidget.item(row, 1).text())
+            #     else:
+            #         _ = QMessageBox.information(self, 'Внимание!',
+            #                                     'Данные не заполнены. Добавление в базу данных не возможно!')
+            #         return
 
         # Обновляем таблицу в соответствии с индексом отправителя
         self.show_table(self.sender_list.index(sender.text()))
@@ -381,12 +398,26 @@ class Add_Dialog(QDialog):
             row_count = len(header_dict['Objects'])-1
             self.tableWidget.setRowCount(row_count)
             # заполним комбобокс с организациями
+            list_obj = self.fill_combobox(state)
+            self.id_obj = QComboBox()
+            self.id_obj.addItems(list_obj)
+            # таблица с данными
+            for i in range(row_count):
+                self.tableWidget.setItem(i, 0, QTableWidgetItem(header_dict['Objects'][i+1]))
+            main_layout.addWidget(self.id_obj)
+            main_layout.addWidget(self.tableWidget)
+
+        if state == 'Проект':
+            self.setWindowTitle('Добавление проекта')
+            row_count = len(header_dict['Objects'])-1
+            self.tableWidget.setRowCount(row_count)
+            # заполним комбобокс с организациями
             list_org = self.fill_combobox(state)
             self.id_company = QComboBox()
             self.id_company.addItems(list_org)
             # таблица с данными
             for i in range(row_count):
-                self.tableWidget.setItem(i, 0, QTableWidgetItem(header_dict['Objects'][i+1]))
+                self.tableWidget.setItem(i, 0, QTableWidgetItem(header_dict['Projects'][i+1]))
             main_layout.addWidget(self.id_company)
             main_layout.addWidget(self.tableWidget)
 
@@ -403,6 +434,11 @@ class Add_Dialog(QDialog):
             query = QSqlQuery('SELECT * FROM Organizations')
             while query.next():
                 list_name.append(str(query.value(0)) + " " + query.value(1))
+            query.exec_()
+        if state == 'Проект':
+            query = QSqlQuery('SELECT * FROM Objects')
+            while query.next():
+                list_name.append(str(query.value(0)) + " " + query.value(4))
             query.exec_()
         return list_name
 
