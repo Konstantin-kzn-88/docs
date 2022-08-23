@@ -1,21 +1,21 @@
+from PySide2.QtSql import QSqlDatabase, QSqlQuery
 
-str_ = "INSERT INTO Organizations (Name_org, Name_org_full, Director, Name_director, Tech_director, Name_tech_director, Jur_adress, Telephone, Fax, Email, License, Date_get_license) VALUES (:Name_org, :Name_org_full, :Director, :Name_director, :Tech_director, :Name_tech_director, :Jur_adress, :Telephone, :Fax, :Email, :License, :Date_get_license)"
+db = QSqlDatabase.addDatabase("QMYSQL")
+db.setHostName("server167.hosting.reg.ru")
+db.setDatabaseName("u1082920_docs_db")
+db.setUserName("u1082920_qt_cl")
+db.setPassword("1201kZn1201!")
+db.open()
 
-
-
-
-table = 'Organizations'
-fields = ('Name_org', 'Name_org_full', 'Director', 'Name_director', 'Tech_director', 'Name_tech_director',
-          'Jur_adress', 'Telephone', 'Fax', 'Email', 'License', 'Date_get_license')
-
-def __create_insert_sql_request(table: str, fields: tuple) -> str:
-    simbol = [f":{i}" for i in fields]
-    print(simbol)
-    fields = str(fields).strip("()")
-    fields = fields.replace("'", "")
-
-    return f'INSERT INTO {table} ({fields}) VALUES ({simbol})'.replace('[', '').replace(']', '').replace("'", "")
-
-
-my_str = __create_insert_sql_request(table, fields)
-print(my_str == str_)
+db.transaction()
+query = QSqlQuery()
+query.prepare(
+    "INSERT INTO Projects (ObjectsId, Name_project, Project_code, Project_description, Аutomation) VALUES (3, ':Name_project', ':Project_code', ':Project_description', ':Аutomation')")
+# query.bindValue(':ObjectsId', 3)
+# query.bindValue(':Name_project', '111')
+# query.bindValue(':Project_code', '111')
+# query.bindValue(':Project_description', '111')
+# query.bindValue(':Аutomation', '111')
+query.exec_()
+db.commit()
+db.close()

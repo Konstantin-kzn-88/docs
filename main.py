@@ -289,7 +289,7 @@ class MainWindow(QMainWindow):
                                                 'Данные не заполнены. Добавление в базу данных не возможно!')
                     return
             # Добавим в список id организации
-            data.insert(0,int(inputDialog.id_company.currentText().split()[0]))
+            data.insert(0,int(inputDialog.id_obj.currentText().split()[0]))
             # Данные введены целиком открываем транзакцию
             db.transaction()
             query = QSqlQuery()
@@ -310,14 +310,35 @@ class MainWindow(QMainWindow):
                 _ = QMessageBox.information(self, 'Внимание!', 'Добавление в базу данных отменено')
                 return
             # Если нажата кнопка Ок, проверим все ли данные введены
-            # data = []
-            # for row in range(inputDialog.tableWidget.rowCount()):
-            #     if inputDialog.tableWidget.item(row, 1) is not None:
-            #         data.append(inputDialog.tableWidget.item(row, 1).text())
-            #     else:
-            #         _ = QMessageBox.information(self, 'Внимание!',
-            #                                     'Данные не заполнены. Добавление в базу данных не возможно!')
-            #         return
+            data = []
+            for row in range(inputDialog.tableWidget.rowCount()):
+                if inputDialog.tableWidget.item(row, 1) is not None:
+                    data.append(inputDialog.tableWidget.item(row, 1).text())
+                else:
+                    _ = QMessageBox.information(self, 'Внимание!',
+                                                'Данные не заполнены. Добавление в базу данных не возможно!')
+                    return
+
+            # Добавим в список id объекта
+            data.insert(0,int(inputDialog.id_company.currentText().split()[0]))
+            print("data", data)
+            # Данные введены целиком открываем транзакцию
+            db.transaction()
+            query = QSqlQuery()
+            placeholder, sql_request = self.__create_insert_sql_request(table="Projects", fields=self.field_dict_in_db["Projects"])
+            # print("sql_request", sql_request)
+            query.prepare("INSERT INTO Organizations (ObjectsId, Name_project, Project_code, Project_description, Аutomation) VALUES (:ObjectsId, :Name_project, :Project_code, :Project_description, :Аutomation)")
+            query.bindValue(':ObjectsId', 4)
+            query.bindValue(':Name_project', '111')
+            query.bindValue(':Project_code', '111')
+            query.bindValue(':Project_description', '111')
+            query.bindValue(':Аutomation', '111')
+
+            # for i in range(len(data)):
+            #     print(placeholder[i], data[i])
+            #     query.bindValue(placeholder[i], data[i])
+            query.exec_()
+            db.commit()
 
         # Обновляем таблицу в соответствии с индексом отправителя
         self.show_table(self.sender_list.index(sender.text()))
@@ -438,7 +459,7 @@ class Add_Dialog(QDialog):
         if state == 'Проект':
             query = QSqlQuery('SELECT * FROM Objects')
             while query.next():
-                list_name.append(str(query.value(0)) + " " + query.value(4))
+                list_name.append(str(query.value(0)) + " " + query.value(2) + " " + query.value(4))
             query.exec_()
         return list_name
 
