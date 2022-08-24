@@ -45,7 +45,7 @@ with mysql_conn as connection:
     # 3 Проекты
     cursor.execute("""CREATE TABLE Projects(Id INT PRIMARY KEY AUTO_INCREMENT, ObjectsId INT NOT NULL,
                                               Name_project VARCHAR(200) NOT NULL, Project_code VARCHAR(20) NOT NULL,
-                                              Project_description TEXT NOT NULL, Аutomation TEXT NOT NULL,
+                                              Project_description TEXT NOT NULL, Project_automat TEXT NOT NULL,
                                               CONSTRAINT projects_objects_fk FOREIGN KEY (ObjectsId)
                                               REFERENCES Objects (Id) ON DELETE CASCADE)""")
     # 4 Наименование томов проекта
@@ -126,7 +126,7 @@ with mysql_conn as connection:
         "Objects":
             ('OrganizationId', 'Name_opo', 'Address_opo', 'Reg_number_opo', 'Class_opo'),
         "Projects":
-            ('ObjectsId', 'Name_project', 'Project_code', 'Project_description', 'Аutomation'),
+            ('ObjectsId', 'Name_project', 'Project_code', 'Project_description', 'Project_automat'),
         "Documents":
             ('ProjectsId', 'Section_other_documentation', 'Part_other_documentation_dpb',
              'Part_other_documentation_gochs',

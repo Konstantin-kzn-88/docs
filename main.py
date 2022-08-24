@@ -44,7 +44,7 @@ class MainWindow(QMainWindow):
             "Objects":
                 ('OrganizationId', 'Name_opo', 'Address_opo', 'Reg_number_opo', 'Class_opo'),
             "Projects":
-                ('ObjectsId', 'Name_project', 'Project_code', 'Project_description', 'Аutomation'),
+                ('ObjectsId', 'Name_project', 'Project_code', 'Project_description', 'Project_automat'),
             "Documents":
                 ('ProjectsId', 'Section_other_documentation', 'Part_other_documentation_dpb',
                  'Part_other_documentation_gochs',
@@ -289,7 +289,7 @@ class MainWindow(QMainWindow):
                                                 'Данные не заполнены. Добавление в базу данных не возможно!')
                     return
             # Добавим в список id организации
-            data.insert(0,int(inputDialog.id_obj.currentText().split()[0]))
+            data.insert(0,int(inputDialog.id_org.currentText().split()[0]))
             # Данные введены целиком открываем транзакцию
             db.transaction()
             query = QSqlQuery()
@@ -319,24 +319,15 @@ class MainWindow(QMainWindow):
                                                 'Данные не заполнены. Добавление в базу данных не возможно!')
                     return
 
-            # Добавим в список id объекта
-            data.insert(0,int(inputDialog.id_company.currentText().split()[0]))
-            print("data", data)
+            # Добавим в список id организации
+            data.insert(0,int(inputDialog.id_obj.currentText().split()[0]))
             # Данные введены целиком открываем транзакцию
             db.transaction()
             query = QSqlQuery()
             placeholder, sql_request = self.__create_insert_sql_request(table="Projects", fields=self.field_dict_in_db["Projects"])
-            # print("sql_request", sql_request)
-            query.prepare("INSERT INTO Organizations (ObjectsId, Name_project, Project_code, Project_description, Аutomation) VALUES (:ObjectsId, :Name_project, :Project_code, :Project_description, :Аutomation)")
-            query.bindValue(':ObjectsId', 4)
-            query.bindValue(':Name_project', '111')
-            query.bindValue(':Project_code', '111')
-            query.bindValue(':Project_description', '111')
-            query.bindValue(':Аutomation', '111')
-
-            # for i in range(len(data)):
-            #     print(placeholder[i], data[i])
-            #     query.bindValue(placeholder[i], data[i])
+            query.prepare(sql_request)
+            for i in range(len(data)):
+                query.bindValue(placeholder[i], data[i])
             query.exec_()
             db.commit()
 
@@ -420,26 +411,26 @@ class Add_Dialog(QDialog):
             self.tableWidget.setRowCount(row_count)
             # заполним комбобокс с организациями
             list_obj = self.fill_combobox(state)
-            self.id_obj = QComboBox()
-            self.id_obj.addItems(list_obj)
+            self.id_org = QComboBox()
+            self.id_org.addItems(list_obj)
             # таблица с данными
             for i in range(row_count):
                 self.tableWidget.setItem(i, 0, QTableWidgetItem(header_dict['Objects'][i+1]))
-            main_layout.addWidget(self.id_obj)
+            main_layout.addWidget(self.id_org)
             main_layout.addWidget(self.tableWidget)
 
         if state == 'Проект':
             self.setWindowTitle('Добавление проекта')
             row_count = len(header_dict['Objects'])-1
             self.tableWidget.setRowCount(row_count)
-            # заполним комбобокс с организациями
-            list_org = self.fill_combobox(state)
-            self.id_company = QComboBox()
-            self.id_company.addItems(list_org)
+            # заполним комбобокс с объектами
+            list_obj = self.fill_combobox(state)
+            self.id_obj = QComboBox()
+            self.id_obj.addItems(list_obj)
             # таблица с данными
             for i in range(row_count):
                 self.tableWidget.setItem(i, 0, QTableWidgetItem(header_dict['Projects'][i+1]))
-            main_layout.addWidget(self.id_company)
+            main_layout.addWidget(self.id_obj)
             main_layout.addWidget(self.tableWidget)
 
         # Группа кнопок Ок-Cancel
