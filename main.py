@@ -243,7 +243,7 @@ class MainWindow(QMainWindow):
         sender = self.sender()
         # 2. Смотрим в списке sender_list под каким индексом
         # стоит отправитель сигнала и сравниваем с:
-        if self.sender_list.index(sender.text()) == 0: # 0 - таблица организаций
+        if self.sender_list.index(sender.text()) == 0:  # 0 - таблица организаций
             # Вызываем диалог добавления
             inputDialog = Add_Dialog(state=sender.text(), header_dict=self.field_dict)
             # Получаем ответ от Диалога
@@ -264,7 +264,8 @@ class MainWindow(QMainWindow):
             # Данные введены целиком открываем транзакцию
             db.transaction()
             query = QSqlQuery()
-            placeholder, sql_request = self.__create_insert_sql_request(table="Organizations", fields=self.field_dict_in_db["Organizations"])
+            placeholder, sql_request = self.__create_insert_sql_request(table="Organizations",
+                                                                        fields=self.field_dict_in_db["Organizations"])
             query.prepare(sql_request)
             for i in range(len(data)):
                 query.bindValue(placeholder[i], data[i])
@@ -289,11 +290,12 @@ class MainWindow(QMainWindow):
                                                 'Данные не заполнены. Добавление в базу данных не возможно!')
                     return
             # Добавим в список id организации
-            data.insert(0,int(inputDialog.id_org.currentText().split()[0]))
+            data.insert(0, int(inputDialog.id_org.currentText().split()[0]))
             # Данные введены целиком открываем транзакцию
             db.transaction()
             query = QSqlQuery()
-            placeholder, sql_request = self.__create_insert_sql_request(table="Objects", fields=self.field_dict_in_db["Objects"])
+            placeholder, sql_request = self.__create_insert_sql_request(table="Objects",
+                                                                        fields=self.field_dict_in_db["Objects"])
             query.prepare(sql_request)
             for i in range(len(data)):
                 query.bindValue(placeholder[i], data[i])
@@ -320,11 +322,45 @@ class MainWindow(QMainWindow):
                     return
 
             # Добавим в список id организации
-            data.insert(0,int(inputDialog.id_obj.currentText().split()[0]))
+            data.insert(0, int(inputDialog.id_obj.currentText().split()[0]))
             # Данные введены целиком открываем транзакцию
             db.transaction()
             query = QSqlQuery()
-            placeholder, sql_request = self.__create_insert_sql_request(table="Projects", fields=self.field_dict_in_db["Projects"])
+            placeholder, sql_request = self.__create_insert_sql_request(table="Projects",
+                                                                        fields=self.field_dict_in_db["Projects"])
+            query.prepare(sql_request)
+            for i in range(len(data)):
+                query.bindValue(placeholder[i], data[i])
+            query.exec_()
+            db.commit()
+
+        if self.sender_list.index(sender.text()) == 3:  # 2 - таблица наименования томов
+            # Вызываем диалог добавления
+            inputDialog = Add_Dialog(state=sender.text(), header_dict=self.field_dict)
+            # Получаем ответ от Диалога
+            rez = inputDialog.exec()
+            # Если нажата кнопка Отмена
+            if not rez:
+                _ = QMessageBox.information(self, 'Внимание!', 'Добавление в базу данных отменено')
+                return
+
+            # Если нажата кнопка Ок, проверим все ли данные введены
+            data = []
+            for row in range(inputDialog.tableWidget.rowCount()):
+                if inputDialog.tableWidget.item(row, 1) is not None:
+                    data.append(inputDialog.tableWidget.item(row, 1).text())
+                else:
+                    _ = QMessageBox.information(self, 'Внимание!',
+                                                'Данные не заполнены. Добавление в базу данных не возможно!')
+                    return
+
+            # Добавим в список id организации
+            data.insert(0, int(inputDialog.id_project.currentText().split()[0]))
+            # Данные введены целиком открываем транзакцию
+            db.transaction()
+            query = QSqlQuery()
+            placeholder, sql_request = self.__create_insert_sql_request(table="Documents",
+                                                                        fields=self.field_dict_in_db["Documents"])
             query.prepare(sql_request)
             for i in range(len(data)):
                 query.bindValue(placeholder[i], data[i])
@@ -407,7 +443,7 @@ class Add_Dialog(QDialog):
 
         if state == 'Объект':
             self.setWindowTitle('Добавление объекта')
-            row_count = len(header_dict['Objects'])-1
+            row_count = len(header_dict['Objects']) - 1
             self.tableWidget.setRowCount(row_count)
             # заполним комбобокс с организациями
             list_obj = self.fill_combobox(state)
@@ -415,13 +451,13 @@ class Add_Dialog(QDialog):
             self.id_org.addItems(list_obj)
             # таблица с данными
             for i in range(row_count):
-                self.tableWidget.setItem(i, 0, QTableWidgetItem(header_dict['Objects'][i+1]))
+                self.tableWidget.setItem(i, 0, QTableWidgetItem(header_dict['Objects'][i + 1]))
             main_layout.addWidget(self.id_org)
             main_layout.addWidget(self.tableWidget)
 
         if state == 'Проект':
             self.setWindowTitle('Добавление проекта')
-            row_count = len(header_dict['Objects'])-1
+            row_count = len(header_dict['Objects']) - 1
             self.tableWidget.setRowCount(row_count)
             # заполним комбобокс с объектами
             list_obj = self.fill_combobox(state)
@@ -429,8 +465,22 @@ class Add_Dialog(QDialog):
             self.id_obj.addItems(list_obj)
             # таблица с данными
             for i in range(row_count):
-                self.tableWidget.setItem(i, 0, QTableWidgetItem(header_dict['Projects'][i+1]))
+                self.tableWidget.setItem(i, 0, QTableWidgetItem(header_dict['Projects'][i + 1]))
             main_layout.addWidget(self.id_obj)
+            main_layout.addWidget(self.tableWidget)
+
+        if state == 'Документ':
+            self.setWindowTitle('Наименование томов')
+            row_count = len(header_dict['Documents']) - 1
+            self.tableWidget.setRowCount(row_count)
+            # заполним комбобокс с объектами
+            list_project = self.fill_combobox(state)
+            self.id_project = QComboBox()
+            self.id_project.addItems(list_project)
+            # таблица с данными
+            for i in range(row_count):
+                self.tableWidget.setItem(i, 0, QTableWidgetItem(header_dict['Documents'][i + 1]))
+            main_layout.addWidget(self.id_project)
             main_layout.addWidget(self.tableWidget)
 
         # Группа кнопок Ок-Cancel
@@ -451,6 +501,11 @@ class Add_Dialog(QDialog):
             query = QSqlQuery('SELECT * FROM Objects')
             while query.next():
                 list_name.append(str(query.value(0)) + " " + query.value(2) + " " + query.value(4))
+            query.exec_()
+        if state == 'Документ':
+            query = QSqlQuery('SELECT * FROM Projects')
+            while query.next():
+                list_name.append(str(query.value(0)) + " " + query.value(3) + " " + query.value(2))
             query.exec_()
         return list_name
 
