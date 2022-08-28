@@ -259,25 +259,28 @@ class MainWindow(QMainWindow):
         # 2.4. Смотрим в списке sender_list под каким индексом
         # стоит отправитель сигнала и сравниваем с:
         if self.sender_list.index(sender.text()) == 0:  # 0 - таблица организаций
-            self.__add_in_database(data = data, table="Organizations", fields=self.field_dict_in_db["Organizations"])
+            self.__add_record(data = data, table="Organizations", fields=self.field_dict_in_db["Organizations"])
         elif self.sender_list.index(sender.text()) == 1:  # 1 - таблица объектов
             # Добавим в список id организации
-            data.insert(0, int(inputDialog.id_org.currentText().split()[0]))
-            self.__add_in_database(data=data, table="Objects", fields=self.field_dict_in_db["Objects"])
+            data.insert(0, int(inputDialog.id.currentText().split()[0]))
+            self.__add_record(data=data, table="Objects", fields=self.field_dict_in_db["Objects"])
         elif self.sender_list.index(sender.text()) == 2:  # 2 - таблица проектов
             # Добавим в список id организации
-            data.insert(0, int(inputDialog.id_obj.currentText().split()[0]))
-            self.__add_in_database(data=data, table="Projects", fields=self.field_dict_in_db["Projects"])
-        if self.sender_list.index(sender.text()) == 3:  # 3 - таблица наименования томов
+            data.insert(0, int(inputDialog.id.currentText().split()[0]))
+            self.__add_record(data=data, table="Projects", fields=self.field_dict_in_db["Projects"])
+        elif self.sender_list.index(sender.text()) == 3:  # 3 - таблица наименования томов
             # Добавим в список id организации
-            data.insert(0, int(inputDialog.id_project.currentText().split()[0]))
-            self.__add_in_database(data=data, table="Documents", fields=self.field_dict_in_db["Documents"])
+            data.insert(0, int(inputDialog.id.currentText().split()[0]))
+            self.__add_record(data=data, table="Documents", fields=self.field_dict_in_db["Documents"])
+        elif self.sender_list.index(sender.text()) == 4:  # 4 - вещества
+            self.__add_record(data=data, table="Substances", fields=self.field_dict_in_db["Substances"])
+
 
         # 3. Обновляем таблицу в соответствии с индексом отправителя
         self.show_table(self.sender_list.index(sender.text()))
     # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
     # Подфункции для add_data_in_db
-    def __add_in_database(self, data: list, table: str, fields: tuple) -> None:
+    def __add_record(self, data: list, table: str, fields: tuple) -> None:
         """
         :param data - список значений из QTableWidget для вставки в базу данных
         :param table - наименование таблицы из базы данных (например: 'Organizations')
@@ -381,54 +384,30 @@ class Add_Dialog(QDialog):
         self.tableWidget.setColumnCount(2)
         main_layout = QVBoxLayout(self)
 
-        if state == 'Организация':
+        if state in ('Организация', 'Вещество'):
+            i = ('Организация', 'Вещество').index(state)
+            name_table = ('Organizations', 'Substances')
             self.setWindowTitle('Добавление организации')
-            row_count = len(header_dict['Organizations'])
+            row_count = len(header_dict[name_table[i]])
             self.tableWidget.setRowCount(row_count)
-            for i in range(row_count):
-                self.tableWidget.setItem(i, 0, QTableWidgetItem(header_dict['Organizations'][i]))
+            for j in range(row_count):
+                self.tableWidget.setItem(j, 0, QTableWidgetItem(header_dict[name_table[i]][j]))
             main_layout.addWidget(self.tableWidget)
 
-        if state == 'Объект':
-            self.setWindowTitle('Добавление объекта')
-            row_count = len(header_dict['Objects']) - 1
+        if state in ('Объект', 'Проект', 'Документ'):
+            i = ('Объект', 'Проект', 'Документ').index(state)
+            name_table = ('Objects', 'Projects', 'Documents')
+            self.setWindowTitle(f'Добавление "{state}"')
+            row_count = len(header_dict[name_table[i]]) - 1
             self.tableWidget.setRowCount(row_count)
-            # заполним комбобокс с организациями
-            list_obj = self.fill_combobox(state)
-            self.id_org = QComboBox()
-            self.id_org.addItems(list_obj)
+            # заполним комбобокс
+            list_ = self.fill_combobox(state)
+            self.id = QComboBox()
+            self.id.addItems(list_)
             # таблица с данными
-            for i in range(row_count):
-                self.tableWidget.setItem(i, 0, QTableWidgetItem(header_dict['Objects'][i + 1]))
-            main_layout.addWidget(self.id_org)
-            main_layout.addWidget(self.tableWidget)
-
-        if state == 'Проект':
-            self.setWindowTitle('Добавление проекта')
-            row_count = len(header_dict['Objects']) - 1
-            self.tableWidget.setRowCount(row_count)
-            # заполним комбобокс с объектами
-            list_obj = self.fill_combobox(state)
-            self.id_obj = QComboBox()
-            self.id_obj.addItems(list_obj)
-            # таблица с данными
-            for i in range(row_count):
-                self.tableWidget.setItem(i, 0, QTableWidgetItem(header_dict['Projects'][i + 1]))
-            main_layout.addWidget(self.id_obj)
-            main_layout.addWidget(self.tableWidget)
-
-        if state == 'Документ':
-            self.setWindowTitle('Наименование томов')
-            row_count = len(header_dict['Documents']) - 1
-            self.tableWidget.setRowCount(row_count)
-            # заполним комбобокс с объектами
-            list_project = self.fill_combobox(state)
-            self.id_project = QComboBox()
-            self.id_project.addItems(list_project)
-            # таблица с данными
-            for i in range(row_count):
-                self.tableWidget.setItem(i, 0, QTableWidgetItem(header_dict['Documents'][i + 1]))
-            main_layout.addWidget(self.id_project)
+            for j in range(row_count):
+                self.tableWidget.setItem(j, 0, QTableWidgetItem(header_dict[name_table[i]][j + 1]))
+            main_layout.addWidget(self.id)
             main_layout.addWidget(self.tableWidget)
 
         # Группа кнопок Ок-Cancel
