@@ -234,6 +234,10 @@ class MainWindow(QMainWindow):
 
         self.model.select()
 
+    # __________________________________________________________________________
+    # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    # Добавление информации в базу данных
+    # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
     def add_data_in_db(self):
         """
         Функция предназначена для добавления данных в базу данных
@@ -241,149 +245,58 @@ class MainWindow(QMainWindow):
         """
         # 1. Кто отправил сигнал
         sender = self.sender()
-        # 2. Смотрим в списке sender_list под каким индексом
+        # 2. Вызываем диалог добавления
+        inputDialog = Add_Dialog(state=sender.text(), header_dict=self.field_dict)
+        # 2.1. Получаем ответ от Диалога
+        rez = inputDialog.exec()
+        # 2.2. Если нажата кнопка Отмена
+        if not rez:
+            _ = QMessageBox.information(self, 'Внимание!', 'Добавление в базу данных отменено')
+            return
+        # 2.3. Если нажата кнопка Ок, проверим все ли данные введены
+        data = self.__check_value_in_table(inputDialog.tableWidget)
+        if data == []: return
+        # 2.4. Смотрим в списке sender_list под каким индексом
         # стоит отправитель сигнала и сравниваем с:
         if self.sender_list.index(sender.text()) == 0:  # 0 - таблица организаций
-            # Вызываем диалог добавления
-            inputDialog = Add_Dialog(state=sender.text(), header_dict=self.field_dict)
-            # Получаем ответ от Диалога
-            rez = inputDialog.exec()
-            # Если нажата кнопка Отмена
-            if not rez:
-                _ = QMessageBox.information(self, 'Внимание!', 'Добавление в базу данных отменено')
-                return
-            # Если нажата кнопка Ок, проверим все ли данные введены
-            data = []
-            for row in range(inputDialog.tableWidget.rowCount()):
-                if inputDialog.tableWidget.item(row, 1) is not None:
-                    data.append(inputDialog.tableWidget.item(row, 1).text())
-                else:
-                    _ = QMessageBox.information(self, 'Внимание!',
-                                                'Данные не заполнены. Добавление в базу данных не возможно!')
-                    return
-            # Данные введены целиком открываем транзакцию
-            db.transaction()
-            query = QSqlQuery()
-            placeholder, sql_request = self.__create_insert_sql_request(table="Organizations",
-                                                                        fields=self.field_dict_in_db["Organizations"])
-            query.prepare(sql_request)
-            for i in range(len(data)):
-                query.bindValue(placeholder[i], data[i])
-            query.exec_()
-            db.commit()
-        if self.sender_list.index(sender.text()) == 1:  # 1 - таблица объектов
-            # Вызываем диалог добавления
-            inputDialog = Add_Dialog(state=sender.text(), header_dict=self.field_dict)
-            # Получаем ответ от Диалога
-            rez = inputDialog.exec()
-            # Если нажата кнопка Отмена
-            if not rez:
-                _ = QMessageBox.information(self, 'Внимание!', 'Добавление в базу данных отменено')
-                return
-            # Если нажата кнопка Ок, проверим все ли данные введены
-            data = []
-            for row in range(inputDialog.tableWidget.rowCount()):
-                if inputDialog.tableWidget.item(row, 1) is not None:
-                    data.append(inputDialog.tableWidget.item(row, 1).text())
-                else:
-                    _ = QMessageBox.information(self, 'Внимание!',
-                                                'Данные не заполнены. Добавление в базу данных не возможно!')
-                    return
+            self.__add_in_database(data = data, table="Organizations", fields=self.field_dict_in_db["Organizations"])
+        elif self.sender_list.index(sender.text()) == 1:  # 1 - таблица объектов
             # Добавим в список id организации
             data.insert(0, int(inputDialog.id_org.currentText().split()[0]))
-            # Данные введены целиком открываем транзакцию
-            db.transaction()
-            query = QSqlQuery()
-            placeholder, sql_request = self.__create_insert_sql_request(table="Objects",
-                                                                        fields=self.field_dict_in_db["Objects"])
-            query.prepare(sql_request)
-            for i in range(len(data)):
-                query.bindValue(placeholder[i], data[i])
-            query.exec_()
-            db.commit()
-
-        if self.sender_list.index(sender.text()) == 2:  # 2 - таблица проектов
-            # Вызываем диалог добавления
-            inputDialog = Add_Dialog(state=sender.text(), header_dict=self.field_dict)
-            # Получаем ответ от Диалога
-            rez = inputDialog.exec()
-            # Если нажата кнопка Отмена
-            if not rez:
-                _ = QMessageBox.information(self, 'Внимание!', 'Добавление в базу данных отменено')
-                return
-            # Если нажата кнопка Ок, проверим все ли данные введены
-            data = []
-            for row in range(inputDialog.tableWidget.rowCount()):
-                if inputDialog.tableWidget.item(row, 1) is not None:
-                    data.append(inputDialog.tableWidget.item(row, 1).text())
-                else:
-                    _ = QMessageBox.information(self, 'Внимание!',
-                                                'Данные не заполнены. Добавление в базу данных не возможно!')
-                    return
-
+            self.__add_in_database(data=data, table="Objects", fields=self.field_dict_in_db["Objects"])
+        elif self.sender_list.index(sender.text()) == 2:  # 2 - таблица проектов
             # Добавим в список id организации
             data.insert(0, int(inputDialog.id_obj.currentText().split()[0]))
-            # Данные введены целиком открываем транзакцию
-            db.transaction()
-            query = QSqlQuery()
-            placeholder, sql_request = self.__create_insert_sql_request(table="Projects",
-                                                                        fields=self.field_dict_in_db["Projects"])
-            query.prepare(sql_request)
-            for i in range(len(data)):
-                query.bindValue(placeholder[i], data[i])
-            query.exec_()
-            db.commit()
-
-        if self.sender_list.index(sender.text()) == 3:  # 2 - таблица наименования томов
-            # Вызываем диалог добавления
-            inputDialog = Add_Dialog(state=sender.text(), header_dict=self.field_dict)
-            # Получаем ответ от Диалога
-            rez = inputDialog.exec()
-            # Если нажата кнопка Отмена
-            if not rez:
-                _ = QMessageBox.information(self, 'Внимание!', 'Добавление в базу данных отменено')
-                return
-
-            # Если нажата кнопка Ок, проверим все ли данные введены
-            data = []
-            for row in range(inputDialog.tableWidget.rowCount()):
-                if inputDialog.tableWidget.item(row, 1) is not None:
-                    data.append(inputDialog.tableWidget.item(row, 1).text())
-                else:
-                    _ = QMessageBox.information(self, 'Внимание!',
-                                                'Данные не заполнены. Добавление в базу данных не возможно!')
-                    return
-
+            self.__add_in_database(data=data, table="Projects", fields=self.field_dict_in_db["Projects"])
+        if self.sender_list.index(sender.text()) == 3:  # 3 - таблица наименования томов
             # Добавим в список id организации
             data.insert(0, int(inputDialog.id_project.currentText().split()[0]))
-            # Данные введены целиком открываем транзакцию
-            db.transaction()
-            query = QSqlQuery()
-            placeholder, sql_request = self.__create_insert_sql_request(table="Documents",
-                                                                        fields=self.field_dict_in_db["Documents"])
-            query.prepare(sql_request)
-            for i in range(len(data)):
-                query.bindValue(placeholder[i], data[i])
-            query.exec_()
-            db.commit()
+            self.__add_in_database(data=data, table="Documents", fields=self.field_dict_in_db["Documents"])
 
-        # Обновляем таблицу в соответствии с индексом отправителя
+        # 3. Обновляем таблицу в соответствии с индексом отправителя
         self.show_table(self.sender_list.index(sender.text()))
+    # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    # Подфункции для add_data_in_db
+    def __add_in_database(self, data: list, table: str, fields: tuple) -> None:
+        """
+        :param data - список значений из QTableWidget для вставки в базу данных
+        :param table - наименование таблицы из базы данных (например: 'Organizations')
+        :param fields - кортеж полей базы данных (например:
+        ('Name_org', 'Name_org_full',
+        'Director', 'Name_director', 'Tech_director', 'Name_tech_director',
+        'Jur_adress', 'Telephone', 'Fax', 'Email', 'License', 'Date_get_license')
+        )
+        """
 
-    def set_ico(self):
-        path_ico = str(Path(os.getcwd()))
-        self.main_ico = QIcon(path_ico + '/ico/main.png')
-        self.add_ico = QIcon(path_ico + '/ico/plus.png')
-        self.del_ico = QIcon(path_ico + '/ico/minus.png')
-        self.ok_ico = QIcon(path_ico + '/ico/ok.png')
-        self.org_ico = QIcon(path_ico + '/ico/org.png')
-        self.object_ico = QIcon(path_ico + '/ico/object.png')
-        self.project_ico = QIcon(path_ico + '/ico/project.png')
-        self.document_ico = QIcon(path_ico + '/ico/document.png')
-        self.sub_ico = QIcon(path_ico + '/ico/sub.png')
-        self.device_ico = QIcon(path_ico + '/ico/device.png')
-        self.pipeline_ico = QIcon(path_ico + '/ico/pipeline.png')
-        self.setWindowIcon(self.main_ico)
+        # Данные введены целиком открываем транзакцию
+        db.transaction()
+        query = QSqlQuery()
+        placeholder, sql_request = self.__create_insert_sql_request(table=table, fields=fields)
+        query.prepare(sql_request)
+        for i in range(len(data)):
+            query.bindValue(placeholder[i], data[i])
+        query.exec_()
+        db.commit()
 
     def __create_insert_sql_request(self, table: str, fields: tuple):
         """
@@ -406,6 +319,41 @@ class MainWindow(QMainWindow):
                                                                                                         '').replace("'",
                                                                                                                     "")
         return placeholder, sql_request
+
+    def __check_value_in_table(self, table_widget) -> list:
+        """
+        Функция предназначена для получения данных из QTableWidget, если данные заполнены не все,
+        то вернуть пустой список.
+
+        :param table_widget - таблица QTableWidget
+        :return data - список значений из QTableWidget, либо пустой список если данные заполнены не все
+        """
+        data = []
+        for row in range(table_widget.rowCount()):
+            if table_widget.item(row, 1) is not None:
+                data.append(table_widget.item(row, 1).text())
+            else:
+                _ = QMessageBox.information(self, 'Внимание!',
+                                            'Данные не заполнены. Добавление в базу данных не возможно!')
+                return []
+        return data
+    # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    # __________________________________________________________________________
+
+    def set_ico(self):
+        path_ico = str(Path(os.getcwd()))
+        self.main_ico = QIcon(path_ico + '/ico/main.png')
+        self.add_ico = QIcon(path_ico + '/ico/plus.png')
+        self.del_ico = QIcon(path_ico + '/ico/minus.png')
+        self.ok_ico = QIcon(path_ico + '/ico/ok.png')
+        self.org_ico = QIcon(path_ico + '/ico/org.png')
+        self.object_ico = QIcon(path_ico + '/ico/object.png')
+        self.project_ico = QIcon(path_ico + '/ico/project.png')
+        self.document_ico = QIcon(path_ico + '/ico/document.png')
+        self.sub_ico = QIcon(path_ico + '/ico/sub.png')
+        self.device_ico = QIcon(path_ico + '/ico/device.png')
+        self.pipeline_ico = QIcon(path_ico + '/ico/pipeline.png')
+        self.setWindowIcon(self.main_ico)
 
     def closeEvent(self, event):
         reply = QMessageBox.question \
