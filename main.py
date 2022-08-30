@@ -1,5 +1,6 @@
 import sys
 import os
+import re
 from pathlib import Path
 from PySide2.QtSql import QSqlDatabase, QSqlQuery, QSqlRelationalTableModel, QSqlRelation
 from PySide2.QtWidgets import QApplication, QMainWindow, QComboBox, QMessageBox, QWidget, QGridLayout, \
@@ -110,12 +111,19 @@ class MainWindow(QMainWindow):
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         # Рамка
         layout_select = QFormLayout(self)
-        GB_select = QGroupBox('Выбор')
+        GB_select = QGroupBox('Таблицы и поиск')
         GB_select.setStyleSheet("QGroupBox { font-weight : bold; }")
         self.select_table = QComboBox()
         self.select_table.addItems(self.table_list)
+        for count, value in enumerate(self.list_ico):
+            self.select_table.setItemIcon(count, value)
         self.select_table.currentIndexChanged.connect(self.show_table)
+        self.search_line_edit = QLineEdit()
+        self.search_line_edit.setPlaceholderText("Введите строку для поиска")
+        self.search_line_edit.setToolTip("Подсказка для поиска")
+        self.search_line_edit.textChanged.connect(self.update_filter)
         layout_select.addRow("", self.select_table)
+        layout_select.addRow("", self.search_line_edit)
         GB_select.setLayout(layout_select)
 
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
@@ -183,6 +191,25 @@ class MainWindow(QMainWindow):
         data_menu.addAction(del_object)
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         self.show()
+
+    def update_filter(self, s):
+        if self.select_table.currentIndex() == 0:  # организации
+            s = re.sub("[\W_]+", "", s)
+            filter_str = f'Name_org LIKE "%{s}%"'
+            self.model.setFilter(filter_str)
+        if self.select_table.currentIndex() == 1:  # объекты
+            s = re.sub("[\W_]+", "", s)
+            filter_str = f'Name_opo LIKE "%{s}%"'
+            self.model.setFilter(filter_str)
+        if self.select_table.currentIndex() == 2: # проекты
+            s = re.sub("[\W_]+", "", s)
+            filter_str = f'Project_code LIKE "%{s}%"'
+            self.model.setFilter(filter_str)
+        if self.select_table.currentIndex() == 3: # наименование томов
+            s = re.sub("[\W_]+", "", s)
+            filter_str = f'Name_project LIKE "%{s}%"'
+            self.model.setFilter(filter_str)
+
 
     def show_table(self, index):
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
@@ -259,7 +286,7 @@ class MainWindow(QMainWindow):
         # 2.4. Смотрим в списке sender_list под каким индексом
         # стоит отправитель сигнала и сравниваем с:
         if self.sender_list.index(sender.text()) == 0:  # 0 - таблица организаций
-            self.__add_record(data = data, table="Organizations", fields=self.field_dict_in_db["Organizations"])
+            self.__add_record(data=data, table="Organizations", fields=self.field_dict_in_db["Organizations"])
         elif self.sender_list.index(sender.text()) == 1:  # 1 - таблица объектов
             # Добавим в список id организации
             data.insert(0, int(inputDialog.id.currentText().split()[0]))
@@ -275,9 +302,9 @@ class MainWindow(QMainWindow):
         elif self.sender_list.index(sender.text()) == 4:  # 4 - вещества
             self.__add_record(data=data, table="Substances", fields=self.field_dict_in_db["Substances"])
 
-
         # 3. Обновляем таблицу в соответствии с индексом отправителя
         self.show_table(self.sender_list.index(sender.text()))
+
     # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
     # Подфункции для add_data_in_db
     def __add_record(self, data: list, table: str, fields: tuple) -> None:
@@ -340,6 +367,7 @@ class MainWindow(QMainWindow):
                                             'Данные не заполнены. Добавление в базу данных не возможно!')
                 return []
         return data
+
     # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
     # __________________________________________________________________________
 
@@ -357,6 +385,8 @@ class MainWindow(QMainWindow):
         self.device_ico = QIcon(path_ico + '/ico/device.png')
         self.pipeline_ico = QIcon(path_ico + '/ico/pipeline.png')
         self.setWindowIcon(self.main_ico)
+        self.list_ico = [self.org_ico, self.object_ico, self.project_ico, self.document_ico, self.sub_ico,
+                         self.device_ico, self.pipeline_ico]
 
     def closeEvent(self, event):
         reply = QMessageBox.question \
