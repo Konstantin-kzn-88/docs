@@ -86,13 +86,14 @@ class MainWindow(QMainWindow):
                  'Т.кип, гр.С', 'Класс', 'Qсг, кДж/кг', 'sigma, -', 'Энергозапас, -',
                  'НКПР, % об.', 'Цена, т.р./т'),
             "Devices":
-                ('ProjectsId', 'SubId', 'Type_device', 'Pozition', 'Name', 'Locations', 'Material', 'Ground', 'Target',
-                 'Volume', 'Completion', 'Pressure', 'Temperature', 'Spill_square', 'View_space', 'Death_person',
-                 'Injured_person', 'Time_person'),
+                ('Шифр', 'Вещество', 'Тип', 'Поз.', 'Наименование', 'Составляющая', 'Материал', 'Расположение',
+                 'Назначение',
+                 'V, м3', 'а, -', 'P, МПа', 'Т, С', 'S, м2', 'Класс, -', 'G1, чел',
+                 'G2, чел', 't, ч'),
             "Pipelines":
-                ('ProjectsId', 'SubId', 'Pozition', 'Name', 'Locations', 'Material', 'Ground', 'Target',
-                 'Length', 'Diameter', 'Pressure', 'Temperature', 'Flow', 'View_space', 'Death_person',
-                 'Injured_person', 'Time_person')
+                ('Шифр', 'Вещество', 'Поз.', 'Наименование', 'Составляющая', 'Материал', 'Расположение', 'Назначение',
+                 'L, км', 'D, мм', 'P, МПа', 'Т, С', 'Q, т/сут', 'Класс, -', 'G1, чел',
+                 'G2, чел', 't, ч')
         }
 
         self.set_ico()
@@ -121,7 +122,7 @@ class MainWindow(QMainWindow):
         self.search_line_edit = QLineEdit()
         self.search_line_edit.setPlaceholderText("Введите строку для поиска")
         self.search_line_edit.setToolTip("Подсказка для поиска")
-        self.search_line_edit.textChanged.connect(self.update_filter)
+        self.search_line_edit.textChanged.connect(self.__update_filter)
         layout_select.addRow("", self.select_table)
         layout_select.addRow("", self.search_line_edit)
         GB_select.setLayout(layout_select)
@@ -192,25 +193,6 @@ class MainWindow(QMainWindow):
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         self.show()
 
-    def update_filter(self, s):
-        if self.select_table.currentIndex() == 0:  # организации
-            s = re.sub("[\W_]+", "", s)
-            filter_str = f'Name_org LIKE "%{s}%"'
-            self.model.setFilter(filter_str)
-        if self.select_table.currentIndex() == 1:  # объекты
-            s = re.sub("[\W_]+", "", s)
-            filter_str = f'Name_opo LIKE "%{s}%"'
-            self.model.setFilter(filter_str)
-        if self.select_table.currentIndex() == 2: # проекты
-            s = re.sub("[\W_]+", "", s)
-            filter_str = f'Project_code LIKE "%{s}%"'
-            self.model.setFilter(filter_str)
-        if self.select_table.currentIndex() == 3: # наименование томов
-            s = re.sub("[\W_]+", "", s)
-            filter_str = f'Name_project LIKE "%{s}%"'
-            self.model.setFilter(filter_str)
-
-
     def show_table(self, index):
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         # Установка таблицы из модели
@@ -220,6 +202,7 @@ class MainWindow(QMainWindow):
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         # Запрет редактирования столбцов
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        self.search_line_edit.setText('')
         if index in (0, 4):
             self.table.setItemDelegateForColumn(0, self.delegate)
             self.table.setItemDelegateForColumn(1, None)
@@ -258,12 +241,24 @@ class MainWindow(QMainWindow):
             for i in count(1, 1):
                 if i > len(self.field_dict["Substances"]): break
                 self.model.setHeaderData(i, Qt.Horizontal, self.field_dict["Substances"][i - 1])
+        if index == 5:
+            self.model.setRelation(1, QSqlRelation("Projects", "Id", "Project_code"))
+            self.model.setRelation(2, QSqlRelation("Substances", "Id", "Name_sub"))
+            for i in count(1, 1):
+                if i > len(self.field_dict["Devices"]): break
+                self.model.setHeaderData(i, Qt.Horizontal, self.field_dict["Devices"][i - 1])
+        if index == 6:
+            self.model.setRelation(1, QSqlRelation("Projects", "Id", "Project_code"))
+            self.model.setRelation(2, QSqlRelation("Substances", "Id", "Name_sub"))
+            for i in count(1, 1):
+                if i > len(self.field_dict["Pipelines"]): break
+                self.model.setHeaderData(i, Qt.Horizontal, self.field_dict["Pipelines"][i - 1])
 
         self.model.select()
 
     # __________________________________________________________________________
     # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-    # Добавление информации в базу данных
+    # Добавление информации в базу данных и фильтрация
     # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
     def add_data_in_db(self):
         """
@@ -367,6 +362,16 @@ class MainWindow(QMainWindow):
                                             'Данные не заполнены. Добавление в базу данных не возможно!')
                 return []
         return data
+
+    def __update_filter(self, s):
+        """
+        Функция фильтрации представления модели
+        :param s - подстрока поиска
+        """
+        name_col_for_filter = (
+        'Name_org', 'Name_opo', 'Project_code', 'Name_project', 'Name_sub', 'Project_code', 'Project_code')
+        filter_str = f'{name_col_for_filter[self.select_table.currentIndex()]} LIKE "%{s}%"'
+        self.model.setFilter(filter_str)
 
     # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
     # __________________________________________________________________________
