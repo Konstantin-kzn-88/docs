@@ -287,16 +287,29 @@ class MainWindow(QMainWindow):
             data.insert(0, int(inputDialog.id.currentText().split()[0]))
             self.__add_record(data=data, table="Objects", fields=self.field_dict_in_db["Objects"])
         elif self.sender_list.index(sender.text()) == 2:  # 2 - таблица проектов
-            # Добавим в список id организации
+            # Добавим в список id объекта
             data.insert(0, int(inputDialog.id.currentText().split()[0]))
             self.__add_record(data=data, table="Projects", fields=self.field_dict_in_db["Projects"])
         elif self.sender_list.index(sender.text()) == 3:  # 3 - таблица наименования томов
-            # Добавим в список id организации
+            # Добавим в список id проекта
             data.insert(0, int(inputDialog.id.currentText().split()[0]))
             self.__add_record(data=data, table="Documents", fields=self.field_dict_in_db["Documents"])
         elif self.sender_list.index(sender.text()) == 4:  # 4 - вещества
             self.__add_record(data=data, table="Substances", fields=self.field_dict_in_db["Substances"])
-
+        elif self.sender_list.index(sender.text()) == 5:  # 5 - Оборудование
+            # Добавим в список тип объекта
+            data.insert(0, int(inputDialog.type_obj.currentText()[-1]))
+            # Добавим в список id вещества
+            data.insert(0, int(inputDialog.id_sub.currentText().split()[0]))
+            # Добавим в список id проекта
+            data.insert(0, int(inputDialog.id.currentText().split()[0]))
+            self.__add_record(data=data, table="Devices", fields=self.field_dict_in_db["Devices"])
+        elif self.sender_list.index(sender.text()) == 6:  # 6 - Трубопроводы
+            # Добавим в список id вещества
+            data.insert(0, int(inputDialog.id_sub.currentText().split()[0]))
+            # Добавим в список id проекта
+            data.insert(0, int(inputDialog.id.currentText().split()[0]))
+            self.__add_record(data=data, table="Pipelines", fields=self.field_dict_in_db["Pipelines"])
         # 3. Обновляем таблицу в соответствии с индексом отправителя
         self.show_table(self.sender_list.index(sender.text()))
 
@@ -369,7 +382,7 @@ class MainWindow(QMainWindow):
         :param s - подстрока поиска
         """
         name_col_for_filter = (
-        'Name_org', 'Name_opo', 'Project_code', 'Name_project', 'Name_sub', 'Project_code', 'Project_code')
+            'Name_org', 'Name_opo', 'Project_code', 'Name_project', 'Name_sub', 'Project_code', 'Project_code')
         filter_str = f'{name_col_for_filter[self.select_table.currentIndex()]} LIKE "%{s}%"'
         self.model.setFilter(filter_str)
 
@@ -445,6 +458,52 @@ class Add_Dialog(QDialog):
             main_layout.addWidget(self.id)
             main_layout.addWidget(self.tableWidget)
 
+        if state in ('Оборудование',):
+            i = ('Оборудование',).index(state)
+            name_table = ('Devices',)
+            self.setWindowTitle(f'Добавление "{state}"')
+            row_count = len(header_dict[name_table[i]]) - 3
+            self.tableWidget.setRowCount(row_count)
+            # заполним комбобокс с проектами
+            list_ = self.fill_combobox(state)
+            self.id = QComboBox()
+            self.id.addItems(list_)
+            # заполним комбобокс с веществами
+            list_sub = self.fill_combobox('Вещество')
+            self.id_sub = QComboBox()
+            self.id_sub.addItems(list_sub)
+            # заполним комбобокс с типами объектов
+            self.type_obj = QComboBox()
+            self.type_obj.addItems(["Тип 0", "Тип 1"])
+            # таблица с данными
+            for j in range(row_count):
+                self.tableWidget.setItem(j, 0, QTableWidgetItem(header_dict[name_table[i]][j + 3]))
+            main_layout.addWidget(self.id)
+            main_layout.addWidget(self.id_sub)
+            main_layout.addWidget(self.type_obj)
+            main_layout.addWidget(self.tableWidget)
+
+        if state in ('Трубопровод',):
+            i = ('Трубопровод',).index(state)
+            name_table = ('Pipelines',)
+            self.setWindowTitle(f'Добавление "{state}"')
+            row_count = len(header_dict[name_table[i]]) - 2
+            self.tableWidget.setRowCount(row_count)
+            # заполним комбобокс с проектами
+            list_ = self.fill_combobox(state)
+            self.id = QComboBox()
+            self.id.addItems(list_)
+            # заполним комбобокс с веществами
+            list_sub = self.fill_combobox('Вещество')
+            self.id_sub = QComboBox()
+            self.id_sub.addItems(list_sub)
+            # таблица с данными
+            for j in range(row_count):
+                self.tableWidget.setItem(j, 0, QTableWidgetItem(header_dict[name_table[i]][j + 2]))
+            main_layout.addWidget(self.id)
+            main_layout.addWidget(self.id_sub)
+            main_layout.addWidget(self.tableWidget)
+
         # Группа кнопок Ок-Cancel
         button_box = QDialogButtonBox(
             QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
@@ -464,10 +523,15 @@ class Add_Dialog(QDialog):
             while query.next():
                 list_name.append(str(query.value(0)) + " " + query.value(2) + " " + query.value(4))
             query.exec_()
-        if state == 'Документ':
+        if state in ('Документ', 'Оборудование', 'Трубопровод'):
             query = QSqlQuery('SELECT * FROM Projects')
             while query.next():
                 list_name.append(str(query.value(0)) + " " + query.value(3) + " " + query.value(2))
+            query.exec_()
+        if state == 'Вещество':
+            query = QSqlQuery('SELECT * FROM Substances')
+            while query.next():
+                list_name.append(str(query.value(0)) + " " + query.value(1))
             query.exec_()
         return list_name
 
