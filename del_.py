@@ -1,44 +1,19 @@
-from PySide2.QtSql import QSqlDatabase, QSqlQuery
+date = ['2021-09-14', '2021-12-15', '2021-09-08', '2021-12-05', '2021-10-09', '2021-09-30', '2021-12-22', '2021-11-29',
+        '2021-12-24', '2021-11-26', '2021-10-27', '2021-12-18', '2021-11-09', '2021-11-23', '2021-09-27', '2021-10-02',
+        '2021-12-27', '2021-09-20', '2021-12-13', '2021-11-01', '2021-11-09', '2021-12-06', '2021-12-08', '2021-10-09',
+        '2021-10-31', '2021-09-30', '2021-11-09', '2021-12-13', '2021-10-26', '2021-12-09']
+money = [1270, 8413, 9028, 3703, 5739, 4095, 295, 4944, 5723, 3701, 4471, 651, 7037, 4274, 6275, 4988, 6930, 2971, 6592,
+         2004, 2822, 519, 3406, 2732, 5015, 2008, 316, 6333, 5700, 2887]
 
-# placeholder [':Name_sub', ':Density', ':Density_gas', ':Molecular_weight', ':Steam_pressure', ':Flash_temperature', ':Boiling_temperature', ':Class_substance', ':Heat_of_combustion', ':Sigma', ':Energy_level', ':Lower_concentration', ':Cost']
-# sql_request INSERT INTO Substances (Name_sub, Density, Density_gas, Molecular_weight, Steam_pressure, Flash_temperature, Boiling_temperature, Class_substance, Heat_of_combustion, Sigma, Energy_level, Lower_concentration, Cost) VALUES (:Name_sub, :Density, :Density_gas, :Molecular_weight, :Steam_pressure, :Flash_temperature, :Boiling_temperature, :Class_substance, :Heat_of_combustion, :Sigma, :Energy_level, :Lower_concentration, :Cost)
+
+def sum_in_month(date: list, money: list) -> dict:
+    res = {}
+    for d, m in zip(date, money):
+        if d[5:7] in res.keys():
+            res[d[5:7]] = res[d[5:7]] + m
+        else:
+            res[d[5:7]] = m
+    return res
 
 
-db = QSqlDatabase.addDatabase("QMYSQL")
-db.setHostName("server167.hosting.reg.ru")
-db.setDatabaseName("u1082920_default")
-db.setUserName("u1082920_test")
-db.setPassword("1501kZn1501!")
-db.open()
-
-if db.open():
-    print("Database Open!")
-else:
-    print(f"Database NOT Open cause {db.lastError().text()}")
-
-query = QSqlQuery()
-
-query.prepare("""DROP TABLE IF EXISTS Substances""")
-query.exec_()
-
-# query.prepare("""CREATE TABLE Substances(Id INT PRIMARY KEY AUTO_INCREMENT,
-#                                                 Name_sub VARCHAR(50) NOT NULL)""")
-# query.exec_()
-#
-# # # query.prepare("DELETE FROM Projects WHERE Аutomation=':Аutomation'")
-# # query.exec_()
-#
-# query.prepare(
-#     "INSERT INTO Substances (Name_sub, Density, Density_gas, Molecular_weight, Steam_pressure, Flash_temperature, Boiling_temperature, Class_substance, Heat_of_combustion, Sigma, Energy_level, Lower_concentration, Cost) "
-#     "VALUES "
-#     "(':Name_sub', ':Density', ':Density_gas', ':Molecular_weight', ':Steam_pressure', ':Flash_temperature', ':Boiling_temperature', ':Class_substance', ':Heat_of_combustion', ':Sigma', ':Energy_level', ':Lower_concentration', ':Cost'")
-
-# placeholder = [':Name_sub', ':Density', ':Density_gas', ':Molecular_weight', ':Steam_pressure', ':Flash_temperature', ':Boiling_temperature', ':Class_substance', ':Heat_of_combustion', ':Sigma', ':Energy_level', ':Lower_concentration', ':Cost']
-# for i in placeholder:
-#     query.bindValue(i, 3)
-# query.exec_()
-# db.commit()
-# query = QSqlQuery('SELECT * FROM Substances')
-# while query.next():
-#     print(str(query.value(0)) + " " + str(query.value(1)) + " " + query.value(2) + " " + query.value(3)+ " " + query.value(4)+ " " + query.value(5))
-db.close()
+print(sum_in_month(date, money))
