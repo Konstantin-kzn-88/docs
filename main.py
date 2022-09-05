@@ -5,7 +5,7 @@ from pathlib import Path
 from PySide2.QtSql import QSqlDatabase, QSqlQuery, QSqlRelationalTableModel, QSqlRelation
 from PySide2.QtWidgets import QApplication, QMainWindow, QComboBox, QMessageBox, QWidget, QGridLayout, \
     QFormLayout, QGroupBox, QTableView, QStyleFactory, QStyledItemDelegate, QHeaderView, QMenu, QAction, QDialog, \
-    QDialogButtonBox, QLineEdit, QPushButton, QHBoxLayout, QVBoxLayout, QTableWidget, QTableWidgetItem
+    QDialogButtonBox, QLineEdit, QPushButton, QHBoxLayout, QVBoxLayout, QTableWidget, QTableWidgetItem, QLabel
 from PySide2.QtGui import QIcon
 from PySide2.QtCore import Qt
 from itertools import count
@@ -181,15 +181,32 @@ class MainWindow(QMainWindow):
         del_object.triggered.connect(self.del_data_in_db)
         # 2. Отчет
         # 2.1 Сводная таблица
-        report_table = QAction(self.table_ico, 'Сводная таблица', self)
-        # del_object.triggered.connect(self.del_data_in_db)
+        report_table = QAction(self.table_ico, 'Сводный отчет', self)
+        report_table.triggered.connect(self.get_report_table)
         # 2.2. Документы
+        doc_menu = QMenu('Разделы', self)
+        doc_menu.setIcon(self.word_ico)
+        doc_prom_bez = QAction(self.book_ico, 'Декларация ПБ', self)
+        # doc_prom_bez.triggered.connect(self.add_data_in_db)
+        doc_menu.addAction(doc_prom_bez)
+        doc_gochs = QAction(self.book_ico, 'ПМ ГОЧС', self)
+        # doc_gochs.triggered.connect(self.add_data_in_db)
+        doc_menu.addAction(doc_gochs)
+        doc_pb = QAction(self.book_ico, 'Пожарная безопасность', self)
+        # doc_pb.triggered.connect(self.add_data_in_db)
+        doc_menu.addAction(doc_pb)
         # 2.3. Расчет
-        calc_menu = QMenu('Добавить', self)
-        calc_menu.setIcon(self.add_ico)
-        calc_fire = QAction(self.org_ico, 'Организация', self)
+        calc_menu = QMenu('Расчет', self)
+        calc_menu.setIcon(self.calc_ico)
+        calc_fire = QAction(self.fire_ico, 'Пожар', self)
         # calc_fire.triggered.connect(self.add_data_in_db)
-
+        calc_menu.addAction(calc_fire)
+        calc_expl = QAction(self.expl_ico, 'Взрыв', self)
+        # calc_expl.triggered.connect(self.add_data_in_db)
+        calc_menu.addAction(calc_expl)
+        calc_flash = QAction(self.flash_ico, 'Вспышка + НКПР', self)
+        # calc_flash.triggered.connect(self.add_data_in_db)
+        calc_menu.addAction(calc_flash)
 
         # Меню приложения (верхняя плашка)
         menubar = self.menuBar()
@@ -198,6 +215,8 @@ class MainWindow(QMainWindow):
         data_menu.addAction(del_object)
         report_menu = menubar.addMenu('Отчет')
         report_menu.addAction(report_table)
+        report_menu.addMenu(doc_menu)
+        report_menu.addMenu(calc_menu)
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         self.show()
 
@@ -419,6 +438,21 @@ class MainWindow(QMainWindow):
 
     # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
     # __________________________________________________________________________
+    # __________________________________________________________________________
+    # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    # Отчеты
+    # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    def get_report_table(self):
+
+        # 1. Вызываем диалог добавления
+        getDialog = Get_report()
+        # 1.1. Получаем ответ от Диалога
+        rez = getDialog.exec()
+        # 1.2. Если нажата кнопка Отмена
+        if not rez:
+            _ = QMessageBox.information(self, 'Внимание!', 'Составление сводного отчета отменено')
+            return
+
 
     def set_ico(self):
         path_ico = str(Path(os.getcwd()))
@@ -434,6 +468,12 @@ class MainWindow(QMainWindow):
         self.device_ico = QIcon(path_ico + '/ico/device.png')
         self.pipeline_ico = QIcon(path_ico + '/ico/pipeline.png')
         self.table_ico = QIcon(path_ico + '/ico/table.png')
+        self.fire_ico = QIcon(path_ico + '/ico/fire.png')
+        self.calc_ico = QIcon(path_ico + '/ico/calc.png')
+        self.expl_ico = QIcon(path_ico + '/ico/explosion.png')
+        self.flash_ico = QIcon(path_ico + '/ico/flash.png')
+        self.word_ico = QIcon(path_ico + '/ico/word.png')
+        self.book_ico = QIcon(path_ico + '/ico/book.png')
         self.setWindowIcon(self.main_ico)
         self.list_ico = [self.org_ico, self.object_ico, self.project_ico, self.document_ico, self.sub_ico,
                          self.device_ico, self.pipeline_ico]
@@ -452,13 +492,29 @@ class MainWindow(QMainWindow):
 
 
 class Get_report(QDialog):
-    def __init__(self, table_name: str, data: list):
+    def __init__(self,):
         super().__init__()
+        # 1. Какие проекты сейчас в БД (id + шифр)
+        number_project = []
+        query = QSqlQuery('SELECT * FROM Projects')
+        while query.next():
+            number_project.append(str(query.value(0)) + "=" + query.value(3))
+        query.exec_()
+        number_project = sorted(number_project)
+        # 2. Иконки
         self.setWindowFlag(Qt.WindowContextHelpButtonHint, False)  # убрать знак вопроса
         path_ico = str(Path(os.getcwd()))
         main_ico = QIcon(path_ico + '/ico/main.png')
         self.setWindowIcon(main_ico)
+        self.setWindowTitle('Сводный отчет')
+        # 3. Основной слой диалога
         main_layout = QVBoxLayout(self)
+        label = QLabel()
+        label.setText('Выберете шифр проекта:')
+        self.id = QComboBox()
+        self.id.addItems(number_project)
+        main_layout.addWidget(label)
+        main_layout.addWidget(self.id)
         # Группа кнопок Ок-Cancel
         button_box = QDialogButtonBox(
             QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
