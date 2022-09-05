@@ -139,12 +139,6 @@ class MainWindow(QMainWindow):
         self.show_table(index=0)
         layout_table.addRow("", self.table)
         GB_table.setLayout(layout_table)
-
-        query = QSqlQuery()
-        query.exec_("SELECT Name_org FROM Organizations")
-        while query.next():
-            print(query.value(0))
-
         self.resize(800, 600)
         self.setWindowTitle('Safety_docs')
         self.set_ico()
@@ -184,7 +178,7 @@ class MainWindow(QMainWindow):
         add_menu.addAction(add_pipeline)
         # 1.1. Удалить
         del_object = QAction(self.del_ico, 'Удалить', self)
-        # del_object.triggered.connect(self.database_connect)
+        del_object.triggered.connect(self.del_data_in_db)
         # Меню приложения (верхняя плашка)
         menubar = self.menuBar()
         data_menu = menubar.addMenu('Данные')
@@ -258,7 +252,7 @@ class MainWindow(QMainWindow):
 
     # __________________________________________________________________________
     # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-    # Добавление информации в базу данных и фильтрация
+    # Добавление, удаление информации для базы данных и фильтрация
     # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
     def add_data_in_db(self):
         """
@@ -282,20 +276,25 @@ class MainWindow(QMainWindow):
         # стоит отправитель сигнала и сравниваем с:
         if self.sender_list.index(sender.text()) == 0:  # 0 - таблица организаций
             self.__add_record(data=data, table="Organizations", fields=self.field_dict_in_db["Organizations"])
+            self.select_table.setCurrentIndex(0)
         elif self.sender_list.index(sender.text()) == 1:  # 1 - таблица объектов
             # Добавим в список id организации
             data.insert(0, int(inputDialog.id.currentText().split()[0]))
+            self.select_table.setCurrentIndex(1)
             self.__add_record(data=data, table="Objects", fields=self.field_dict_in_db["Objects"])
         elif self.sender_list.index(sender.text()) == 2:  # 2 - таблица проектов
             # Добавим в список id объекта
             data.insert(0, int(inputDialog.id.currentText().split()[0]))
             self.__add_record(data=data, table="Projects", fields=self.field_dict_in_db["Projects"])
+            self.select_table.setCurrentIndex(2)
         elif self.sender_list.index(sender.text()) == 3:  # 3 - таблица наименования томов
             # Добавим в список id проекта
             data.insert(0, int(inputDialog.id.currentText().split()[0]))
             self.__add_record(data=data, table="Documents", fields=self.field_dict_in_db["Documents"])
+            self.select_table.setCurrentIndex(3)
         elif self.sender_list.index(sender.text()) == 4:  # 4 - вещества
             self.__add_record(data=data, table="Substances", fields=self.field_dict_in_db["Substances"])
+            self.select_table.setCurrentIndex(4)
         elif self.sender_list.index(sender.text()) == 5:  # 5 - Оборудование
             # Добавим в список тип объекта
             data.insert(0, int(inputDialog.type_obj.currentText()[-1]))
@@ -304,14 +303,29 @@ class MainWindow(QMainWindow):
             # Добавим в список id проекта
             data.insert(0, int(inputDialog.id.currentText().split()[0]))
             self.__add_record(data=data, table="Devices", fields=self.field_dict_in_db["Devices"])
+            self.select_table.setCurrentIndex(5)
         elif self.sender_list.index(sender.text()) == 6:  # 6 - Трубопроводы
             # Добавим в список id вещества
             data.insert(0, int(inputDialog.id_sub.currentText().split()[0]))
             # Добавим в список id проекта
             data.insert(0, int(inputDialog.id.currentText().split()[0]))
             self.__add_record(data=data, table="Pipelines", fields=self.field_dict_in_db["Pipelines"])
+            self.select_table.setCurrentIndex(6)
         # 3. Обновляем таблицу в соответствии с индексом отправителя
         self.show_table(self.sender_list.index(sender.text()))
+
+    def del_data_in_db(self):
+        index = self.table.currentIndex()
+        id = self.table.model().index(index.row(), 0).data()
+        table_name = self.table_list_eng[self.select_table.currentIndex()]
+        print(id, table_name)
+        db.transaction()
+        query = QSqlQuery()
+        sql_request = f'DELETE FROM {table_name} WHERE Id={id}'
+        query.prepare(sql_request)
+        query.exec_()
+        db.commit()
+        self.show_table(self.select_table.currentIndex())
 
     # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
     # Подфункции для add_data_in_db
