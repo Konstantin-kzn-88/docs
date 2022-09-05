@@ -151,7 +151,7 @@ class MainWindow(QMainWindow):
 
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         # Меню (тулбар)
-        # 1. Файл
+        # 1. Данные
         # 1.1. Добавить
         add_menu = QMenu('Добавить', self)
         add_menu.setIcon(self.add_ico)
@@ -179,11 +179,25 @@ class MainWindow(QMainWindow):
         # 1.1. Удалить
         del_object = QAction(self.del_ico, 'Удалить', self)
         del_object.triggered.connect(self.del_data_in_db)
+        # 2. Отчет
+        # 2.1 Сводная таблица
+        report_table = QAction(self.table_ico, 'Сводная таблица', self)
+        # del_object.triggered.connect(self.del_data_in_db)
+        # 2.2. Документы
+        # 2.3. Расчет
+        calc_menu = QMenu('Добавить', self)
+        calc_menu.setIcon(self.add_ico)
+        calc_fire = QAction(self.org_ico, 'Организация', self)
+        # calc_fire.triggered.connect(self.add_data_in_db)
+
+
         # Меню приложения (верхняя плашка)
         menubar = self.menuBar()
         data_menu = menubar.addMenu('Данные')
         data_menu.addMenu(add_menu)
         data_menu.addAction(del_object)
+        report_menu = menubar.addMenu('Отчет')
+        report_menu.addAction(report_table)
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         self.show()
 
@@ -315,6 +329,9 @@ class MainWindow(QMainWindow):
         self.show_table(self.sender_list.index(sender.text()))
 
     def del_data_in_db(self):
+        """
+        Удаление данных из таблицы по наименованию таблицы и id строки
+        """
         index = self.table.currentIndex()
         id = self.table.model().index(index.row(), 0).data()
         table_name = self.table_list_eng[self.select_table.currentIndex()]
@@ -416,6 +433,7 @@ class MainWindow(QMainWindow):
         self.sub_ico = QIcon(path_ico + '/ico/sub.png')
         self.device_ico = QIcon(path_ico + '/ico/device.png')
         self.pipeline_ico = QIcon(path_ico + '/ico/pipeline.png')
+        self.table_ico = QIcon(path_ico + '/ico/table.png')
         self.setWindowIcon(self.main_ico)
         self.list_ico = [self.org_ico, self.object_ico, self.project_ico, self.document_ico, self.sub_ico,
                          self.device_ico, self.pipeline_ico]
@@ -432,6 +450,21 @@ class MainWindow(QMainWindow):
         else:
             event.ignore()
 
+
+class Get_report(QDialog):
+    def __init__(self, table_name: str, data: list):
+        super().__init__()
+        self.setWindowFlag(Qt.WindowContextHelpButtonHint, False)  # убрать знак вопроса
+        path_ico = str(Path(os.getcwd()))
+        main_ico = QIcon(path_ico + '/ico/main.png')
+        self.setWindowIcon(main_ico)
+        main_layout = QVBoxLayout(self)
+        # Группа кнопок Ок-Cancel
+        button_box = QDialogButtonBox(
+            QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        button_box.accepted.connect(self.accept)
+        button_box.rejected.connect(self.reject)
+        main_layout.addWidget(button_box)
 
 class Add_Dialog(QDialog):
     def __init__(self, state: str, header_dict: dict):
