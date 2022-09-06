@@ -452,14 +452,35 @@ class MainWindow(QMainWindow):
         if not rez:
             _ = QMessageBox.information(self, 'Внимание!', 'Составление сводного отчета отменено')
             return
-        # 2 Получим шифр проекта
-        # print(get_report_dialog.num_project.currentText())
-
-        #     2.1. Вытянем о нему инфу из таблицы
+        # 1.3 Заведем словари для информации
+        project_info = {}
+        object_info = {}
+        org_info = {}
+        # 2. Получим по шифру из проекта инфу из таблицы Projects
         query = QSqlQuery(f'SELECT * FROM Projects WHERE Project_code = "{get_report_dialog.num_project.currentText()}"')
-        while query.next():
-            print(str(query.value(0)) + " " + query.value(3) + " " + query.value(2))
+        query.next()
+        for i in range(len(self.field_dict_in_db['Projects'])):
+            if i == 0: project_info['Id'] = query.value(i)
+            else: project_info[self.field_dict_in_db['Projects'][i-1]] = query.value(i)
+        print(project_info)
         query.exec_()
+        # 3. Получим по id  инфу из таблицы Objects
+        query = QSqlQuery(f'SELECT * FROM Objects WHERE Id = {project_info["ObjectsId"]}')
+        query.next()
+        for i in range(len(self.field_dict_in_db['Objects'])):
+            if i == 0: object_info['Id'] = query.value(i)
+            else: object_info[self.field_dict_in_db['Objects'][i-1]] = query.value(i)
+        print(object_info)
+        query.exec_()
+        # 3. Получим по id  инфу из таблицы Organizations
+        query = QSqlQuery(f'SELECT * FROM Organizations WHERE Id = {object_info["OrganizationId"]}')
+        query.next()
+        for i in range(len(self.field_dict_in_db['Organizations'])):
+            if i == 0: org_info['Id'] = query.value(i)
+            else: org_info[self.field_dict_in_db['Organizations'][i-1]] = query.value(i)
+        print(org_info)
+        query.exec_()
+
 
 
     def set_ico(self):
