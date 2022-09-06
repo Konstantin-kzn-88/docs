@@ -445,13 +445,21 @@ class MainWindow(QMainWindow):
     def get_report_table(self):
 
         # 1. Вызываем диалог добавления
-        getDialog = Get_report()
+        get_report_dialog = Get_report()
         # 1.1. Получаем ответ от Диалога
-        rez = getDialog.exec()
+        rez = get_report_dialog.exec()
         # 1.2. Если нажата кнопка Отмена
         if not rez:
             _ = QMessageBox.information(self, 'Внимание!', 'Составление сводного отчета отменено')
             return
+        # 2 Получим шифр проекта
+        # print(get_report_dialog.num_project.currentText())
+
+        #     2.1. Вытянем о нему инфу из таблицы
+        query = QSqlQuery(f'SELECT * FROM Projects WHERE Project_code = "{get_report_dialog.num_project.currentText()}"')
+        while query.next():
+            print(str(query.value(0)) + " " + query.value(3) + " " + query.value(2))
+        query.exec_()
 
 
     def set_ico(self):
@@ -492,13 +500,13 @@ class MainWindow(QMainWindow):
 
 
 class Get_report(QDialog):
-    def __init__(self,):
+    def __init__(self, ):
         super().__init__()
         # 1. Какие проекты сейчас в БД (id + шифр)
         number_project = []
         query = QSqlQuery('SELECT * FROM Projects')
         while query.next():
-            number_project.append(str(query.value(0)) + "=" + query.value(3))
+            number_project.append(query.value(3))
         query.exec_()
         number_project = sorted(number_project)
         # 2. Иконки
@@ -511,16 +519,17 @@ class Get_report(QDialog):
         main_layout = QVBoxLayout(self)
         label = QLabel()
         label.setText('Выберете шифр проекта:')
-        self.id = QComboBox()
-        self.id.addItems(number_project)
+        self.num_project = QComboBox()
+        self.num_project.addItems(number_project)
         main_layout.addWidget(label)
-        main_layout.addWidget(self.id)
+        main_layout.addWidget(self.num_project)
         # Группа кнопок Ок-Cancel
         button_box = QDialogButtonBox(
             QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         button_box.accepted.connect(self.accept)
         button_box.rejected.connect(self.reject)
         main_layout.addWidget(button_box)
+
 
 class Add_Dialog(QDialog):
     def __init__(self, state: str, header_dict: dict):
