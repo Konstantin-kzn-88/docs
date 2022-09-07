@@ -9,6 +9,7 @@ from PySide2.QtWidgets import QApplication, QMainWindow, QComboBox, QMessageBox,
 from PySide2.QtGui import QIcon
 from PySide2.QtCore import Qt
 from itertools import count
+from pprint import pprint
 
 db = QSqlDatabase.addDatabase("QMYSQL")
 db.setHostName("server167.hosting.reg.ru")
@@ -354,7 +355,6 @@ class MainWindow(QMainWindow):
         index = self.table.currentIndex()
         id = self.table.model().index(index.row(), 0).data()
         table_name = self.table_list_eng[self.select_table.currentIndex()]
-        print(id, table_name)
         db.transaction()
         query = QSqlQuery()
         sql_request = f'DELETE FROM {table_name} WHERE Id={id}'
@@ -456,13 +456,16 @@ class MainWindow(QMainWindow):
         project_info = {}
         object_info = {}
         org_info = {}
+        doc_info = {}
+        dev_info = []
+        pipe_info = []
         # 2. Получим по шифру из проекта инфу из таблицы Projects
         query = QSqlQuery(f'SELECT * FROM Projects WHERE Project_code = "{get_report_dialog.num_project.currentText()}"')
         query.next()
         for i in range(len(self.field_dict_in_db['Projects'])):
             if i == 0: project_info['Id'] = query.value(i)
             else: project_info[self.field_dict_in_db['Projects'][i-1]] = query.value(i)
-        print(project_info)
+        pprint(project_info)
         query.exec_()
         # 3. Получим по id  инфу из таблицы Objects
         query = QSqlQuery(f'SELECT * FROM Objects WHERE Id = {project_info["ObjectsId"]}')
@@ -470,7 +473,7 @@ class MainWindow(QMainWindow):
         for i in range(len(self.field_dict_in_db['Objects'])):
             if i == 0: object_info['Id'] = query.value(i)
             else: object_info[self.field_dict_in_db['Objects'][i-1]] = query.value(i)
-        print(object_info)
+        pprint(object_info)
         query.exec_()
         # 3. Получим по id  инфу из таблицы Organizations
         query = QSqlQuery(f'SELECT * FROM Organizations WHERE Id = {object_info["OrganizationId"]}')
@@ -478,7 +481,39 @@ class MainWindow(QMainWindow):
         for i in range(len(self.field_dict_in_db['Organizations'])):
             if i == 0: org_info['Id'] = query.value(i)
             else: org_info[self.field_dict_in_db['Organizations'][i-1]] = query.value(i)
-        print(org_info)
+        pprint(org_info)
+        query.exec_()
+        # 4. Получим по id  инфу из таблицы Documents
+        query = QSqlQuery(f'SELECT * FROM Documents WHERE ProjectsId = {project_info["Id"]}')
+        query.next()
+        for i in range(len(self.field_dict_in_db['Documents'])):
+            if i == 0: doc_info['Id'] = query.value(i)
+            else: doc_info[self.field_dict_in_db['Documents'][i-1]] = query.value(i)
+        pprint(doc_info)
+        query.exec_()
+        # 5. Получим по id  инфу из таблицы Devices
+        query = QSqlQuery(f'SELECT * FROM Devices WHERE ProjectsId = {project_info["Id"]}')
+        while query.next():
+            dict_dev = {}
+            for i in range(len(self.field_dict_in_db['Devices'])):
+                if i == 0:
+                    dict_dev['Id'] = query.value(i)
+                else:
+                    dict_dev[self.field_dict_in_db['Devices'][i - 1]] = query.value(i)
+            dev_info.append(dict_dev)
+        pprint(dev_info)
+        query.exec_()
+        # 6. Получим по id  инфу из таблицы Devices
+        query = QSqlQuery(f'SELECT * FROM Pipelines WHERE ProjectsId = {project_info["Id"]}')
+        while query.next():
+            dict_pipe = {}
+            for i in range(len(self.field_dict_in_db['Pipelines'])):
+                if i == 0:
+                    dict_pipe['Id'] = query.value(i)
+                else:
+                    dict_pipe[self.field_dict_in_db['Pipelines'][i - 1]] = query.value(i)
+            pipe_info.append(dict_pipe)
+        pprint(pipe_info)
         query.exec_()
 
 
