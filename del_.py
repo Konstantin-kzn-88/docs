@@ -1,6 +1,9 @@
-import itertools
+import xlwings as xw
 
-for i in itertools.count(0,1):
-    print(i)
-    if i > 10:
-        break
+with xw.App(visible=False) as app:
+    book = xw.Book("weather.xls")
+    sheet = book.sheets['data']
+    print(sheet.range('A1').value)
+    # xw.Range((k, i)).value = rec
+    book.close()
+
