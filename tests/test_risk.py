@@ -77,32 +77,49 @@ class ServerTest(TestCase):
 
     def test_risk_probability(self):
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-        # mchs_liquid
+        # rosteh_device_tube
         self.assertEqual(
-            risk_probability.Probability.probability_rosteh(type_obj=0, length=25),
-            ('7.50e-06', '5.00e-05'))
-        self.assertEqual(
-            risk_probability.Probability.probability_rosteh(type_obj=1, length=0),
-            ('1.00e-06', '1.00e-05'))
-        self.assertEqual(
-            risk_probability.Probability.probability_rosteh(type_obj=2, length=0),
+            risk_probability.Probability.probability_rosteh_device(1),
             ('1.00e-05', '5.00e-05'))
         self.assertEqual(
-            risk_probability.Probability.probability_rosteh(type_obj=3, length=0),
-            ('1.00e-05', '1.00e-04'))
-        self.assertEqual(
-            risk_probability.Probability.probability_rosteh(type_obj=4, length=0),
-            ('1.00e-05', '1.00e-04'))
-        self.assertEqual(
-            risk_probability.Probability.probability_rosteh(type_obj=5, length=0),
-            ('1.50e-05', '1.00e-03'))
-        self.assertEqual(
-            risk_probability.Probability.probability_rosteh(type_obj=6, length=0),
-            ('5.00e-07', '4.00e-05'))
-        # mchs_liquid_len
-        for j in range(0, 7, 1):
+            risk_probability.Probability.probability_rosteh_tube(1,114),
+            ('3.00e-07', '2.00e-07'))
+        # rosteh_device_tube
+        for j in range(0, 6, 1):
             self.assertEqual(
-                len(risk_probability.Probability.probability_rosteh(type_obj=j, length=0)), 2)
+                len(risk_probability.Probability.probability_rosteh_device(type_obj=j)), 2)
+        for j in range(10, 600, 10):
+            self.assertEqual(
+                len(risk_probability.Probability.probability_rosteh_tube(j,j)), 2)
+
+        # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        # mchs_device
+        self.assertEqual(
+            risk_probability.Probability.probability_mchs_device(0),
+            ('3.00e-07', '1.70e-06', '3.80e-06', '6.20e-06', '1.00e-05', '4.00e-05'))
+        self.assertEqual(
+            risk_probability.Probability.probability_mchs_device(1),
+            ('5.00e-06', '1.20e-05', '8.80e-05'))
+        # mchs_device_len
+        for _ in range(10):
+            self.assertEqual(
+                len(risk_probability.Probability.probability_mchs_device(0)), 6)
+        for _ in range(10):
+            self.assertEqual(
+                len(risk_probability.Probability.probability_mchs_device(1)), 3)
+
+        # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        # mchs_tube
+        self.assertEqual(
+            risk_probability.Probability.probability_mchs_tube(1,100),
+            ('2.80e-06', '1.20e-06', '4.70e-07', '0.00e+00', '2.40e-07'))
+        self.assertEqual(
+            risk_probability.Probability.probability_mchs_tube(1, 600),
+            ('4.70e-07', '2.00e-07', '7.90e-08', '3.40e-08', '6.40e-09'))
+        # mchs_tube_len
+        for j in range(25):
+            self.assertEqual(
+                len(risk_probability.Probability.probability_mchs_tube(j,100)), 5)
 
 if __name__ == '__main__':
     main()
