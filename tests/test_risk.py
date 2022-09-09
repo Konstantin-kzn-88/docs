@@ -1,6 +1,6 @@
 import random
 from unittest import TestCase, main
-from risk import risk_event_tree
+from risk import risk_event_tree, risk_probability
 
 
 class ServerTest(TestCase):
@@ -75,6 +75,34 @@ class ServerTest(TestCase):
                 len(risk_event_tree.Event_tree().rostech_liquid(type_obj=random.choice((1, 2)), flow_rate=f / 10,
                                                                 probability=7e-5)), 4)
 
+    def test_risk_probability(self):
+        # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        # mchs_liquid
+        self.assertEqual(
+            risk_probability.Probability.probability_rosteh(type_obj=0, length=25),
+            ('7.50e-06', '5.00e-05'))
+        self.assertEqual(
+            risk_probability.Probability.probability_rosteh(type_obj=1, length=0),
+            ('1.00e-06', '1.00e-05'))
+        self.assertEqual(
+            risk_probability.Probability.probability_rosteh(type_obj=2, length=0),
+            ('1.00e-05', '5.00e-05'))
+        self.assertEqual(
+            risk_probability.Probability.probability_rosteh(type_obj=3, length=0),
+            ('1.00e-05', '1.00e-04'))
+        self.assertEqual(
+            risk_probability.Probability.probability_rosteh(type_obj=4, length=0),
+            ('1.00e-05', '1.00e-04'))
+        self.assertEqual(
+            risk_probability.Probability.probability_rosteh(type_obj=5, length=0),
+            ('1.50e-05', '1.00e-03'))
+        self.assertEqual(
+            risk_probability.Probability.probability_rosteh(type_obj=6, length=0),
+            ('5.00e-07', '4.00e-05'))
+        # mchs_liquid_len
+        for j in range(0, 7, 1):
+            self.assertEqual(
+                len(risk_probability.Probability.probability_rosteh(type_obj=j, length=0)), 2)
 
 if __name__ == '__main__':
     main()

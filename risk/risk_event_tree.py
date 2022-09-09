@@ -1,3 +1,12 @@
+# -----------------------------------------------------------
+# Класс предназначен для получения кортежа вероятностей возможных аварий
+# по деревьям событий МЧС и Ростехнадзора
+#
+# МЧС РФ от 10.07.2009 N 404
+# РТН от 17.08.2015 N 317
+# (C) 2022 Kuznetsov Konstantin, Kazan , Russian Federation
+# email kuznetsovkm@yandex.ru
+# -----------------------------------------------------------
 class Event_tree:
     @staticmethod
     def mchs_liquid(flash_temperature: float, flow_rate: float, probability: float) -> tuple:
@@ -79,7 +88,7 @@ class Event_tree:
                 "{:.2e}".format(probability * (1 - a) * (1 - b)))  # рассеивание
 
     @staticmethod
-    def rostech_liquid(type_obj: int, flow_rate: float, probability: float):
+    def rostech_liquid(type_obj: int, flow_rate: float, probability: float) -> tuple:
         """
         "Дерево собьтий" для жидкости в емкости под давлением по приказу РТН от 17.08.2015 N 317
 
@@ -115,7 +124,7 @@ class Event_tree:
                 a, b, c = ratio_tuple[3]
             else:
                 a, b, c = ratio_tuple[1]
-        else: # емкостное и пр. оборудование
+        else:  # емкостное и пр. оборудование
             a, b, c = ratio_tuple[4]
 
         return ("{:.2e}".format(probability * a),  # пожар
