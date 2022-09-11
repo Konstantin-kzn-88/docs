@@ -503,7 +503,7 @@ class MainWindow(QMainWindow):
             dev_info.append(dict_dev)
         pprint(dev_info)
         query.exec_()
-        # 6. Получим по id  инфу из таблицы Devices
+        # 6. Получим по id  инфу из таблицы Pipelines
         query = QSqlQuery(f'SELECT * FROM Pipelines WHERE ProjectsId = {project_info["Id"]}')
         while query.next():
             dict_pipe = {}
