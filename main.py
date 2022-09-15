@@ -459,43 +459,53 @@ class MainWindow(QMainWindow):
         doc_info = {}
         dev_info = []
         pipe_info = []
+        sub_info = []
         # 2. Получим по шифру из проекта инфу из таблицы Projects
-        query = QSqlQuery(f'SELECT * FROM Projects WHERE Project_code = "{get_report_dialog.num_project.currentText()}"')
+        query = QSqlQuery(
+            f'SELECT * FROM Projects WHERE Project_code = "{get_report_dialog.num_project.currentText()}"')
         query.next()
-        for i in range(len(self.field_dict_in_db['Projects'])):
-            if i == 0: project_info['Id'] = query.value(i)
-            else: project_info[self.field_dict_in_db['Projects'][i-1]] = query.value(i)
+        for i in range(len(self.field_dict_in_db['Projects']) + 1):
+            if i == 0:
+                project_info['Id'] = query.value(i)
+            else:
+                project_info[self.field_dict_in_db['Projects'][i - 1]] = query.value(i)
         pprint(project_info)
         query.exec_()
         # 3. Получим по id  инфу из таблицы Objects
         query = QSqlQuery(f'SELECT * FROM Objects WHERE Id = {project_info["ObjectsId"]}')
         query.next()
-        for i in range(len(self.field_dict_in_db['Objects'])):
-            if i == 0: object_info['Id'] = query.value(i)
-            else: object_info[self.field_dict_in_db['Objects'][i-1]] = query.value(i)
+        for i in range(len(self.field_dict_in_db['Objects']) + 1):
+            if i == 0:
+                object_info['Id'] = query.value(i)
+            else:
+                object_info[self.field_dict_in_db['Objects'][i - 1]] = query.value(i)
         pprint(object_info)
         query.exec_()
         # 3. Получим по id  инфу из таблицы Organizations
         query = QSqlQuery(f'SELECT * FROM Organizations WHERE Id = {object_info["OrganizationId"]}')
         query.next()
-        for i in range(len(self.field_dict_in_db['Organizations'])):
-            if i == 0: org_info['Id'] = query.value(i)
-            else: org_info[self.field_dict_in_db['Organizations'][i-1]] = query.value(i)
+        for i in range(len(self.field_dict_in_db['Organizations']) + 1):
+            if i == 0:
+                org_info['Id'] = query.value(i)
+            else:
+                org_info[self.field_dict_in_db['Organizations'][i - 1]] = query.value(i)
         pprint(org_info)
         query.exec_()
         # 4. Получим по id  инфу из таблицы Documents
         query = QSqlQuery(f'SELECT * FROM Documents WHERE ProjectsId = {project_info["Id"]}')
         query.next()
-        for i in range(len(self.field_dict_in_db['Documents'])):
-            if i == 0: doc_info['Id'] = query.value(i)
-            else: doc_info[self.field_dict_in_db['Documents'][i-1]] = query.value(i)
+        for i in range(len(self.field_dict_in_db['Documents']) + 1):
+            if i == 0:
+                doc_info['Id'] = query.value(i)
+            else:
+                doc_info[self.field_dict_in_db['Documents'][i - 1]] = query.value(i)
         pprint(doc_info)
         query.exec_()
         # 5. Получим по id  инфу из таблицы Devices
         query = QSqlQuery(f'SELECT * FROM Devices WHERE ProjectsId = {project_info["Id"]}')
         while query.next():
             dict_dev = {}
-            for i in range(len(self.field_dict_in_db['Devices'])):
+            for i in range(len(self.field_dict_in_db['Devices'])+1):
                 if i == 0:
                     dict_dev['Id'] = query.value(i)
                 else:
@@ -507,16 +517,25 @@ class MainWindow(QMainWindow):
         query = QSqlQuery(f'SELECT * FROM Pipelines WHERE ProjectsId = {project_info["Id"]}')
         while query.next():
             dict_pipe = {}
-            for i in range(len(self.field_dict_in_db['Pipelines'])):
+            for i in range(len(self.field_dict_in_db['Pipelines'])+1):
                 if i == 0:
                     dict_pipe['Id'] = query.value(i)
                 else:
                     dict_pipe[self.field_dict_in_db['Pipelines'][i - 1]] = query.value(i)
             pipe_info.append(dict_pipe)
         pprint(pipe_info)
+        # 6. Получим все вещества
+        query = QSqlQuery(f'SELECT * FROM Substances')
+        while query.next():
+            dict_sub = {}
+            for i in range(len(self.field_dict_in_db['Substances'])+1):
+                if i == 0:
+                    dict_sub['Id'] = query.value(i)
+                else:
+                    dict_sub[self.field_dict_in_db['Substances'][i - 1]] = query.value(i)
+            sub_info.append(dict_sub)
+        pprint(sub_info)
         query.exec_()
-
-
 
     def set_ico(self):
         path_ico = str(Path(os.getcwd()))
