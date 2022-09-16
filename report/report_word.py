@@ -227,11 +227,22 @@ class Report:
         context.update(self.object_info)
         context.update(self.project_info)
         context.update(self.doc_info)
+        # Таблица с оборудованием
         context['dev_table'] = self.dev_info
         context['pipe_table'] = self.pipe_info
+        # Таблица с распределением ОВ
         mass_in_dev_and_pipe = self.__calc_mass_in_device(self.dev_info, self.pipe_info, self.sub_info)
         context['mass_sub_table'] = mass_in_dev_and_pipe
         context['sum_sub'] = sum([float(i['Quantity']) for i in mass_in_dev_and_pipe])
+        # Таблица с авариями
+        if len(self.pipe_info) != 0:
+            with open(f'{path_template}\\report\\templates\\oil_pipelines.txt', 'r', encoding="utf-8") as f:
+                data_oil_pipe = f.read()
+                context['oil_pipeline_accident_table'] = eval(data_oil_pipe)
+        if len(self.dev_info) != 0:
+            with open(f'{path_template}\\report\\templates\\oil_device.txt', 'r', encoding="utf-8") as f:
+                data_oil_dev = f.read()
+                context['oil_device_accident_table'] = eval(data_oil_dev)
         doc.render(context)
         text = str(int(time.time()))
         doc.save(f'{DESKTOP_PATH}\\{text}_{project_info["Project_code"]}_all_table.docx')
