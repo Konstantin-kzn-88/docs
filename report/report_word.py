@@ -1,3 +1,5 @@
+from pprint import pprint
+
 pipe_info = [{'Death_person': '1',
               'Diameter': '114',
               'Flow': '5',
@@ -201,6 +203,7 @@ from docxtpl import DocxTemplate, InlineImage
 from pathlib import Path
 import time
 import os
+import math
 
 DESKTOP_PATH = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
 
@@ -226,16 +229,88 @@ class Report:
         context.update(self.doc_info)
         context['dev_table'] = self.dev_info
         context['pipe_table'] = self.pipe_info
+        mass_in_dev_and_pipe = self.__calc_mass_in_device(self.dev_info, self.pipe_info, self.sub_info)
+        context['mass_sub_table'] = mass_in_dev_and_pipe
+        context['sum_sub'] = sum([float(i['Quantity']) for i in mass_in_dev_and_pipe])
         doc.render(context)
         text = str(int(time.time()))
         doc.save(f'{DESKTOP_PATH}\\{text}_{project_info["Project_code"]}_all_table.docx')
 
-    def _calc_mass_in_device(self, dev_info: dict):
+    def __calc_mass_in_device(self, dev_info: list, pipe_info: list, sub_info: list):
+        """
+        Расчет количества опасного вещества в оборудовании
+        :param dev_info: список словарей оборудования
+        :param pipe_info: спиок словарей трубопроводов
+        :param sub_info: список словарей веществ
+        :return: mass_list список словарей оборудования с распределением веществ
+        """
+        mass_list = []
         for item in dev_info:
-            print(item['Volume'])
-            print(item['Completion'])
-            print(item['SubId'])
-            mass_sub = item['Volume'] * item['Completion'] * item['Completion']  # аварийная масса выброса, кг
+            dev_dict = {}
+            dev_dict['Locations'] = item['Locations']
+            sub = self.__get_sub(sub_info, item['SubId'])
+            dev_dict['Poz_sub'] = f"{item['Pozition']}, {sub['Name_sub']}"
+            dev_dict['Quantity'] = round((float(item['Volume']) * float(item['Completion'].replace(",", ".")) * float(
+                sub['Density'].replace(",", "."))) / 1000, 2)
+            dev_dict['State'] = 'г.ф.+ж.ф.' if item['Completion'] != 1 else 'ж.ф.'
+            dev_dict['Pressure'] = item['Pressure']
+            dev_dict['Temperature'] = item['Temperature']
+            mass_list.append(dev_dict)
+
+        for item in pipe_info:
+            pipe_dict = {}
+            pipe_dict['Locations'] = item['Locations']
+            sub = self.__get_sub(sub_info, item['SubId'])
+            pipe_dict['Poz_sub'] = f"{item['Pozition']}, {sub['Name_sub']}"
+
+            diametr = float(item['Diameter'].replace(",", "."))
+            lenght = float(item['Length'].replace(",", "."))
+            density = float(sub['Density'].replace(",", "."))
+
+            pipe_dict['Quantity'] = round((self.__get_volume_pipe(diametr, lenght) * density) / 1000, 2)  # M, т
+            pipe_dict['State'] = 'ж.ф.'
+            pipe_dict['Pressure'] = item['Pressure']
+            pipe_dict['Temperature'] = item['Temperature']
+            mass_list.append(pipe_dict)
+
+        return mass_list
+
+    def __get_sub(self, sub_info: list, id: int) -> dict:
+        """
+        Функция возрвщает словарь сос свойствами вещества
+        :param sub_info: список словарей свойств веществ
+        :param id: id вещества которое нужно вытащить из sub_info
+        :return: item словарь со свойствами вещества
+        """
+        # Посмотрим каждое вещество, если id совпадает, то вернем его свойства
+        for item in sub_info:
+            if item['Id'] == id:
+                return item
+        # Если ничего не нашли, то вернем типовые свойства
+        item = {'Boiling_temperature': '330',
+                'Class_substance': '1',
+                'Cost': '60000',
+                'Density': '800',
+                'Density_gas': '4',
+                'Energy_level': '1',
+                'Flash_temperature': '10',
+                'Heat_of_combustion': '45309',
+                'Id': 0,
+                'Lower_concentration': '4',
+                'Molecular_weight': '160',
+                'Name_sub': 'Нефть_типовая',
+                'Sigma': '4',
+                'Steam_pressure': '50'}
+        return item
+
+    def __get_volume_pipe(self, diametr: float, lenght: float):
+        """
+        Получение объема трубопровода, м3
+        :param diametr: диаметр, мм
+        :param lenght: длина, км
+        :return: объем, м3
+        """
+        return math.pi * math.pow(diametr / 2000, 2) * (lenght * 1000)
 
 
 if __name__ == '__main__':
