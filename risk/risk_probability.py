@@ -59,7 +59,7 @@ class Probability:
 
         Parametrs:
         :param type_obj: тип оборудования
-        0 - емкость под давлением (разрушение, 100, 50, 25, 12.5, 5 мм)
+        0 - емкость под давлением (разрушение, 100, 50, 25, 12.5)
         1 - резервуар атм.(разрушение, 100, 25 мм)
 
         Return:
@@ -67,9 +67,8 @@ class Probability:
         """
         type_obj = -1 if type_obj > 1 else type_obj
         probabality_tuple = (
-            ("{:.2e}".format(3E-7), "{:.2e}".format(1.7E-6), "{:.2e}".format(3.8E-6), "{:.2e}".format(6.2E-6),
-             "{:.2e}".format(1E-5), "{:.2e}".format(4E-5)),
-            ("{:.2e}".format(5E-6), "{:.2e}".format(1.2E-5), "{:.2e}".format(8.8E-5))
+            ('1e-05', '6.2e-06', '3.8e-06', '1.7e-06', '3e-07'),
+            ('3.6e-04', '1.6e-04', '8.8e-05', '1.2e-05', '5e-06')
         )
         return probabality_tuple[type_obj]
 
@@ -85,36 +84,34 @@ class Probability:
         probability_tuple кортеж вероятностей инициирующих событий (приказ РТН от 11 апреля 2016 г. N 144)
         """
         set_tuple = ((5.7E-6, 2.4E-6, 0, 0, 1.4E-6),
-                             (2.8E-6, 1.2E-6, 4.7E-7, 0, 2.4E-7),
-                             (1.9E-6, 7.9E-7, 3.1E-7, 1.3E-7, 2.5E-8),
-                             (1.1E-6, 4.7E-7, 1.9E-7, 7.8E-8, 1.5E-8),
-                             (4.7E-7, 2E-7, 7.9E-8, 3.4E-8, 6.4E-9),
-                             (3.1E-7, 1.3E-7, 5.2E-8, 2.2E-8, 4.2E-9),
-                             (2.4E-7, 9.8E-8, 3.9E-8, 1.7E-8, 3.2E-9)
-                             )
+                     (2.8E-6, 1.2E-6, 4.7E-7, 0, 2.4E-7),
+                     (1.9E-6, 7.9E-7, 3.1E-7, 1.3E-7, 2.5E-8),
+                     (1.1E-6, 4.7E-7, 1.9E-7, 7.8E-8, 1.5E-8),
+                     (4.7E-7, 2E-7, 7.9E-8, 3.4E-8, 6.4E-9),
+                     (3.1E-7, 1.3E-7, 5.2E-8, 2.2E-8, 4.2E-9),
+                     (2.4E-7, 9.8E-8, 3.9E-8, 1.7E-8, 3.2E-9)
+                     )
 
         if diametr <= 50:
-            probabality_tuple = tuple("{:.2e}".format(i*lenght) for i in set_tuple[0])
-        elif diametr> 50 and diametr <= 100:
-            probabality_tuple = tuple("{:.2e}".format(i*lenght) for i in set_tuple[1])
-        elif diametr> 100 and diametr <= 150:
-            probabality_tuple = tuple("{:.2e}".format(i*lenght) for i in set_tuple[2])
-        elif diametr> 150 and diametr <= 250:
-            probabality_tuple = tuple("{:.2e}".format(i*lenght) for i in set_tuple[3])
-        elif diametr> 250 and diametr <= 600:
-            probabality_tuple = tuple("{:.2e}".format(i*lenght) for i in set_tuple[4])
-        elif diametr> 600 and diametr <= 900:
-            probabality_tuple = tuple("{:.2e}".format(i*lenght) for i in set_tuple[5])
-        elif diametr> 900:
-            probabality_tuple = tuple("{:.2e}".format(i*lenght) for i in set_tuple[6])
+            probabality_tuple = tuple("{:.2e}".format(i * lenght) for i in set_tuple[0])
+        elif diametr > 50 and diametr <= 100:
+            probabality_tuple = tuple("{:.2e}".format(i * lenght) for i in set_tuple[1])
+        elif diametr > 100 and diametr <= 150:
+            probabality_tuple = tuple("{:.2e}".format(i * lenght) for i in set_tuple[2])
+        elif diametr > 150 and diametr <= 250:
+            probabality_tuple = tuple("{:.2e}".format(i * lenght) for i in set_tuple[3])
+        elif diametr > 250 and diametr <= 600:
+            probabality_tuple = tuple("{:.2e}".format(i * lenght) for i in set_tuple[4])
+        elif diametr > 600 and diametr <= 900:
+            probabality_tuple = tuple("{:.2e}".format(i * lenght) for i in set_tuple[5])
+        elif diametr > 900:
+            probabality_tuple = tuple("{:.2e}".format(i * lenght) for i in set_tuple[6])
         else:
-            probabality_tuple = tuple("{:.2e}".format(i*lenght) for i in set_tuple[6])
+            probabality_tuple = tuple("{:.2e}".format(i * lenght) for i in set_tuple[6])
 
         return probabality_tuple
 
 
-
 if __name__ == '__main__':
-    print(Probability.probability_mchs_tube(1,100))
+    print(Probability.probability_mchs_tube(1, 100))
     print(Probability.probability_mchs_tube(1, 600))
-

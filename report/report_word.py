@@ -204,8 +204,18 @@ from pathlib import Path
 import time
 import os
 import math
+from calc import calc_liguid_evaporation as ev
+from risk import risk_statistics_weather as weather
+from risk import risk_probability as pr
+from risk import risk_event_tree as tree
 
 DESKTOP_PATH = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
+LAYER_THICKNESS = 20  # м^-1
+KG_TO_TONN = 1000  # 1000 кг = 1000/KG_TO_TONN = 1 тонна
+TONN_TO_KG = 1000  # 1т = 1*TONN_TO_KG = 1000 кг
+KM_TO_M = 1000  # 1км = 1*KM_TO_M = 1000 м
+CUT_OFF_TIME = 12  # секунд
+TIME_EVAPORATION = 3600  # секунд
 
 
 class Report:
@@ -243,6 +253,10 @@ class Report:
             with open(f'{path_template}\\report\\templates\\oil_device.txt', 'r', encoding="utf-8") as f:
                 data_oil_dev = f.read()
                 context['oil_device_accident_table'] = eval(data_oil_dev)
+        # Таблица количества опасного вещества участвующего в аварии
+        context['mass_С1_1_tmax_table'] = self.__get_mass_accident(1, 30, mass_in_dev_and_pipe, type_hole=0)
+        context['mass_С2_1_tmax_table'] = self.__get_mass_accident(1, 30, mass_in_dev_and_pipe, type_hole=0)
+
         doc.render(context)
         text = str(int(time.time()))
         doc.save(f'{DESKTOP_PATH}\\{text}_{project_info["Project_code"]}_all_table.docx')
@@ -259,13 +273,29 @@ class Report:
         for item in dev_info:
             dev_dict = {}
             dev_dict['Locations'] = item['Locations']
+            dev_dict['Spill_square'] = float(item['Spill_square'])
+            dev_dict['Flow'] = 0  # допущение что для емкостного оборудования притока нет
             sub = self.__get_sub(sub_info, item['SubId'])
             dev_dict['Poz_sub'] = f"{item['Pozition']}, {sub['Name_sub']}"
             dev_dict['Quantity'] = round((float(item['Volume']) * float(item['Completion'].replace(",", ".")) * float(
-                sub['Density'].replace(",", "."))) / 1000, 2)
+                sub['Density'].replace(",", "."))) / KG_TO_TONN, 2)
             dev_dict['State'] = 'г.ф.+ж.ф.' if item['Completion'] != 1 else 'ж.ф.'
             dev_dict['Pressure'] = item['Pressure']
             dev_dict['Temperature'] = item['Temperature']
+            # получим свойства вещества
+            dev_dict['Class_substance'] = float(sub['Class_substance'].replace(",", "."))
+            dev_dict['Cost'] = float(sub['Cost'].replace(",", "."))
+            dev_dict['Density'] = float(sub['Density'].replace(",", "."))
+            dev_dict['Density_gas'] = float(sub['Density_gas'].replace(",", "."))
+            dev_dict['Energy_level'] = float(sub['Energy_level'].replace(",", "."))
+            dev_dict['Flash_temperature'] = float(sub['Flash_temperature'].replace(",", "."))
+            dev_dict['Heat_of_combustion'] = float(sub['Heat_of_combustion'].replace(",", "."))
+            dev_dict['Lower_concentration'] = float(sub['Lower_concentration'].replace(",", "."))
+            dev_dict['Molecular_weight'] = float(sub['Molecular_weight'].replace(",", "."))
+            dev_dict['Sigma'] = float(sub['Sigma'].replace(",", "."))
+            dev_dict['Steam_pressure'] = float(sub['Steam_pressure'].replace(",", "."))
+            dev_dict['Type_device'] = item['Type_device']
+
             mass_list.append(dev_dict)
 
         for item in pipe_info:
@@ -277,11 +307,30 @@ class Report:
             diametr = float(item['Diameter'].replace(",", "."))
             lenght = float(item['Length'].replace(",", "."))
             density = float(sub['Density'].replace(",", "."))
+            volume = self.__get_volume_pipe(diametr, lenght)
 
-            pipe_dict['Quantity'] = round((self.__get_volume_pipe(diametr, lenght) * density) / 1000, 2)  # M, т
+            pipe_dict['Flow'] = float(item['Flow'].replace(",", "."))
+            pipe_dict['Spill_square'] = volume * LAYER_THICKNESS
+            pipe_dict['Quantity'] = round((volume * density) / KG_TO_TONN, 2)  # M, т
             pipe_dict['State'] = 'ж.ф.'
             pipe_dict['Pressure'] = item['Pressure']
             pipe_dict['Temperature'] = item['Temperature']
+            # получим свойства вещества
+            pipe_dict['Class_substance'] = float(sub['Class_substance'].replace(",", "."))
+            pipe_dict['Cost'] = float(sub['Cost'].replace(",", "."))
+            pipe_dict['Density'] = float(sub['Density'].replace(",", "."))
+            pipe_dict['Density_gas'] = float(sub['Density_gas'].replace(",", "."))
+            pipe_dict['Energy_level'] = float(sub['Energy_level'].replace(",", "."))
+            pipe_dict['Flash_temperature'] = float(sub['Flash_temperature'].replace(",", "."))
+            pipe_dict['Heat_of_combustion'] = float(sub['Heat_of_combustion'].replace(",", "."))
+            pipe_dict['Lower_concentration'] = float(sub['Lower_concentration'].replace(",", "."))
+            pipe_dict['Molecular_weight'] = float(sub['Molecular_weight'].replace(",", "."))
+            pipe_dict['Sigma'] = float(sub['Sigma'].replace(",", "."))
+            pipe_dict['Steam_pressure'] = float(sub['Steam_pressure'].replace(",", "."))
+            pipe_dict['Type_device'] = -1
+            pipe_dict['Length'] = item['Length']
+            pipe_dict['Diameter'] = item['Diameter']
+
             mass_list.append(pipe_dict)
 
         return mass_list
@@ -322,6 +371,74 @@ class Report:
         :return: объем, м3
         """
         return math.pi * math.pow(diametr / 2000, 2) * (lenght * 1000)
+
+    def __get_mass_accident(self, wind_velocity: int, air_temperature: int, characteristics: list,
+                            type_hole: int) -> list:
+        """
+        :param wind_velocity: скорость ветра, м/с
+        :param air_temperature: температура воздуха, град.С
+        :param characteristics: характеристики оборудования и вещества в нем
+        :param type_hole: тип разгерметизации
+                            0 - полная
+                            1 - 100 мм
+                            2 - 50 мм
+                            3 - 25 мм
+                            4 - 12 мм
+        :return: список словарей с характеристиками оборудования и испарившейся массы
+        """
+        result = []
+        wind_index = (1, 2, 3).index(wind_velocity) if wind_velocity in (1, 2, 3) else 0
+        temperature_index = (10, 20, 30).index(air_temperature) if air_temperature in (1, 2, 3) else 0
+
+        for item in characteristics:
+            # 1. Определим количество испарившегося
+            steam_arr = self.__get_array_steam_pressure(item['Steam_pressure'])
+            steam_pressure = steam_arr[wind_index][temperature_index]
+            item['Steam_pressure'] = steam_pressure  # заменим даление пара на расчетное
+            evaporation_mass = ev.Liquid_evaporation().evaporation_in_moment(TIME_EVAPORATION,
+                                                                             item['Steam_pressure'],
+                                                                             item['Molecular_weight'],
+                                                                             item['Spill_square'])[0]
+
+            item['Evaporation'] = (
+                round(evaporation_mass / KG_TO_TONN, 2) if evaporation_mass / KG_TO_TONN < item['Quantity'] else item[
+                    'Quantity'])
+
+            result.append(item)
+            # 2. Определим сценарии аварии
+            wind_speed, temperature, _, _ = weather.Weather.get_statistic_weather(
+                self.object_info['Address_opo'].split()[0])
+            if item['Type_device'] == -1:
+                probability = pr.Probability().probability_mchs_tube(
+                    int(float(item['Length'].replace(",", ".")) * KM_TO_M),
+                    int(item['Diameter'].replace(",", ".")))
+            else:
+                probability = pr.Probability().probability_mchs_device(
+                    0 if float(item['Pressure'].replace(",", ".")) else 1)
+
+            poz_ = 4 - type_hole
+            temp = float(probability[poz_]) * wind_speed[wind_index] * temperature[temperature_index]
+            tree_arr = tree.Event_tree.mchs_liquid(float(item['Flash_temperature']), item['Flow'], temp)
+
+            item['Frequency_C1'] = tree_arr[0]
+            item['Frequency_C2'] = tree_arr[1]
+
+        return result
+
+    def __get_array_steam_pressure(self, steam_pressure):
+        """
+        Получить массив значений давлений насыщенного пара, для различных скоростей ветра и температур
+        t/v    10      20    30
+        1     0,75x    x     1.25x
+        2     0,75y    y     1.25y
+        3     0,75z    z     1.25z
+        """
+        x = steam_pressure
+        y = steam_pressure * 1.1
+        z = steam_pressure * 1.2
+        return ((0.75 * x, x, 1.25 * x),
+                (0.75 * y, y, 1.25 * y),
+                (0.75 * z, z, 1.25 * z))
 
 
 if __name__ == '__main__':
