@@ -2,7 +2,7 @@ from pprint import pprint
 
 pipe_info = [{'Death_person': '1',
               'Diameter': '114',
-              'Flow': '5',
+              'Flow': '10',
               'Ground': 'Подземное',
               'Id': 53,
               'Injured_person': '2',
@@ -19,7 +19,7 @@ pipe_info = [{'Death_person': '1',
               'View_space': '4'},
              {'Death_person': '1',
               'Diameter': '159',
-              'Flow': '6',
+              'Flow': '12',
               'Ground': 'Подземное',
               'Id': 54,
               'Injured_person': '2',
@@ -214,8 +214,10 @@ LAYER_THICKNESS = 20  # м^-1
 KG_TO_TONN = 1000  # 1000 кг = 1000/KG_TO_TONN = 1 тонна
 TONN_TO_KG = 1000  # 1т = 1*TONN_TO_KG = 1000 кг
 KM_TO_M = 1000  # 1км = 1*KM_TO_M = 1000 м
-CUT_OFF_TIME = 12  # секунд
+CUT_OFF_TIME = 12 * 3600  # секунд
 TIME_EVAPORATION = 3600  # секунд
+HOUR_TO_SECONDS = 3600  # 1ч = 1*HOUR_TO_SECONDS = 3600 с
+DAY_TO_HOUR = 24  # 1сут = 1*DAY_TO_HOUR = 24 ч
 
 
 class Report:
@@ -254,8 +256,19 @@ class Report:
                 data_oil_dev = f.read()
                 context['oil_device_accident_table'] = eval(data_oil_dev)
         # Таблица количества опасного вещества участвующего в аварии
-        context['mass_С1_1_tmax_table'] = self.__get_mass_accident(1, 30, mass_in_dev_and_pipe, type_hole=0)
-        context['mass_С2_1_tmax_table'] = self.__get_mass_accident(1, 30, mass_in_dev_and_pipe, type_hole=0)
+        tt = self.__get_mass_accident(1, 30, mass_in_dev_and_pipe[:], type_hole=0)
+        # context['table1'] = tt
+        # context['table2'] = tt
+        # context['table3'] = tt
+        # context['table4'] = tt
+        tb = self.__get_mass_accident(3, 30, mass_in_dev_and_pipe[:], type_hole=0)
+        # context['table5'] = tb
+        # context['table6'] = tb
+        # context['table7'] = tb
+        # context['table8'] = tb
+
+        pprint(tt)
+        pprint(tb)
 
         doc.render(context)
         text = str(int(time.time()))
@@ -310,7 +323,9 @@ class Report:
             volume = self.__get_volume_pipe(diametr, lenght)
 
             pipe_dict['Flow'] = float(item['Flow'].replace(",", "."))
-            pipe_dict['Spill_square'] = volume * LAYER_THICKNESS
+            part = (((pipe_dict['Flow'] * CUT_OFF_TIME) * TONN_TO_KG / (DAY_TO_HOUR * HOUR_TO_SECONDS)) / float(
+                sub['Density'].replace(",", "."))) * LAYER_THICKNESS
+            pipe_dict['Spill_square'] = volume * LAYER_THICKNESS + part
             pipe_dict['Quantity'] = round((volume * density) / KG_TO_TONN, 2)  # M, т
             pipe_dict['State'] = 'ж.ф.'
             pipe_dict['Pressure'] = item['Pressure']
@@ -389,22 +404,37 @@ class Report:
         result = []
         wind_index = (1, 2, 3).index(wind_velocity) if wind_velocity in (1, 2, 3) else 0
         temperature_index = (10, 20, 30).index(air_temperature) if air_temperature in (1, 2, 3) else 0
+        z = self.__get_array_z()[wind_index][temperature_index]
+        print(f'z={z}')
+        print(f'wind_index={wind_index}')
+        print(f'temperature_index={temperature_index}')
 
         for item in characteristics:
             # 1. Определим количество испарившегося
             steam_arr = self.__get_array_steam_pressure(item['Steam_pressure'])
             steam_pressure = steam_arr[wind_index][temperature_index]
-            item['Steam_pressure'] = steam_pressure  # заменим даление пара на расчетное
+            print(f'steam_pressure={steam_pressure}')
+            item['Steam_pressure'] = steam_pressure  # заменим давление пара на расчетное
+            # Определим коэф.участия в зависимости от типа разгерметизации
+            k = (1, 0.8, 0.5, 0.25, 0.1)
+            item['Emergency_weight'] = round(
+                (item['Quantity'] + (item['Flow'] * CUT_OFF_TIME) / (DAY_TO_HOUR * HOUR_TO_SECONDS)) * k[
+                    type_hole] * TONN_TO_KG, 2)
+
+            spill_square = item['Spill_square'] * k[type_hole]
+            print(f'spill_square={spill_square}')
+
             evaporation_mass = ev.Liquid_evaporation().evaporation_in_moment(TIME_EVAPORATION,
                                                                              item['Steam_pressure'],
                                                                              item['Molecular_weight'],
-                                                                             item['Spill_square'])[0]
-
+                                                                             spill_square)[0]
+            print(f'evaporation_mass={evaporation_mass}')
+            print(f'evaporation_mass2={evaporation_mass * z}')
             item['Evaporation'] = (
-                round(evaporation_mass / KG_TO_TONN, 2) if evaporation_mass / KG_TO_TONN < item['Quantity'] else item[
+                round(evaporation_mass * z, 2) if evaporation_mass / KG_TO_TONN < item['Quantity'] else item[
                     'Quantity'])
 
-            result.append(item)
+
             # 2. Определим сценарии аварии
             wind_speed, temperature, _, _ = weather.Weather.get_statistic_weather(
                 self.object_info['Address_opo'].split()[0])
@@ -417,15 +447,19 @@ class Report:
                     0 if float(item['Pressure'].replace(",", ".")) else 1)
 
             poz_ = 4 - type_hole
-            temp = float(probability[poz_]) * wind_speed[wind_index] * temperature[temperature_index]
-            tree_arr = tree.Event_tree.mchs_liquid(float(item['Flash_temperature']), item['Flow'], temp)
+            chance = float(probability[poz_]) * wind_speed[wind_index] * temperature[temperature_index]
+            tree_arr = tree.Event_tree.mchs_liquid(float(item['Flash_temperature']), item['Flow'], chance)
 
             item['Frequency_C1'] = tree_arr[0]
             item['Frequency_C2'] = tree_arr[1]
+            item['Frequency_C3'] = tree_arr[2]
+            item['Frequency_C4'] = tree_arr[3]
+
+            result.append(item)
 
         return result
 
-    def __get_array_steam_pressure(self, steam_pressure):
+    def __get_array_steam_pressure(self, steam_pressure) -> tuple:
         """
         Получить массив значений давлений насыщенного пара, для различных скоростей ветра и температур
         t/v    10      20    30
@@ -439,6 +473,19 @@ class Report:
         return ((0.75 * x, x, 1.25 * x),
                 (0.75 * y, y, 1.25 * y),
                 (0.75 * z, z, 1.25 * z))
+
+    def __get_array_z(self, z: float = 0.1) -> tuple:
+        """
+        Получить массив значений давлений насыщенного пара, для различных скоростей ветра и температур
+        t/v    10      20         30
+        1      z       z          z
+        2     0,07    0,07       0,07
+        3     0,04    0,04       0,04
+        """
+
+        return ((z, z, z),
+                (0.07, 0.07, 0.07),
+                (0.04, 0.04, 0.04))
 
 
 if __name__ == '__main__':
