@@ -206,6 +206,7 @@ import os
 import math
 import copy
 from calc import calc_liguid_evaporation as ev
+from calc import calc_tvs_explosion as expl
 from risk import risk_statistics_weather as weather
 from risk import risk_probability as pr
 from risk import risk_event_tree as tree
@@ -277,7 +278,11 @@ class Report:
         context['C2_1_max_100'] = C1_1_max_100
         context['C3_1_max_100'] = C1_1_max_100
         context['C4_1_max_100'] = C1_1_max_100
-        pprint(C1_1_max_100)
+
+        # Таблица взрывов
+        C2_1_max_dP = C1_1_max
+        context['C2_1_max_dP'] = C2_1_max_dP
+
 
         doc.render(context)
         text = str(int(time.time()))
@@ -317,6 +322,9 @@ class Report:
             dev_dict['Sigma'] = float(sub['Sigma'].replace(",", "."))
             dev_dict['Steam_pressure'] = float(sub['Steam_pressure'].replace(",", "."))
             dev_dict['Type_device'] = item['Type_device']
+            dev_dict['Death_person'] = int(item['Death_person'])
+            dev_dict['Injured_person'] = int(item['Injured_person'])
+            dev_dict['View_space'] = int(item['View_space'])
 
             mass_list.append(dev_dict)
 
@@ -354,6 +362,9 @@ class Report:
             pipe_dict['Type_device'] = -1
             pipe_dict['Length'] = item['Length']
             pipe_dict['Diameter'] = item['Diameter']
+            pipe_dict['Death_person'] = int(item['Death_person'])
+            pipe_dict['Injured_person'] = int(item['Injured_person'])
+            pipe_dict['View_space'] = int(item['View_space'])
 
             mass_list.append(pipe_dict)
 
@@ -438,7 +449,6 @@ class Report:
                 round(evaporation_mass * z, 2) if evaporation_mass / KG_TO_TONN < item['Quantity'] else item[
                     'Quantity'])
 
-
             # 2. Определим сценарии аварии
             wind_speed, temperature, _, _ = weather.Weather.get_statistic_weather(
                 self.object_info['Address_opo'].split()[0])
@@ -459,6 +469,17 @@ class Report:
             item['Frequency_C3'] = tree_arr[2]
             item['Frequency_C4'] = tree_arr[3]
 
+            item['dP100'], item['dP53'], item['dP28'], item['dP12'], item['dP5'], item[
+                'dP3'] = expl.Explosion().explosion_class_zone(class_substance=int(item['Class_substance']),
+                                                               view_space=item['View_space'],
+                                                               mass=round(evaporation_mass * z, 2),
+                                                               heat_of_combustion=item['Heat_of_combustion'],
+                                                               sigma=item['Sigma'],
+                                                               energy_level=item['Energy_level'])
+
+            # 3. Расчитаем взрыв
+
+            # Добавление item  врезультирующий список
             result.append(item)
             # Удаление из словаря 0 значений
             for i in result:
