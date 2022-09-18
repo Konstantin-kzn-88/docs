@@ -1,7 +1,7 @@
 from pprint import pprint
 
 pipe_info = [{'Death_person': '1',
-              'Diameter': '114',
+              'Diameter': '89',
               'Flow': '10',
               'Ground': 'Подземное',
               'Id': 53,
@@ -204,6 +204,7 @@ from pathlib import Path
 import time
 import os
 import math
+import copy
 from calc import calc_liguid_evaporation as ev
 from risk import risk_statistics_weather as weather
 from risk import risk_probability as pr
@@ -256,19 +257,27 @@ class Report:
                 data_oil_dev = f.read()
                 context['oil_device_accident_table'] = eval(data_oil_dev)
         # Таблица количества опасного вещества участвующего в аварии
-        tt = self.__get_mass_accident(1, 30, mass_in_dev_and_pipe[:], type_hole=0)
-        # context['table1'] = tt
-        # context['table2'] = tt
-        # context['table3'] = tt
-        # context['table4'] = tt
-        tb = self.__get_mass_accident(3, 30, mass_in_dev_and_pipe[:], type_hole=0)
-        # context['table5'] = tb
-        # context['table6'] = tb
-        # context['table7'] = tb
-        # context['table8'] = tb
-
-        pprint(tt)
-        pprint(tb)
+        C1_1_max = self.__get_mass_accident(1, 30, mass_in_dev_and_pipe, type_hole=0)
+        context['C1_1_max'] = C1_1_max
+        context['C2_1_max'] = C1_1_max
+        context['C3_1_max'] = C1_1_max
+        context['C4_1_max'] = C1_1_max
+        C1_2_max = self.__get_mass_accident(2, 30, mass_in_dev_and_pipe, type_hole=0)
+        context['C1_2_max'] = C1_2_max
+        context['C2_2_max'] = C1_2_max
+        context['C3_2_max'] = C1_2_max
+        context['C4_2_max'] = C1_2_max
+        C1_3_max = self.__get_mass_accident(3, 30, mass_in_dev_and_pipe, type_hole=0)
+        context['C1_3_max'] = C1_3_max
+        context['C2_3_max'] = C1_3_max
+        context['C3_3_max'] = C1_3_max
+        context['C4_3_max'] = C1_3_max
+        C1_1_max_100 = self.__get_mass_accident(1, 30, mass_in_dev_and_pipe, type_hole=1)
+        context['C1_1_max_100'] = C1_1_max_100
+        context['C2_1_max_100'] = C1_1_max_100
+        context['C3_1_max_100'] = C1_1_max_100
+        context['C4_1_max_100'] = C1_1_max_100
+        pprint(C1_1_max_100)
 
         doc.render(context)
         text = str(int(time.time()))
@@ -401,19 +410,16 @@ class Report:
                             4 - 12 мм
         :return: список словарей с характеристиками оборудования и испарившейся массы
         """
+        characteristics = copy.deepcopy(characteristics)
         result = []
         wind_index = (1, 2, 3).index(wind_velocity) if wind_velocity in (1, 2, 3) else 0
         temperature_index = (10, 20, 30).index(air_temperature) if air_temperature in (1, 2, 3) else 0
         z = self.__get_array_z()[wind_index][temperature_index]
-        print(f'z={z}')
-        print(f'wind_index={wind_index}')
-        print(f'temperature_index={temperature_index}')
 
         for item in characteristics:
             # 1. Определим количество испарившегося
             steam_arr = self.__get_array_steam_pressure(item['Steam_pressure'])
             steam_pressure = steam_arr[wind_index][temperature_index]
-            print(f'steam_pressure={steam_pressure}')
             item['Steam_pressure'] = steam_pressure  # заменим давление пара на расчетное
             # Определим коэф.участия в зависимости от типа разгерметизации
             k = (1, 0.8, 0.5, 0.25, 0.1)
@@ -422,14 +428,12 @@ class Report:
                     type_hole] * TONN_TO_KG, 2)
 
             spill_square = item['Spill_square'] * k[type_hole]
-            print(f'spill_square={spill_square}')
 
             evaporation_mass = ev.Liquid_evaporation().evaporation_in_moment(TIME_EVAPORATION,
                                                                              item['Steam_pressure'],
                                                                              item['Molecular_weight'],
                                                                              spill_square)[0]
-            print(f'evaporation_mass={evaporation_mass}')
-            print(f'evaporation_mass2={evaporation_mass * z}')
+
             item['Evaporation'] = (
                 round(evaporation_mass * z, 2) if evaporation_mass / KG_TO_TONN < item['Quantity'] else item[
                     'Quantity'])
@@ -456,6 +460,9 @@ class Report:
             item['Frequency_C4'] = tree_arr[3]
 
             result.append(item)
+            # Удаление из словаря 0 значений
+            for i in result:
+                if 0 == float(i['Frequency_C1']): result.pop(result.index(i))
 
         return result
 
