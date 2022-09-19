@@ -207,6 +207,9 @@ import math
 import copy
 from calc import calc_liguid_evaporation as ev
 from calc import calc_tvs_explosion as expl
+from calc import calc_strait_fire as fire
+from calc import calc_lower_concentration as nkpr
+from calc import calc_damage as damage
 from risk import risk_statistics_weather as weather
 from risk import risk_probability as pr
 from risk import risk_event_tree as tree
@@ -283,6 +286,17 @@ class Report:
         C2_1_max_dP = C1_1_max
         context['C2_1_max_dP'] = C2_1_max_dP
 
+        # Таблица пожаров
+        C1_1_max_Q = C1_1_max
+        context['C1_1_max_Q'] = C1_1_max_Q
+
+        # Таблица вспышек
+        C3_1_max_NKPR = C1_1_max
+        context['C3_1_max_NKPR'] = C3_1_max_NKPR
+
+        # Таблица ущерба
+        C1_1_max_damage = C1_1_max
+        context['C1_1_max_damage'] = C1_1_max_damage
 
         doc.render(context)
         text = str(int(time.time()))
@@ -304,6 +318,7 @@ class Report:
             dev_dict['Flow'] = 0  # допущение что для емкостного оборудования притока нет
             sub = self.__get_sub(sub_info, item['SubId'])
             dev_dict['Poz_sub'] = f"{item['Pozition']}, {sub['Name_sub']}"
+            dev_dict['Volume'] = float(item['Volume'])
             dev_dict['Quantity'] = round((float(item['Volume']) * float(item['Completion'].replace(",", ".")) * float(
                 sub['Density'].replace(",", "."))) / KG_TO_TONN, 2)
             dev_dict['State'] = 'г.ф.+ж.ф.' if item['Completion'] != 1 else 'ж.ф.'
@@ -321,6 +336,7 @@ class Report:
             dev_dict['Molecular_weight'] = float(sub['Molecular_weight'].replace(",", "."))
             dev_dict['Sigma'] = float(sub['Sigma'].replace(",", "."))
             dev_dict['Steam_pressure'] = float(sub['Steam_pressure'].replace(",", "."))
+            dev_dict['Boiling_temperature'] = float(sub['Boiling_temperature'].replace(",", "."))
             dev_dict['Type_device'] = item['Type_device']
             dev_dict['Death_person'] = int(item['Death_person'])
             dev_dict['Injured_person'] = int(item['Injured_person'])
@@ -359,6 +375,7 @@ class Report:
             pipe_dict['Molecular_weight'] = float(sub['Molecular_weight'].replace(",", "."))
             pipe_dict['Sigma'] = float(sub['Sigma'].replace(",", "."))
             pipe_dict['Steam_pressure'] = float(sub['Steam_pressure'].replace(",", "."))
+            pipe_dict['Boiling_temperature'] = float(sub['Boiling_temperature'].replace(",", "."))
             pipe_dict['Type_device'] = -1
             pipe_dict['Length'] = item['Length']
             pipe_dict['Diameter'] = item['Diameter']
@@ -438,12 +455,12 @@ class Report:
                 (item['Quantity'] + (item['Flow'] * CUT_OFF_TIME) / (DAY_TO_HOUR * HOUR_TO_SECONDS)) * k[
                     type_hole] * TONN_TO_KG, 2)
 
-            spill_square = item['Spill_square'] * k[type_hole]
+            item['Spill_fire'] = item['Spill_square'] * k[type_hole]
 
             evaporation_mass = ev.Liquid_evaporation().evaporation_in_moment(TIME_EVAPORATION,
                                                                              item['Steam_pressure'],
                                                                              item['Molecular_weight'],
-                                                                             spill_square)[0]
+                                                                             item['Spill_fire'])[0]
 
             item['Evaporation'] = (
                 round(evaporation_mass * z, 2) if evaporation_mass / KG_TO_TONN < item['Quantity'] else item[
@@ -469,6 +486,7 @@ class Report:
             item['Frequency_C3'] = tree_arr[2]
             item['Frequency_C4'] = tree_arr[3]
 
+            # 3. Расчитаем взрыв
             item['dP100'], item['dP53'], item['dP28'], item['dP12'], item['dP5'], item[
                 'dP3'] = expl.Explosion().explosion_class_zone(class_substance=int(item['Class_substance']),
                                                                view_space=item['View_space'],
@@ -477,7 +495,114 @@ class Report:
                                                                sigma=item['Sigma'],
                                                                energy_level=item['Energy_level'])
 
-            # 3. Расчитаем взрыв
+            # 4. Расчитаем пожар пролива
+            item['q10'], item['q7'], item['q4'], item['q1'] = fire.Strait_fire().termal_class_zone(
+                S_spill=item['Spill_fire'],
+                m_sg=0.06,
+                mol_mass=item['Molecular_weight'],
+                t_boiling=item['Boiling_temperature'], wind_velocity=wind_velocity)
+
+            # 5. Расчитаем вспышку
+            item['Nkpr'], item['Flash'] = nkpr.LCLP().lower_concentration_limit(mass=round(evaporation_mass * z, 2),
+                                                                                mol_mass=item['Molecular_weight'],
+                                                                                t_boiling=item['Boiling_temperature'],
+                                                                                lower_concentration=item[
+                                                                                    'Lower_concentration'])
+
+            # 6. Расчитаем погибших и пострадавших
+
+            tuple_dead_people = (
+                (item['Death_person'], item['Death_person'], 0, 0, 0),
+                (item['Death_person'], item['Death_person'], 0, 0, 0),
+                (0, 0, 0, 0, 0),
+                (0, 0, 0, 0, 0),
+                (0, 0, 0, 0, 0)
+            )[type_hole]
+
+            tuple_injured_people = (
+                (item['Injured_person'], item['Injured_person'], 1, 1, 1),
+                (item['Injured_person'], item['Injured_person'], 1, 1, 1),
+                (1, 1, 1, 1, 1),
+                (1, 1, 1, 1, 1),
+                (0, 0, 0, 0, 0)
+            )[type_hole]
+
+            item['Death_person_C1'] = tuple_dead_people[type_hole]
+            item['Death_person_C2'] = round(tuple_dead_people[type_hole] / 2)
+            item['Death_person_C3'] = item['Death_person_C2']
+            item['Death_person_C4'] = 0
+
+            item['Injured_person_C1'] = tuple_injured_people[type_hole]
+            item['Injured_person_C2'] = round(tuple_injured_people[type_hole] / 2)
+            item['Injured_person_C3'] = item['Injured_person_C2']
+            item['Injured_person_C4'] = 0
+
+            # 7. Ущерб.
+            if item['Type_device'] == -1:
+                volume = 0
+                diametr = int(item['Diameter'].replace(",", "."))
+                lenght = int(float(item['Length'].replace(",", ".")) * KM_TO_M)
+            else:
+                volume = item['Volume']
+                diametr = 0
+                lenght = 0
+
+            C1_damage = damage.Damage().damage_array(volume=volume, diametr=diametr, lenght=lenght,
+                                                     cost_sub=item['Cost'] * pow(10, -6),
+                                                     part_sub=1,
+                                                     death_person=item['Death_person_C1'],
+                                                     injured_person=item['Injured_person_C1'],
+                                                     m_out_spill=evaporation_mass,
+                                                     m_in_spill=item['Emergency_weight'],
+                                                     S_spill=item['Spill_fire'])
+
+            print(C1_damage)
+
+            item['D1_C1'], item['D2_C1'], item['D3_C1'], item['D4_C1'], item['D5_C1'], item['D6_C1'], item[
+                'Dsum_C1'] = (
+                C1_damage[0], C1_damage[1], C1_damage[2], C1_damage[3], sum(C1_damage[4:8]), C1_damage[8], C1_damage[9])
+
+            C2_damage = damage.Damage().damage_array(volume=volume, diametr=diametr, lenght=lenght,
+                                                     cost_sub=item['Cost'] * pow(10, -6),
+                                                     part_sub=0.4,
+                                                     death_person=item['Death_person_C2'],
+                                                     injured_person=item['Injured_person_C2'],
+                                                     m_out_spill=evaporation_mass,
+                                                     m_in_spill=item[
+                                                                    'Emergency_weight'] / KG_TO_TONN,
+                                                     S_spill=item['Spill_fire'])
+
+            item['D1_C2'], item['D2_C2'], item['D3_C2'], item['D4_C2'], item['D5_C2'], item['D6_C2'], item[
+                'Dsum_C2'] = (
+                C2_damage[0], C2_damage[1], C2_damage[2], C2_damage[3], sum(C2_damage[4:8]), C2_damage[8], C2_damage[9])
+
+            C3_damage = damage.Damage().damage_array(volume=volume, diametr=diametr, lenght=lenght,
+                                                     cost_sub=item['Cost'] * pow(10, -6),
+                                                     part_sub=0.3,
+                                                     death_person=item['Death_person_C3'],
+                                                     injured_person=item['Injured_person_C3'],
+                                                     m_out_spill=evaporation_mass,
+                                                     m_in_spill=item[
+                                                                    'Emergency_weight'] / KG_TO_TONN,
+                                                     S_spill=item['Spill_fire'])
+
+            item['D3_C3'], item['D2_C3'], item['D3_C3'], item['D4_C3'], item['D5_C3'], item['D6_C3'], item[
+                'Dsum_C3'] = (
+                C3_damage[0], C3_damage[1], C3_damage[2], C3_damage[3], sum(C3_damage[4:8]), C3_damage[8], C3_damage[9])
+
+            C4_damage = damage.Damage().damage_array(volume=volume, diametr=diametr, lenght=lenght,
+                                                     cost_sub=item['Cost'] * pow(10, -6),
+                                                     part_sub=0.1,
+                                                     death_person=item['Death_person_C4'],
+                                                     injured_person=item['Injured_person_C4'],
+                                                     m_out_spill=evaporation_mass,
+                                                     m_in_spill=item[
+                                                                    'Emergency_weight'] / KG_TO_TONN,
+                                                     S_spill=item['Spill_fire'])
+
+            item['D3_C4'], item['D2_C4'], item['D3_C4'], item['D4_C4'], item['D5_C4'], item[
+                'D6_C4'], item['Dsum_C4'] = (
+                C4_damage[0], C4_damage[1], C4_damage[2], C4_damage[3], sum(C4_damage[4:8]), C4_damage[8], C4_damage[9])
 
             # Добавление item  врезультирующий список
             result.append(item)
