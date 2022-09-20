@@ -10,7 +10,7 @@ import random
 from prettytable import PrettyTable
 import math
 
-CONST = 1  # часть ущерба
+CONST = 0.5  # часть ущерба
 
 
 class Damage:
@@ -71,10 +71,10 @@ class Damage:
         - ущерб, млн.руб
         """
         se_damage = (death_person *
-                     (12000 * 18 * 12 + 2000000 + 1000000) +  # ФЗ-225 и 125
-                     injured_person * 250000) * math.pow(10, -6)
+                     (6000 * 18 * 12 + 2000000) +  # ФЗ-225
+                     injured_person * 150000) * math.pow(10, -6)
 
-        se_damage = round(se_damage, 2)
+        se_damage = round(se_damage*CONST, 2)
         return se_damage
 
     def damage_air(self, m_out_spill=3.4):
@@ -230,7 +230,7 @@ class Damage:
                                   damage_air_fire +
                                   damage_earth, 2)
         # __________________________________________________________________
-        new_man = round(death_person * (30000 * (3200 / 170000) / (52 * 5)), 2)
+        new_man = round(direct_damage*0.56, 2)
 
         sum_damage = round(round(direct_damage * CONST, 2) + liquidation_failures + se_damage +
                            consequential_damage +

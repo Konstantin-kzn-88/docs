@@ -552,57 +552,57 @@ class Report:
                                                      part_sub=1,
                                                      death_person=item['Death_person_C1'],
                                                      injured_person=item['Injured_person_C1'],
-                                                     m_out_spill=evaporation_mass,
-                                                     m_in_spill=item['Emergency_weight'],
+                                                     m_out_spill=evaporation_mass / KG_TO_TONN,
+                                                     m_in_spill=item['Emergency_weight'] / KG_TO_TONN,
                                                      S_spill=item['Spill_fire'])
 
-            print(C1_damage)
+            print(item['Poz_sub'], type_hole, C1_damage)
 
             item['D1_C1'], item['D2_C1'], item['D3_C1'], item['D4_C1'], item['D5_C1'], item['D6_C1'], item[
                 'Dsum_C1'] = (
-                C1_damage[0], C1_damage[1], C1_damage[2], C1_damage[3], sum(C1_damage[4:8]), C1_damage[8], C1_damage[9])
+                C1_damage[0], C1_damage[1], C1_damage[2], C1_damage[3], C1_damage[8], C1_damage[7], C1_damage[9])
 
             C2_damage = damage.Damage().damage_array(volume=volume, diametr=diametr, lenght=lenght,
                                                      cost_sub=item['Cost'] * pow(10, -6),
                                                      part_sub=0.4,
                                                      death_person=item['Death_person_C2'],
                                                      injured_person=item['Injured_person_C2'],
-                                                     m_out_spill=evaporation_mass,
+                                                     m_out_spill=evaporation_mass / KG_TO_TONN,
                                                      m_in_spill=item[
                                                                     'Emergency_weight'] / KG_TO_TONN,
                                                      S_spill=item['Spill_fire'])
 
             item['D1_C2'], item['D2_C2'], item['D3_C2'], item['D4_C2'], item['D5_C2'], item['D6_C2'], item[
                 'Dsum_C2'] = (
-                C2_damage[0], C2_damage[1], C2_damage[2], C2_damage[3], sum(C2_damage[4:8]), C2_damage[8], C2_damage[9])
+                C2_damage[0], C2_damage[1], C2_damage[2], C2_damage[3], C2_damage[8], C2_damage[7], C2_damage[9])
 
             C3_damage = damage.Damage().damage_array(volume=volume, diametr=diametr, lenght=lenght,
                                                      cost_sub=item['Cost'] * pow(10, -6),
                                                      part_sub=0.3,
                                                      death_person=item['Death_person_C3'],
                                                      injured_person=item['Injured_person_C3'],
-                                                     m_out_spill=evaporation_mass,
+                                                     m_out_spill=evaporation_mass / KG_TO_TONN,
                                                      m_in_spill=item[
                                                                     'Emergency_weight'] / KG_TO_TONN,
                                                      S_spill=item['Spill_fire'])
 
             item['D3_C3'], item['D2_C3'], item['D3_C3'], item['D4_C3'], item['D5_C3'], item['D6_C3'], item[
                 'Dsum_C3'] = (
-                C3_damage[0], C3_damage[1], C3_damage[2], C3_damage[3], sum(C3_damage[4:8]), C3_damage[8], C3_damage[9])
+                C3_damage[0], C3_damage[1], C3_damage[2], C3_damage[3], C3_damage[8], C3_damage[7], C3_damage[9])
 
             C4_damage = damage.Damage().damage_array(volume=volume, diametr=diametr, lenght=lenght,
                                                      cost_sub=item['Cost'] * pow(10, -6),
                                                      part_sub=0.1,
                                                      death_person=item['Death_person_C4'],
                                                      injured_person=item['Injured_person_C4'],
-                                                     m_out_spill=evaporation_mass,
+                                                     m_out_spill=evaporation_mass / KG_TO_TONN,
                                                      m_in_spill=item[
                                                                     'Emergency_weight'] / KG_TO_TONN,
                                                      S_spill=item['Spill_fire'])
 
             item['D3_C4'], item['D2_C4'], item['D3_C4'], item['D4_C4'], item['D5_C4'], item[
                 'D6_C4'], item['Dsum_C4'] = (
-                C4_damage[0], C4_damage[1], C4_damage[2], C4_damage[3], sum(C4_damage[4:8]), C4_damage[8], C4_damage[9])
+                C4_damage[0], C4_damage[1], C4_damage[2], C4_damage[3], C4_damage[8], C4_damage[7], C4_damage[9])
 
             # Добавление item  врезультирующий список
             result.append(item)
