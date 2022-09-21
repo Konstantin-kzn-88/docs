@@ -260,7 +260,11 @@ class Report:
             with open(f'{path_template}\\report\\templates\\oil_device.txt', 'r', encoding="utf-8") as f:
                 data_oil_dev = f.read()
                 context['oil_device_accident_table'] = eval(data_oil_dev)
+        # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         # Таблица количества опасного вещества участвующего в аварии
+        # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        # Т=30 С
+        # Полная
         C1_1_max = self.__get_mass_accident(1, 30, mass_in_dev_and_pipe, type_hole=0)
         context['C1_1_max'] = C1_1_max
         context['C2_1_max'] = C1_1_max
@@ -276,15 +280,196 @@ class Report:
         context['C2_3_max'] = C1_3_max
         context['C3_3_max'] = C1_3_max
         context['C4_3_max'] = C1_3_max
+        # 100 мм
         C1_1_max_100 = self.__get_mass_accident(1, 30, mass_in_dev_and_pipe, type_hole=1)
         context['C1_1_max_100'] = C1_1_max_100
         context['C2_1_max_100'] = C1_1_max_100
         context['C3_1_max_100'] = C1_1_max_100
         context['C4_1_max_100'] = C1_1_max_100
+        C1_2_max_100 = self.__get_mass_accident(2, 30, mass_in_dev_and_pipe, type_hole=1)
+        context['C1_2_max_100'] = C1_2_max_100
+        context['C2_2_max_100'] = C1_2_max_100
+        context['C3_2_max_100'] = C1_2_max_100
+        context['C4_2_max_100'] = C1_2_max_100
+        C1_3_max_100 = self.__get_mass_accident(3, 30, mass_in_dev_and_pipe, type_hole=1)
+        context['C1_3_max_100'] = C1_3_max_100
+        context['C2_3_max_100'] = C1_3_max_100
+        context['C3_3_max_100'] = C1_3_max_100
+        context['C4_3_max_100'] = C1_3_max_100
+        # 50 мм
+        C1_1_max_50 = self.__get_mass_accident(1, 30, mass_in_dev_and_pipe, type_hole=2)
+        context['C1_1_max_50'] = C1_1_max_50
+        context['C2_1_max_50'] = C1_1_max_50
+        context['C3_1_max_50'] = C1_1_max_50
+        context['C4_1_max_50'] = C1_1_max_50
+        C1_2_max_50 = self.__get_mass_accident(2, 30, mass_in_dev_and_pipe, type_hole=2)
+        context['C1_2_max_50'] = C1_2_max_50
+        context['C2_2_max_50'] = C1_2_max_50
+        context['C3_2_max_50'] = C1_2_max_50
+        context['C4_2_max_50'] = C1_2_max_50
+        C1_3_max_50 = self.__get_mass_accident(3, 30, mass_in_dev_and_pipe, type_hole=2)
+        context['C1_3_max_50'] = C1_3_max_50
+        context['C2_3_max_50'] = C1_3_max_50
+        context['C3_3_max_50'] = C1_3_max_50
+        context['C4_3_max_50'] = C1_3_max_50
+        # 25 мм
+        C1_1_max_25 = self.__get_mass_accident(1, 30, mass_in_dev_and_pipe, type_hole=3)
+        context['C1_1_max_25'] = C1_1_max_25
+        context['C2_1_max_25'] = C1_1_max_25
+        context['C3_1_max_25'] = C1_1_max_25
+        context['C4_1_max_25'] = C1_1_max_25
+        C1_2_max_25 = self.__get_mass_accident(2, 30, mass_in_dev_and_pipe, type_hole=3)
+        context['C1_2_max_25'] = C1_2_max_25
+        context['C2_2_max_25'] = C1_2_max_25
+        context['C3_2_max_25'] = C1_2_max_25
+        context['C4_2_max_25'] = C1_2_max_25
+        C1_3_max_25 = self.__get_mass_accident(3, 30, mass_in_dev_and_pipe, type_hole=3)
+        context['C1_3_max_25'] = C1_3_max_25
+        context['C2_3_max_25'] = C1_3_max_25
+        context['C3_3_max_25'] = C1_3_max_25
+        context['C4_3_max_25'] = C1_3_max_25
+
+        # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        # Т=20 С
+        # Полная
+        C1_1_20 = self.__get_mass_accident(1, 20, mass_in_dev_and_pipe, type_hole=0)
+        context['C1_1_20'] = C1_1_20
+        context['C2_1_20'] = C1_1_20
+        context['C3_1_20'] = C1_1_20
+        context['C4_1_20'] = C1_1_20
+        C1_2_20 = self.__get_mass_accident(2, 20, mass_in_dev_and_pipe, type_hole=0)
+        context['C1_2_20'] = C1_2_20
+        context['C2_2_20'] = C1_2_20
+        context['C3_2_20'] = C1_2_20
+        context['C4_2_20'] = C1_2_20
+        C1_3_20 = self.__get_mass_accident(3, 20, mass_in_dev_and_pipe, type_hole=0)
+        context['C1_3_20'] = C1_3_20
+        context['C2_3_20'] = C1_3_20
+        context['C3_3_20'] = C1_3_20
+        context['C4_3_20'] = C1_3_20
+        # 100 мм
+        C1_1_20_100 = self.__get_mass_accident(1, 20, mass_in_dev_and_pipe, type_hole=1)
+        context['C1_1_20_100'] = C1_1_20_100
+        context['C2_1_20_100'] = C1_1_20_100
+        context['C3_1_20_100'] = C1_1_20_100
+        context['C4_1_20_100'] = C1_1_20_100
+        C1_2_20_100 = self.__get_mass_accident(2, 20, mass_in_dev_and_pipe, type_hole=1)
+        context['C1_2_20_100'] = C1_2_20_100
+        context['C2_2_20_100'] = C1_2_20_100
+        context['C3_2_20_100'] = C1_2_20_100
+        context['C4_2_20_100'] = C1_2_20_100
+        C1_3_20_100 = self.__get_mass_accident(3, 20, mass_in_dev_and_pipe, type_hole=1)
+        context['C1_3_20_100'] = C1_3_20_100
+        context['C2_3_20_100'] = C1_3_20_100
+        context['C3_3_20_100'] = C1_3_20_100
+        context['C4_3_20_100'] = C1_3_20_100
+        # 50 мм
+        C1_1_20_50 = self.__get_mass_accident(1, 20, mass_in_dev_and_pipe, type_hole=2)
+        context['C1_1_20_50'] = C1_1_20_50
+        context['C2_1_20_50'] = C1_1_20_50
+        context['C3_1_20_50'] = C1_1_20_50
+        context['C4_1_20_50'] = C1_1_20_50
+        C1_2_20_50 = self.__get_mass_accident(2, 20, mass_in_dev_and_pipe, type_hole=2)
+        context['C1_2_20_50'] = C1_2_20_50
+        context['C2_2_20_50'] = C1_2_20_50
+        context['C3_2_20_50'] = C1_2_20_50
+        context['C4_2_20_50'] = C1_2_20_50
+        C1_3_20_50 = self.__get_mass_accident(3, 20, mass_in_dev_and_pipe, type_hole=2)
+        context['C1_3_20_50'] = C1_3_20_50
+        context['C2_3_20_50'] = C1_3_20_50
+        context['C3_3_20_50'] = C1_3_20_50
+        context['C4_3_20_50'] = C1_3_20_50
+        # 25 мм
+        C1_1_20_25 = self.__get_mass_accident(1, 20, mass_in_dev_and_pipe, type_hole=3)
+        context['C1_1_20_25'] = C1_1_20_25
+        context['C2_1_20_25'] = C1_1_20_25
+        context['C3_1_20_25'] = C1_1_20_25
+        context['C4_1_20_25'] = C1_1_20_25
+        C1_2_20_25 = self.__get_mass_accident(2, 20, mass_in_dev_and_pipe, type_hole=3)
+        context['C1_2_20_25'] = C1_2_20_25
+        context['C2_2_20_25'] = C1_2_20_25
+        context['C3_2_20_25'] = C1_2_20_25
+        context['C4_2_20_25'] = C1_2_20_25
+        C1_3_20_25 = self.__get_mass_accident(3, 20, mass_in_dev_and_pipe, type_hole=3)
+        context['C1_3_20_25'] = C1_3_20_25
+        context['C2_3_20_25'] = C1_3_20_25
+        context['C3_3_20_25'] = C1_3_20_25
+        context['C4_3_20_25'] = C1_3_20_25
+        # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        # Т=10 С
+        # Полная
+        C1_1_10 = self.__get_mass_accident(1, 10, mass_in_dev_and_pipe, type_hole=0)
+        context['C1_1_10'] = C1_1_10
+        context['C2_1_10'] = C1_1_10
+        context['C3_1_10'] = C1_1_10
+        context['C4_1_10'] = C1_1_10
+        C1_2_10 = self.__get_mass_accident(2, 10, mass_in_dev_and_pipe, type_hole=0)
+        context['C1_2_10'] = C1_2_10
+        context['C2_2_10'] = C1_2_10
+        context['C3_2_10'] = C1_2_10
+        context['C4_2_10'] = C1_2_10
+        C1_3_10 = self.__get_mass_accident(3, 10, mass_in_dev_and_pipe, type_hole=0)
+        context['C1_3_10'] = C1_3_10
+        context['C2_3_10'] = C1_3_10
+        context['C3_3_10'] = C1_3_10
+        context['C4_3_10'] = C1_3_10
+        # 100 мм
+        C1_1_10_100 = self.__get_mass_accident(1, 10, mass_in_dev_and_pipe, type_hole=1)
+        context['C1_1_10_100'] = C1_1_10_100
+        context['C2_1_10_100'] = C1_1_10_100
+        context['C3_1_10_100'] = C1_1_10_100
+        context['C4_1_10_100'] = C1_1_10_100
+        C1_2_10_100 = self.__get_mass_accident(2, 10, mass_in_dev_and_pipe, type_hole=1)
+        context['C1_2_10_100'] = C1_2_10_100
+        context['C2_2_10_100'] = C1_2_10_100
+        context['C3_2_10_100'] = C1_2_10_100
+        context['C4_2_10_100'] = C1_2_10_100
+        C1_3_10_100 = self.__get_mass_accident(3, 10, mass_in_dev_and_pipe, type_hole=1)
+        context['C1_3_10_100'] = C1_3_10_100
+        context['C2_3_10_100'] = C1_3_10_100
+        context['C3_3_10_100'] = C1_3_10_100
+        context['C4_3_10_100'] = C1_3_10_100
+        # 50 мм
+        C1_1_10_50 = self.__get_mass_accident(1, 10, mass_in_dev_and_pipe, type_hole=2)
+        context['C1_1_10_50'] = C1_1_10_50
+        context['C2_1_10_50'] = C1_1_10_50
+        context['C3_1_10_50'] = C1_1_10_50
+        context['C4_1_10_50'] = C1_1_10_50
+        C1_2_10_50 = self.__get_mass_accident(2, 10, mass_in_dev_and_pipe, type_hole=2)
+        context['C1_2_10_50'] = C1_2_10_50
+        context['C2_2_10_50'] = C1_2_10_50
+        context['C3_2_10_50'] = C1_2_10_50
+        context['C4_2_10_50'] = C1_2_10_50
+        C1_3_10_50 = self.__get_mass_accident(3, 10, mass_in_dev_and_pipe, type_hole=2)
+        context['C1_3_10_50'] = C1_3_10_50
+        context['C2_3_10_50'] = C1_3_10_50
+        context['C3_3_10_50'] = C1_3_10_50
+        context['C4_3_10_50'] = C1_3_10_50
+        # 25 мм
+        C1_1_10_25 = self.__get_mass_accident(1, 10, mass_in_dev_and_pipe, type_hole=3)
+        context['C1_1_10_25'] = C1_1_10_25
+        context['C2_1_10_25'] = C1_1_10_25
+        context['C3_1_10_25'] = C1_1_10_25
+        context['C4_1_10_25'] = C1_1_10_25
+        C1_2_10_25 = self.__get_mass_accident(2, 10, mass_in_dev_and_pipe, type_hole=3)
+        context['C1_2_10_25'] = C1_2_10_25
+        context['C2_2_10_25'] = C1_2_10_25
+        context['C3_2_10_25'] = C1_2_10_25
+        context['C4_2_10_25'] = C1_2_10_25
+        C1_3_10_25 = self.__get_mass_accident(3, 10, mass_in_dev_and_pipe, type_hole=3)
+        context['C1_3_10_25'] = C1_3_10_25
+        context['C2_3_10_25'] = C1_3_10_25
+        context['C3_3_10_25'] = C1_3_10_25
+        context['C4_3_10_25'] = C1_3_10_25
 
         # Таблица взрывов
-        C2_1_max_dP = C1_1_max
-        context['C2_1_max_dP'] = C2_1_max_dP
+        context['C2_1_max_dP'] = C1_1_max
+        context['C2_2_max_dP'] = C1_2_max
+        context['C2_3_max_dP'] = C1_3_max
+        # 100мм
+        context['C2_1_max_100_dP'] = C1_1_max_100
+        context['C2_2_max_100_dP'] = C1_2_max_100
+        context['C2_3_max_100_dP'] = C1_3_max_100
 
         # Таблица пожаров
         C1_1_max_Q = C1_1_max
@@ -435,13 +620,13 @@ class Report:
                             1 - 100 мм
                             2 - 50 мм
                             3 - 25 мм
-                            4 - 12 мм
+
         :return: список словарей с характеристиками оборудования и испарившейся массы
         """
         characteristics = copy.deepcopy(characteristics)
         result = []
         wind_index = (1, 2, 3).index(wind_velocity) if wind_velocity in (1, 2, 3) else 0
-        temperature_index = (10, 20, 30).index(air_temperature) if air_temperature in (1, 2, 3) else 0
+        temperature_index = (10, 20, 30).index(air_temperature) if air_temperature in (10, 20, 30) else 0
         z = self.__get_array_z()[wind_index][temperature_index]
 
         for item in characteristics:
@@ -450,7 +635,7 @@ class Report:
             steam_pressure = steam_arr[wind_index][temperature_index]
             item['Steam_pressure'] = steam_pressure  # заменим давление пара на расчетное
             # Определим коэф.участия в зависимости от типа разгерметизации
-            k = (1, 0.8, 0.5, 0.25, 0.1)
+            k = (1, 0.9, 0.8, 0.6)
             item['Emergency_weight'] = round(
                 (item['Quantity'] + (item['Flow'] * CUT_OFF_TIME) / (DAY_TO_HOUR * HOUR_TO_SECONDS)) * k[
                     type_hole] * TONN_TO_KG, 2)
@@ -556,7 +741,6 @@ class Report:
                                                      m_in_spill=item['Emergency_weight'] / KG_TO_TONN,
                                                      S_spill=item['Spill_fire'])
 
-            print(item['Poz_sub'], type_hole, C1_damage)
 
             item['D1_C1'], item['D2_C1'], item['D3_C1'], item['D4_C1'], item['D5_C1'], item['D6_C1'], item[
                 'Dsum_C1'] = (
