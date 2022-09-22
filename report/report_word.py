@@ -463,6 +463,9 @@ class Report:
         context['C4_3_10_25'] = C1_3_10_25
 
         # Таблица взрывов
+        # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        # Т=30 С
+        # Полная
         context['C2_1_max_dP'] = C1_1_max
         context['C2_2_max_dP'] = C1_2_max
         context['C2_3_max_dP'] = C1_3_max
@@ -470,6 +473,14 @@ class Report:
         context['C2_1_max_100_dP'] = C1_1_max_100
         context['C2_2_max_100_dP'] = C1_2_max_100
         context['C2_3_max_100_dP'] = C1_3_max_100
+        # 50мм
+        context['C2_1_max_50_dP'] = C1_1_max_50
+        context['C2_2_max_50_dP'] = C1_2_max_50
+        context['C2_3_max_50_dP'] = C1_3_max_50
+        # 25мм
+        context['C2_1_max_25_dP'] = C1_1_max_25
+        context['C2_2_max_25_dP'] = C1_2_max_25
+        context['C2_3_max_25_dP'] = C1_3_max_25
 
         # Таблица пожаров
         C1_1_max_Q = C1_1_max

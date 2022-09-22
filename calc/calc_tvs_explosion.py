@@ -127,7 +127,7 @@ class Explosion:
             probit = round(Probit().probit_explosion(delta_p, impulse), 3)
             probability = round(Probit().probability(probit), 3)
             # append
-            radius_arr.append(round(radius, 2))
+            radius_arr.append(int(radius))
             delta_p_arr.append(delta_p)
             impulse_arr.append(impulse)
             probit_arr.append(probit)
