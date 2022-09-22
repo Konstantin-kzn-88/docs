@@ -13,7 +13,7 @@ pipe_info = [{'Death_person': '1',
               'Pozition': 'Трубопровод от К-19 до БГ',
               'Pressure': '0,55',
               'ProjectsId': 28,
-              'SubId': 1,
+              'SubId': 3,
               'Target': 'Транспорт нефти',
               'Temperature': '10',
               'View_space': '4'},
@@ -30,7 +30,7 @@ pipe_info = [{'Death_person': '1',
               'Pozition': 'К-99',
               'Pressure': '2',
               'ProjectsId': 28,
-              'SubId': 1,
+              'SubId': 2,
               'Target': 'Транспорт нефти',
               'Temperature': '10',
               'View_space': '4'}]
@@ -481,10 +481,98 @@ class Report:
         context['C2_1_max_25_dP'] = C1_1_max_25
         context['C2_2_max_25_dP'] = C1_2_max_25
         context['C2_3_max_25_dP'] = C1_3_max_25
+        # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        # Т=20 С
+        # Полная
+        context['C2_1_20_dP'] = C1_1_20
+        context['C2_2_20_dP'] = C1_2_20
+        context['C2_3_20_dP'] = C1_3_20
+        # 100мм
+        context['C2_1_20_100_dP'] = C1_1_20_100
+        context['C2_2_20_100_dP'] = C1_2_20_100
+        context['C2_3_20_100_dP'] = C1_3_20_100
+        # 50мм
+        context['C2_1_20_50_dP'] = C1_1_20_50
+        context['C2_2_20_50_dP'] = C1_2_20_50
+        context['C2_3_20_50_dP'] = C1_3_20_50
+        # 25мм
+        context['C2_1_20_25_dP'] = C1_1_20_25
+        context['C2_2_20_25_dP'] = C1_2_20_25
+        context['C2_3_20_25_dP'] = C1_3_20_25
+        # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        # Т=10 С
+        # Полная
+        context['C2_1_10_dP'] = C1_1_10
+        context['C2_2_10_dP'] = C1_2_10
+        context['C2_3_10_dP'] = C1_3_10
+        # 100мм
+        context['C2_1_10_100_dP'] = C1_1_10_100
+        context['C2_2_10_100_dP'] = C1_2_10_100
+        context['C2_3_10_100_dP'] = C1_3_10_100
+        # 50мм
+        context['C2_1_10_50_dP'] = C1_1_10_50
+        context['C2_2_10_50_dP'] = C1_2_10_50
+        context['C2_3_10_50_dP'] = C1_3_10_50
+        # 25мм
+        context['C2_1_10_25_dP'] = C1_1_10_25
+        context['C2_2_10_25_dP'] = C1_2_10_25
+        context['C2_3_10_25_dP'] = C1_3_10_25
 
         # Таблица пожаров
-        C1_1_max_Q = C1_1_max
-        context['C1_1_max_Q'] = C1_1_max_Q
+        # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        # Т=30 С
+        # Полная
+        context['C1_1_max_Q'] = C1_1_max
+        context['C1_2_max_Q'] = C1_2_max
+        context['C1_3_max_Q'] = C1_3_max
+        # 100 мм
+        context['C1_1_max_100_Q'] = C1_1_max_100
+        context['C1_2_max_100_Q'] = C1_2_max_100
+        context['C1_3_max_100_Q'] = C1_3_max_100
+        # 50 мм
+        context['C1_1_max_50_Q'] = C1_1_max_50
+        context['C1_2_max_50_Q'] = C1_2_max_50
+        context['C1_3_max_50_Q'] = C1_3_max_50
+        # 25 мм
+        context['C1_1_max_25_Q'] = C1_1_max_25
+        context['C1_2_max_25_Q'] = C1_2_max_25
+        context['C1_3_max_25_Q'] = C1_3_max_25
+        # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        # Т=20 С
+        # Полная
+        context['C1_1_20_Q'] = C1_1_20
+        context['C1_2_20_Q'] = C1_2_20
+        context['C1_3_20_Q'] = C1_3_20
+        # 100 мм
+        context['C1_1_20_100_Q'] = C1_1_20_100
+        context['C1_2_20_100_Q'] = C1_2_20_100
+        context['C1_3_20_100_Q'] = C1_3_20_100
+        # 50 мм
+        context['C1_1_20_50_Q'] = C1_1_20_50
+        context['C1_2_20_50_Q'] = C1_2_20_50
+        context['C1_3_20_50_Q'] = C1_3_20_50
+        # 25 мм
+        context['C1_1_20_25_Q'] = C1_1_20_25
+        context['C1_2_20_25_Q'] = C1_2_20_25
+        context['C1_3_20_25_Q'] = C1_3_20_25
+        # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        # Т=10 С
+        # Полная
+        context['C1_1_10_Q'] = C1_1_10
+        context['C1_2_10_Q'] = C1_2_10
+        context['C1_3_10_Q'] = C1_3_10
+        # 100 мм
+        context['C1_1_10_100_Q'] = C1_1_10_100
+        context['C1_2_10_100_Q'] = C1_2_10_100
+        context['C1_3_10_100_Q'] = C1_3_10_100
+        # 50 мм
+        context['C1_1_10_50_Q'] = C1_1_10_50
+        context['C1_2_10_50_Q'] = C1_2_10_50
+        context['C1_3_10_50_Q'] = C1_3_10_50
+        # 25 мм
+        context['C1_1_10_25_Q'] = C1_1_10_25
+        context['C1_2_10_25_Q'] = C1_2_10_25
+        context['C1_3_10_25_Q'] = C1_3_10_25
 
         # Таблица вспышек
         C3_1_max_NKPR = C1_1_max
@@ -651,7 +739,7 @@ class Report:
                 (item['Quantity'] + (item['Flow'] * CUT_OFF_TIME) / (DAY_TO_HOUR * HOUR_TO_SECONDS)) * k[
                     type_hole] * TONN_TO_KG, 2)
 
-            item['Spill_fire'] = item['Spill_square'] * k[type_hole]
+            item['Spill_fire'] = int(item['Spill_square'] * k[type_hole])
 
             evaporation_mass = ev.Liquid_evaporation().evaporation_in_moment(TIME_EVAPORATION,
                                                                              item['Steam_pressure'],
