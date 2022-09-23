@@ -682,6 +682,58 @@ class Report:
         context['C1_2_10_25_damage'] = C1_2_10_25
         context['C1_3_10_25_damage'] = C1_3_10_25
 
+        # Таблица риска
+        # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        # Т=30 С
+        # Полная 1 м/с
+        context['C1_1_max_risk'] = C1_1_max
+        context['C2_1_max_risk'] = C1_1_max
+        context['C3_1_max_risk'] = C1_1_max
+        context['C4_1_max_risk'] = C1_1_max
+        # Полная 2 м/с
+        context['C1_2_max_risk'] = C1_2_max
+        context['C2_2_max_risk'] = C1_2_max
+        context['C3_2_max_risk'] = C1_2_max
+        context['C4_2_max_risk'] = C1_2_max
+        # Полная 3 м/с
+        context['C1_3_max_risk'] = C1_3_max
+        context['C2_3_max_risk'] = C1_3_max
+        context['C3_3_max_risk'] = C1_3_max
+        context['C4_3_max_risk'] = C1_3_max
+        # # Полная
+        # C1_1_max = self.__get_mass_accident(1, 30, mass_in_dev_and_pipe, type_hole=0)
+        # context['C1_1_max'] = C1_1_max
+        # context['C2_1_max'] = C1_1_max
+        # context['C3_1_max'] = C1_1_max
+        # context['C4_1_max'] = C1_1_max
+        # C1_2_max = self.__get_mass_accident(2, 30, mass_in_dev_and_pipe, type_hole=0)
+        # context['C1_2_max'] = C1_2_max
+        # context['C2_2_max'] = C1_2_max
+        # context['C3_2_max'] = C1_2_max
+        # context['C4_2_max'] = C1_2_max
+        # C1_3_max = self.__get_mass_accident(3, 30, mass_in_dev_and_pipe, type_hole=0)
+        # context['C1_3_max'] = C1_3_max
+        # context['C2_3_max'] = C1_3_max
+        # context['C3_3_max'] = C1_3_max
+        # context['C4_3_max'] = C1_3_max
+        # # 100 мм
+        # C1_1_max_100 = self.__get_mass_accident(1, 30, mass_in_dev_and_pipe, type_hole=1)
+        # context['C1_1_max_100'] = C1_1_max_100
+        # context['C2_1_max_100'] = C1_1_max_100
+        # context['C3_1_max_100'] = C1_1_max_100
+        # context['C4_1_max_100'] = C1_1_max_100
+        # C1_2_max_100 = self.__get_mass_accident(2, 30, mass_in_dev_and_pipe, type_hole=1)
+        # context['C1_2_max_100'] = C1_2_max_100
+        # context['C2_2_max_100'] = C1_2_max_100
+        # context['C3_2_max_100'] = C1_2_max_100
+        # context['C4_2_max_100'] = C1_2_max_100
+        # C1_3_max_100 = self.__get_mass_accident(3, 30, mass_in_dev_and_pipe, type_hole=1)
+        # context['C1_3_max_100'] = C1_3_max_100
+        # context['C2_3_max_100'] = C1_3_max_100
+        # context['C3_3_max_100'] = C1_3_max_100
+        # context['C4_3_max_100'] = C1_3_max_100
+
+
 
 
         doc.render(context)
@@ -988,6 +1040,12 @@ class Report:
             item['D3_C4'], item['D2_C4'], item['D3_C4'], item['D4_C4'], item['D5_C4'], item[
                 'D6_C4'], item['Dsum_C4'] = (
                 C4_damage[0], C4_damage[1], C4_damage[2], C4_damage[3], C4_damage[8], C4_damage[7], C4_damage[9])
+
+            # Риск мат ожидание
+            item['Risk_C1'] = "{:.2e}".format(float(item['Frequency_C1']) * float(item['Dsum_C1']))
+            item['Risk_C2'] = "{:.2e}".format(float(item['Frequency_C2']) * float(item['Dsum_C2']))
+            item['Risk_C3'] = "{:.2e}".format(float(item['Frequency_C3']) * float(item['Dsum_C3']))
+            item['Risk_C4'] = "{:.2e}".format(float(item['Frequency_C4']) * float(item['Dsum_C4']))
 
             # Добавление item  врезультирующий список
             result.append(item)
