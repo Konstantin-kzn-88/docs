@@ -629,8 +629,60 @@ class Report:
         context['C3_3_10_25_NKPR'] = C1_3_10_25
 
         # Таблица ущерба
-        C1_1_max_damage = C1_1_max
-        context['C1_1_max_damage'] = C1_1_max_damage
+        # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        # Т=30 С
+        # Полная
+        context['C1_1_max_damage'] = C1_1_max
+        context['C1_2_max_damage'] = C1_2_max
+        context['C1_3_max_damage'] = C1_3_max
+        # 100мм
+        context['C1_1_max_100_damage'] = C1_1_max_100
+        context['C1_2_max_100_damage'] = C1_2_max_100
+        context['C1_3_max_100_damage'] = C1_3_max_100
+        # 50мм
+        context['C1_1_max_50_damage'] = C1_1_max_50
+        context['C1_2_max_50_damage'] = C1_2_max_50
+        context['C1_3_max_50_damage'] = C1_3_max_50
+        # 25мм
+        context['C1_1_max_25_damage'] = C1_1_max_25
+        context['C1_2_max_25_damage'] = C1_2_max_25
+        context['C1_3_max_25_damage'] = C1_3_max_25
+        # Т=20 С
+        # Полная
+        context['C1_1_20_damage'] = C1_1_20
+        context['C1_2_20_damage'] = C1_2_20
+        context['C1_3_20_damage'] = C1_3_20
+        # 100мм
+        context['C1_1_20_100_damage'] = C1_1_20_100
+        context['C1_2_20_100_damage'] = C1_2_20_100
+        context['C1_3_20_100_damage'] = C1_3_20_100
+        # 50мм
+        context['C1_1_20_50_damage'] = C1_1_20_50
+        context['C1_2_20_50_damage'] = C1_2_20_50
+        context['C1_3_20_50_damage'] = C1_3_20_50
+        # 25мм
+        context['C1_1_20_25_damage'] = C1_1_20_25
+        context['C1_2_20_25_damage'] = C1_2_20_25
+        context['C1_3_20_25_damage'] = C1_3_20_25
+        # Т=10 С
+        # Полная
+        context['C1_1_10_damage'] = C1_1_10
+        context['C1_2_10_damage'] = C1_2_10
+        context['C1_3_10_damage'] = C1_3_10
+        # 100мм
+        context['C1_1_10_100_damage'] = C1_1_10_100
+        context['C1_2_10_100_damage'] = C1_2_10_100
+        context['C1_3_10_100_damage'] = C1_3_10_100
+        # 50мм
+        context['C1_1_10_50_damage'] = C1_1_10_50
+        context['C1_2_10_50_damage'] = C1_2_10_50
+        context['C1_3_10_50_damage'] = C1_3_10_50
+        # 25мм
+        context['C1_1_10_25_damage'] = C1_1_10_25
+        context['C1_2_10_25_damage'] = C1_2_10_25
+        context['C1_3_10_25_damage'] = C1_3_10_25
+
+
 
         doc.render(context)
         text = str(int(time.time()))
@@ -877,7 +929,7 @@ class Report:
                 diametr = int(item['Diameter'].replace(",", "."))
                 lenght = int(float(item['Length'].replace(",", ".")) * KM_TO_M)
             else:
-                volume = item['Volume']
+                volume = item['Volume']* k[type_hole]
                 diametr = 0
                 lenght = 0
 
