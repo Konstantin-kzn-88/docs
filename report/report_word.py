@@ -17,7 +17,7 @@ pipe_info = [{'Death_person': '1',
               'Target': 'Транспорт нефти',
               'Temperature': '10',
               'View_space': '4'},
-             {'Death_person': '1',
+             {'Death_person': '2',
               'Diameter': '159',
               'Flow': '12',
               'Ground': 'Подземное',
@@ -36,7 +36,7 @@ pipe_info = [{'Death_person': '1',
               'View_space': '4'}]
 
 dev_info = [{'Completion': '0,8',
-             'Death_person': '1',
+             'Death_person': '2',
              'Ground': 'Наземное',
              'Id': 55,
              'Injured_person': '2',
@@ -575,8 +575,58 @@ class Report:
         context['C1_3_10_25_Q'] = C1_3_10_25
 
         # Таблица вспышек
-        C3_1_max_NKPR = C1_1_max
-        context['C3_1_max_NKPR'] = C3_1_max_NKPR
+        # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        # Т=30 С
+        # Полная
+        context['C3_1_max_NKPR'] = C1_1_max
+        context['C3_2_max_NKPR'] = C1_2_max
+        context['C3_3_max_NKPR'] = C1_3_max
+        # 100 мм
+        context['C3_1_max_100_NKPR'] = C1_1_max_100
+        context['C3_2_max_100_NKPR'] = C1_2_max_100
+        context['C3_3_max_100_NKPR'] = C1_3_max_100
+        # 50 мм
+        context['C3_1_max_50_NKPR'] = C1_1_max_50
+        context['C3_2_max_50_NKPR'] = C1_2_max_50
+        context['C3_3_max_50_NKPR'] = C1_3_max_50
+        # 25 мм
+        context['C3_1_max_25_NKPR'] = C1_1_max_25
+        context['C3_2_max_25_NKPR'] = C1_2_max_25
+        context['C3_3_max_25_NKPR'] = C1_3_max_25
+        # Т=20 С
+        # Полная
+        context['C3_1_20_NKPR'] = C1_1_20
+        context['C3_2_20_NKPR'] = C1_2_20
+        context['C3_3_20_NKPR'] = C1_3_20
+        # 100 мм
+        context['C3_1_20_100_NKPR'] = C1_1_20_100
+        context['C3_2_20_100_NKPR'] = C1_2_20_100
+        context['C3_3_20_100_NKPR'] = C1_3_20_100
+        # 50 мм
+        context['C3_1_20_50_NKPR'] = C1_1_20_50
+        context['C3_2_20_50_NKPR'] = C1_2_20_50
+        context['C3_3_20_50_NKPR'] = C1_3_20_50
+        # 25 мм
+        context['C3_1_20_25_NKPR'] = C1_1_20_25
+        context['C3_2_20_25_NKPR'] = C1_2_20_25
+        context['C3_3_20_25_NKPR'] = C1_3_20_25
+        # Т=20 С
+        # Полная
+        context['C3_1_10_NKPR'] = C1_1_10
+        context['C3_2_10_NKPR'] = C1_2_10
+        context['C3_3_10_NKPR'] = C1_3_10
+        # 100 мм
+        context['C3_1_10_100_NKPR'] = C1_1_10_100
+        context['C3_2_10_100_NKPR'] = C1_2_10_100
+        context['C3_3_10_100_NKPR'] = C1_3_10_100
+        # 50 мм
+        context['C3_1_10_50_NKPR'] = C1_1_10_50
+        context['C3_2_10_50_NKPR'] = C1_2_10_50
+        context['C3_3_10_50_NKPR'] = C1_3_10_50
+        # 25 мм
+        context['C3_1_10_25_NKPR'] = C1_1_10_25
+        context['C3_2_10_25_NKPR'] = C1_2_10_25
+        context['C3_3_10_25_NKPR'] = C1_3_10_25
 
         # Таблица ущерба
         C1_1_max_damage = C1_1_max
@@ -615,7 +665,7 @@ class Report:
             dev_dict['Density_gas'] = float(sub['Density_gas'].replace(",", "."))
             dev_dict['Energy_level'] = float(sub['Energy_level'].replace(",", "."))
             dev_dict['Flash_temperature'] = float(sub['Flash_temperature'].replace(",", "."))
-            dev_dict['Heat_of_combustion'] = float(sub['Heat_of_combustion'].replace(",", "."))
+            dev_dict['Heat_of_combustion'] = int(sub['Heat_of_combustion'].replace(",", "."))
             dev_dict['Lower_concentration'] = float(sub['Lower_concentration'].replace(",", "."))
             dev_dict['Molecular_weight'] = float(sub['Molecular_weight'].replace(",", "."))
             dev_dict['Sigma'] = float(sub['Sigma'].replace(",", "."))
@@ -654,7 +704,7 @@ class Report:
             pipe_dict['Density_gas'] = float(sub['Density_gas'].replace(",", "."))
             pipe_dict['Energy_level'] = float(sub['Energy_level'].replace(",", "."))
             pipe_dict['Flash_temperature'] = float(sub['Flash_temperature'].replace(",", "."))
-            pipe_dict['Heat_of_combustion'] = float(sub['Heat_of_combustion'].replace(",", "."))
+            pipe_dict['Heat_of_combustion'] = int(sub['Heat_of_combustion'].replace(",", "."))
             pipe_dict['Lower_concentration'] = float(sub['Lower_concentration'].replace(",", "."))
             pipe_dict['Molecular_weight'] = float(sub['Molecular_weight'].replace(",", "."))
             pipe_dict['Sigma'] = float(sub['Sigma'].replace(",", "."))
