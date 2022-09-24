@@ -200,6 +200,7 @@ sub_info = [{'Boiling_temperature': '359',
              'Steam_pressure': '51'}]
 
 from docxtpl import DocxTemplate, InlineImage
+from docx.shared import Mm
 from pathlib import Path
 import time
 import os
@@ -210,6 +211,7 @@ from calc import calc_tvs_explosion as expl
 from calc import calc_strait_fire as fire
 from calc import calc_lower_concentration as nkpr
 from calc import calc_damage as damage
+from calc import calc_fn_fg_chart
 from risk import risk_statistics_weather as weather
 from risk import risk_probability as pr
 from risk import risk_event_tree as tree
@@ -237,8 +239,8 @@ class Report:
         self.sub_info = sub_info
 
     def all_table(self):
-        path_template = Path(__file__).parents[1]
-        doc = DocxTemplate(f'{path_template}\\report\\templates\\all_table.docx')
+        self.path_template = Path(__file__).parents[1]
+        doc = DocxTemplate(f'{self.path_template}\\report\\templates\\all_table.docx')
         context = {}
         context.update(self.org_info)
         context.update(self.object_info)
@@ -253,16 +255,17 @@ class Report:
         context['sum_sub'] = sum([float(i['Quantity']) for i in mass_in_dev_and_pipe])
         # Таблица с авариями
         if len(self.pipe_info) != 0:
-            with open(f'{path_template}\\report\\templates\\oil_pipelines.txt', 'r', encoding="utf-8") as f:
+            with open(f'{self.path_template}\\report\\templates\\oil_pipelines.txt', 'r', encoding="utf-8") as f:
                 data_oil_pipe = f.read()
                 context['oil_pipeline_accident_table'] = eval(data_oil_pipe)
         if len(self.dev_info) != 0:
-            with open(f'{path_template}\\report\\templates\\oil_device.txt', 'r', encoding="utf-8") as f:
+            with open(f'{self.path_template}\\report\\templates\\oil_device.txt', 'r', encoding="utf-8") as f:
                 data_oil_dev = f.read()
                 context['oil_device_accident_table'] = eval(data_oil_dev)
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         # Таблица количества опасного вещества участвующего в аварии
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+        all_table_data = []  # список всех таблиц
         # Т=30 С
         # Полная
         C1_1_max = self.__get_mass_accident(1, 30, mass_in_dev_and_pipe, type_hole=0)
@@ -280,6 +283,8 @@ class Report:
         context['C2_3_max'] = C1_3_max
         context['C3_3_max'] = C1_3_max
         context['C4_3_max'] = C1_3_max
+        all_table_data.extend((C1_1_max, C1_2_max, C1_3_max))
+
         # 100 мм
         C1_1_max_100 = self.__get_mass_accident(1, 30, mass_in_dev_and_pipe, type_hole=1)
         context['C1_1_max_100'] = C1_1_max_100
@@ -296,6 +301,7 @@ class Report:
         context['C2_3_max_100'] = C1_3_max_100
         context['C3_3_max_100'] = C1_3_max_100
         context['C4_3_max_100'] = C1_3_max_100
+        all_table_data.extend((C1_1_max_100, C1_2_max_100, C1_3_max_100))
         # 50 мм
         C1_1_max_50 = self.__get_mass_accident(1, 30, mass_in_dev_and_pipe, type_hole=2)
         context['C1_1_max_50'] = C1_1_max_50
@@ -312,6 +318,7 @@ class Report:
         context['C2_3_max_50'] = C1_3_max_50
         context['C3_3_max_50'] = C1_3_max_50
         context['C4_3_max_50'] = C1_3_max_50
+        all_table_data.extend((C1_1_max_50, C1_2_max_50, C1_3_max_50))
         # 25 мм
         C1_1_max_25 = self.__get_mass_accident(1, 30, mass_in_dev_and_pipe, type_hole=3)
         context['C1_1_max_25'] = C1_1_max_25
@@ -328,6 +335,7 @@ class Report:
         context['C2_3_max_25'] = C1_3_max_25
         context['C3_3_max_25'] = C1_3_max_25
         context['C4_3_max_25'] = C1_3_max_25
+        all_table_data.extend((C1_1_max_25, C1_2_max_25, C1_3_max_25))
 
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         # Т=20 С
@@ -347,6 +355,7 @@ class Report:
         context['C2_3_20'] = C1_3_20
         context['C3_3_20'] = C1_3_20
         context['C4_3_20'] = C1_3_20
+        all_table_data.extend((C1_1_20, C1_2_20, C1_3_20))
         # 100 мм
         C1_1_20_100 = self.__get_mass_accident(1, 20, mass_in_dev_and_pipe, type_hole=1)
         context['C1_1_20_100'] = C1_1_20_100
@@ -363,6 +372,7 @@ class Report:
         context['C2_3_20_100'] = C1_3_20_100
         context['C3_3_20_100'] = C1_3_20_100
         context['C4_3_20_100'] = C1_3_20_100
+        all_table_data.extend((C1_1_20_100, C1_2_20_100, C1_3_20_100))
         # 50 мм
         C1_1_20_50 = self.__get_mass_accident(1, 20, mass_in_dev_and_pipe, type_hole=2)
         context['C1_1_20_50'] = C1_1_20_50
@@ -379,6 +389,7 @@ class Report:
         context['C2_3_20_50'] = C1_3_20_50
         context['C3_3_20_50'] = C1_3_20_50
         context['C4_3_20_50'] = C1_3_20_50
+        all_table_data.extend((C1_1_20_50, C1_2_20_50, C1_3_20_50))
         # 25 мм
         C1_1_20_25 = self.__get_mass_accident(1, 20, mass_in_dev_and_pipe, type_hole=3)
         context['C1_1_20_25'] = C1_1_20_25
@@ -395,6 +406,7 @@ class Report:
         context['C2_3_20_25'] = C1_3_20_25
         context['C3_3_20_25'] = C1_3_20_25
         context['C4_3_20_25'] = C1_3_20_25
+        all_table_data.extend((C1_1_20_25, C1_2_20_25, C1_3_20_25))
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         # Т=10 С
         # Полная
@@ -413,6 +425,7 @@ class Report:
         context['C2_3_10'] = C1_3_10
         context['C3_3_10'] = C1_3_10
         context['C4_3_10'] = C1_3_10
+        all_table_data.extend((C1_1_10, C1_2_10, C1_3_10))
         # 100 мм
         C1_1_10_100 = self.__get_mass_accident(1, 10, mass_in_dev_and_pipe, type_hole=1)
         context['C1_1_10_100'] = C1_1_10_100
@@ -429,6 +442,7 @@ class Report:
         context['C2_3_10_100'] = C1_3_10_100
         context['C3_3_10_100'] = C1_3_10_100
         context['C4_3_10_100'] = C1_3_10_100
+        all_table_data.extend((C1_1_10_100, C1_2_10_100, C1_3_10_100))
         # 50 мм
         C1_1_10_50 = self.__get_mass_accident(1, 10, mass_in_dev_and_pipe, type_hole=2)
         context['C1_1_10_50'] = C1_1_10_50
@@ -445,6 +459,7 @@ class Report:
         context['C2_3_10_50'] = C1_3_10_50
         context['C3_3_10_50'] = C1_3_10_50
         context['C4_3_10_50'] = C1_3_10_50
+        all_table_data.extend((C1_1_10_50, C1_2_10_50, C1_3_10_50))
         # 25 мм
         C1_1_10_25 = self.__get_mass_accident(1, 10, mass_in_dev_and_pipe, type_hole=3)
         context['C1_1_10_25'] = C1_1_10_25
@@ -461,6 +476,9 @@ class Report:
         context['C2_3_10_25'] = C1_3_10_25
         context['C3_3_10_25'] = C1_3_10_25
         context['C4_3_10_25'] = C1_3_10_25
+        all_table_data.extend((C1_1_10_25, C1_2_10_25, C1_3_10_25))
+
+        self.__save_fn_fg_chart(all_table_data)
 
         # Таблица взрывов
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
@@ -877,10 +895,80 @@ class Report:
         context['C3_3_10_25_risk'] = C1_3_10_25
         context['C4_3_10_25_risk'] = C1_3_10_25
 
+        # Индивидуальный и коллективный риск
+        risk = self.__calc_ind_risk(all_table_data)
+        context['Ind_risk'] = "{:.2e}".format(risk[0])
+        context['Group_risk'] = "{:.2e}".format(risk[1])
+
+        # FN FG диаграммы
+        context['fn'] = InlineImage(doc, f'{self.path_template}\\report\\templates\\fn.jpg', width=Mm(160))
+        context['fg'] = InlineImage(doc, f'{self.path_template}\\report\\templates\\fg.jpg', width=Mm(160))
+
+        context['most_dangerous'] = self.__most_dangerous(C1_1_max)
+        context['most_possible'] = self.__most_possible(C1_3_10_25)
 
         doc.render(context)
         text = str(int(time.time()))
         doc.save(f'{DESKTOP_PATH}\\{text}_{project_info["Project_code"]}_all_table.docx')
+
+    def __save_fn_fg_chart(self, data: list):
+        pr = []  # вероятности
+        ppl = []  # люди
+        dmg = []  # ущерб
+        for item in data:
+            for dict_ in item:
+                pr.extend((float(dict_['Frequency_C1']), float(dict_['Frequency_C2']),
+                           float(dict_['Frequency_C3']), float(dict_['Frequency_C4'])))
+                ppl.extend((float(dict_['Death_person_C1']), float(dict_['Death_person_C2']),
+                            float(dict_['Death_person_C3']), float(dict_['Death_person_C4'])))
+                dmg.extend((float(dict_['Dsum_C1']), float(dict_['Dsum_C2']),
+                            float(dict_['Dsum_C3']), float(dict_['Dsum_C4'])))
+        calc_fn_fg_chart.FN_FG_chart(f'{self.path_template}\\report\\templates').fn_chart([pr, ppl])
+        calc_fn_fg_chart.FN_FG_chart(f'{self.path_template}\\report\\templates').fg_chart([pr, dmg])
+
+    def __calc_ind_risk(self, data: list):
+        group_risk = 0  # коллективный риск
+        ppl_sum = 0  # люди
+        for item in data:
+            for dict_ in item:
+                ppl_sum += float(dict_['Death_person_C1']) + float(dict_['Death_person_C2'])
+                ppl_sum += float(dict_['Death_person_C3']) + float(dict_['Death_person_C4'])
+
+                group_risk += float(dict_['Frequency_C1']) * float(dict_['Death_person_C1'])
+                group_risk += float(dict_['Frequency_C2']) * float(dict_['Death_person_C2'])
+                group_risk += float(dict_['Frequency_C3']) * float(dict_['Death_person_C3'])
+                group_risk += float(dict_['Frequency_C4']) * float(dict_['Death_person_C4'])
+
+        individual_risk = group_risk / ppl_sum
+        return (individual_risk, group_risk)
+
+    def __most_possible(self, data: list):
+        dev = data[0]['Poz_sub']
+        frequency = data[0]['Frequency_C4']
+        dmg = data[0]['Dsum_C4']
+
+        for item in data:
+            if float(frequency) < float(item['Frequency_C4']):
+                dev = item['Poz_sub']
+                frequency = item['Frequency_C4']
+                dmg = item['Dsum_C4']
+
+        str_ = f'''наиболее вероятным сценарием является сценарий частичной разгерметизации С4_3_10град_25 для обрудования (диаметр деффектного отверстия 25 мм): {dev.split()[0].replace(',', '')} с вероятностью возникновения {frequency} 1/год при метеоусловиях:  скорость ветра 3 м/с, температура воздуха воздуха 10 град.С. Ущерб при реализации данного сценария составляет: {dmg} млн.руб'''
+        return str_
+
+    def __most_dangerous(self, data: list):
+        dev = data[0]['Poz_sub']
+        frequency = data[0]['Frequency_C1']
+        dmg = data[0]['Dsum_C1']
+
+        for item in data:
+            if float(dmg) < float(item['Dsum_C1']):
+                dev = item['Poz_sub']
+                frequency = item['Frequency_C1']
+                dmg = item['Dsum_C1']
+
+        str_ = f'''наиболее опасным сценарием является сценарий полного разрушения С2_1_tmax для обрудования: {dev.split()[0].replace(',', '')} с вероятностью возникновения {frequency} 1/год при метеоусловиях:  скорость ветра 1 м/с, температура воздуха воздуха 39 град.С. Ущерб при реализации данного сценария составляет: {dmg} млн.руб'''
+        return str_
 
     def __calc_mass_in_device(self, dev_info: list, pipe_info: list, sub_info: list):
         """
@@ -1123,7 +1211,7 @@ class Report:
                 diametr = int(item['Diameter'].replace(",", "."))
                 lenght = int(float(item['Length'].replace(",", ".")) * KM_TO_M)
             else:
-                volume = item['Volume']* k[type_hole]
+                volume = item['Volume'] * k[type_hole]
                 diametr = 0
                 lenght = 0
 
@@ -1135,7 +1223,6 @@ class Report:
                                                      m_out_spill=evaporation_mass / KG_TO_TONN,
                                                      m_in_spill=item['Emergency_weight'] / KG_TO_TONN,
                                                      S_spill=item['Spill_fire'])
-
 
             item['D1_C1'], item['D2_C1'], item['D3_C1'], item['D4_C1'], item['D5_C1'], item['D6_C1'], item[
                 'Dsum_C1'] = (
