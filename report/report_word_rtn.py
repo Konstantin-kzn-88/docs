@@ -240,7 +240,7 @@ class Report:
 
     def all_table(self):
         self.path_template = Path(__file__).parents[1]
-        doc = DocxTemplate(f'{self.path_template}\\report\\templates\\all_table.docx')
+        doc = DocxTemplate(f'{self.path_template}\\report\\templates\\all_table_rtn.docx')
         context = {}
         context.update(self.org_info)
         context.update(self.object_info)
@@ -284,59 +284,23 @@ class Report:
         context['C3_3_max'] = C1_3_max
         context['C4_3_max'] = C1_3_max
         all_table_data.extend((C1_1_max, C1_2_max, C1_3_max))
-
-        # 100 мм
-        C1_1_max_100 = self.__get_mass_accident(1, 30, mass_in_dev_and_pipe, type_hole=1)
-        context['C1_1_max_100'] = C1_1_max_100
-        context['C2_1_max_100'] = C1_1_max_100
-        context['C3_1_max_100'] = C1_1_max_100
-        context['C4_1_max_100'] = C1_1_max_100
-        C1_2_max_100 = self.__get_mass_accident(2, 30, mass_in_dev_and_pipe, type_hole=1)
-        context['C1_2_max_100'] = C1_2_max_100
-        context['C2_2_max_100'] = C1_2_max_100
-        context['C3_2_max_100'] = C1_2_max_100
-        context['C4_2_max_100'] = C1_2_max_100
-        C1_3_max_100 = self.__get_mass_accident(3, 30, mass_in_dev_and_pipe, type_hole=1)
-        context['C1_3_max_100'] = C1_3_max_100
-        context['C2_3_max_100'] = C1_3_max_100
-        context['C3_3_max_100'] = C1_3_max_100
-        context['C4_3_max_100'] = C1_3_max_100
-        all_table_data.extend((C1_1_max_100, C1_2_max_100, C1_3_max_100))
-        # 50 мм
-        C1_1_max_50 = self.__get_mass_accident(1, 30, mass_in_dev_and_pipe, type_hole=2)
-        context['C1_1_max_50'] = C1_1_max_50
-        context['C2_1_max_50'] = C1_1_max_50
-        context['C3_1_max_50'] = C1_1_max_50
-        context['C4_1_max_50'] = C1_1_max_50
-        C1_2_max_50 = self.__get_mass_accident(2, 30, mass_in_dev_and_pipe, type_hole=2)
-        context['C1_2_max_50'] = C1_2_max_50
-        context['C2_2_max_50'] = C1_2_max_50
-        context['C3_2_max_50'] = C1_2_max_50
-        context['C4_2_max_50'] = C1_2_max_50
-        C1_3_max_50 = self.__get_mass_accident(3, 30, mass_in_dev_and_pipe, type_hole=2)
-        context['C1_3_max_50'] = C1_3_max_50
-        context['C2_3_max_50'] = C1_3_max_50
-        context['C3_3_max_50'] = C1_3_max_50
-        context['C4_3_max_50'] = C1_3_max_50
-        all_table_data.extend((C1_1_max_50, C1_2_max_50, C1_3_max_50))
-        # 25 мм
-        C1_1_max_25 = self.__get_mass_accident(1, 30, mass_in_dev_and_pipe, type_hole=3)
-        context['C1_1_max_25'] = C1_1_max_25
-        context['C2_1_max_25'] = C1_1_max_25
-        context['C3_1_max_25'] = C1_1_max_25
-        context['C4_1_max_25'] = C1_1_max_25
-        C1_2_max_25 = self.__get_mass_accident(2, 30, mass_in_dev_and_pipe, type_hole=3)
-        context['C1_2_max_25'] = C1_2_max_25
-        context['C2_2_max_25'] = C1_2_max_25
-        context['C3_2_max_25'] = C1_2_max_25
-        context['C4_2_max_25'] = C1_2_max_25
-        C1_3_max_25 = self.__get_mass_accident(3, 30, mass_in_dev_and_pipe, type_hole=3)
-        context['C1_3_max_25'] = C1_3_max_25
-        context['C2_3_max_25'] = C1_3_max_25
-        context['C3_3_max_25'] = C1_3_max_25
-        context['C4_3_max_25'] = C1_3_max_25
-        all_table_data.extend((C1_1_max_25, C1_2_max_25, C1_3_max_25))
-
+        # 10 мм
+        C1_1_max_10 = self.__get_mass_accident(1, 30, mass_in_dev_and_pipe, type_hole=1)
+        context['C1_1_max_10'] = C1_1_max_10
+        context['C2_1_max_10'] = C1_1_max_10
+        context['C3_1_max_10'] = C1_1_max_10
+        context['C4_1_max_10'] = C1_1_max_10
+        C1_2_max_10 = self.__get_mass_accident(2, 30, mass_in_dev_and_pipe, type_hole=1)
+        context['C1_2_max_10'] = C1_2_max_10
+        context['C2_2_max_10'] = C1_2_max_10
+        context['C3_2_max_10'] = C1_2_max_10
+        context['C4_2_max_10'] = C1_2_max_10
+        C1_3_max_10 = self.__get_mass_accident(3, 30, mass_in_dev_and_pipe, type_hole=1)
+        context['C1_3_max_10'] = C1_3_max_10
+        context['C2_3_max_10'] = C1_3_max_10
+        context['C3_3_max_10'] = C1_3_max_10
+        context['C4_3_max_10'] = C1_3_max_10
+        all_table_data.extend((C1_1_max_10, C1_2_max_10, C1_3_max_10))
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         # Т=20 С
         # Полная
@@ -356,57 +320,23 @@ class Report:
         context['C3_3_20'] = C1_3_20
         context['C4_3_20'] = C1_3_20
         all_table_data.extend((C1_1_20, C1_2_20, C1_3_20))
-        # 100 мм
-        C1_1_20_100 = self.__get_mass_accident(1, 20, mass_in_dev_and_pipe, type_hole=1)
-        context['C1_1_20_100'] = C1_1_20_100
-        context['C2_1_20_100'] = C1_1_20_100
-        context['C3_1_20_100'] = C1_1_20_100
-        context['C4_1_20_100'] = C1_1_20_100
-        C1_2_20_100 = self.__get_mass_accident(2, 20, mass_in_dev_and_pipe, type_hole=1)
-        context['C1_2_20_100'] = C1_2_20_100
-        context['C2_2_20_100'] = C1_2_20_100
-        context['C3_2_20_100'] = C1_2_20_100
-        context['C4_2_20_100'] = C1_2_20_100
-        C1_3_20_100 = self.__get_mass_accident(3, 20, mass_in_dev_and_pipe, type_hole=1)
-        context['C1_3_20_100'] = C1_3_20_100
-        context['C2_3_20_100'] = C1_3_20_100
-        context['C3_3_20_100'] = C1_3_20_100
-        context['C4_3_20_100'] = C1_3_20_100
-        all_table_data.extend((C1_1_20_100, C1_2_20_100, C1_3_20_100))
-        # 50 мм
-        C1_1_20_50 = self.__get_mass_accident(1, 20, mass_in_dev_and_pipe, type_hole=2)
-        context['C1_1_20_50'] = C1_1_20_50
-        context['C2_1_20_50'] = C1_1_20_50
-        context['C3_1_20_50'] = C1_1_20_50
-        context['C4_1_20_50'] = C1_1_20_50
-        C1_2_20_50 = self.__get_mass_accident(2, 20, mass_in_dev_and_pipe, type_hole=2)
-        context['C1_2_20_50'] = C1_2_20_50
-        context['C2_2_20_50'] = C1_2_20_50
-        context['C3_2_20_50'] = C1_2_20_50
-        context['C4_2_20_50'] = C1_2_20_50
-        C1_3_20_50 = self.__get_mass_accident(3, 20, mass_in_dev_and_pipe, type_hole=2)
-        context['C1_3_20_50'] = C1_3_20_50
-        context['C2_3_20_50'] = C1_3_20_50
-        context['C3_3_20_50'] = C1_3_20_50
-        context['C4_3_20_50'] = C1_3_20_50
-        all_table_data.extend((C1_1_20_50, C1_2_20_50, C1_3_20_50))
-        # 25 мм
-        C1_1_20_25 = self.__get_mass_accident(1, 20, mass_in_dev_and_pipe, type_hole=3)
-        context['C1_1_20_25'] = C1_1_20_25
-        context['C2_1_20_25'] = C1_1_20_25
-        context['C3_1_20_25'] = C1_1_20_25
-        context['C4_1_20_25'] = C1_1_20_25
-        C1_2_20_25 = self.__get_mass_accident(2, 20, mass_in_dev_and_pipe, type_hole=3)
-        context['C1_2_20_25'] = C1_2_20_25
-        context['C2_2_20_25'] = C1_2_20_25
-        context['C3_2_20_25'] = C1_2_20_25
-        context['C4_2_20_25'] = C1_2_20_25
-        C1_3_20_25 = self.__get_mass_accident(3, 20, mass_in_dev_and_pipe, type_hole=3)
-        context['C1_3_20_25'] = C1_3_20_25
-        context['C2_3_20_25'] = C1_3_20_25
-        context['C3_3_20_25'] = C1_3_20_25
-        context['C4_3_20_25'] = C1_3_20_25
-        all_table_data.extend((C1_1_20_25, C1_2_20_25, C1_3_20_25))
+        # 10мм
+        C1_1_20_10 = self.__get_mass_accident(1, 20, mass_in_dev_and_pipe, type_hole=1)
+        context['C1_1_20_10'] = C1_1_20_10
+        context['C2_1_20_10'] = C1_1_20_10
+        context['C3_1_20_10'] = C1_1_20_10
+        context['C4_1_20_10'] = C1_1_20_10
+        C1_2_20_10 = self.__get_mass_accident(2, 20, mass_in_dev_and_pipe, type_hole=1)
+        context['C1_2_20_10'] = C1_2_20_10
+        context['C2_2_20_10'] = C1_2_20_10
+        context['C3_2_20_10'] = C1_2_20_10
+        context['C4_2_20_10'] = C1_2_20_10
+        C1_3_20_10 = self.__get_mass_accident(3, 20, mass_in_dev_and_pipe, type_hole=1)
+        context['C1_3_20_10'] = C1_3_20_10
+        context['C2_3_20_10'] = C1_3_20_10
+        context['C3_3_20_10'] = C1_3_20_10
+        context['C4_3_20_10'] = C1_3_20_10
+        all_table_data.extend((C1_1_20_10, C1_2_20_10, C1_3_20_10))
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         # Т=10 С
         # Полная
@@ -426,57 +356,23 @@ class Report:
         context['C3_3_10'] = C1_3_10
         context['C4_3_10'] = C1_3_10
         all_table_data.extend((C1_1_10, C1_2_10, C1_3_10))
-        # 100 мм
-        C1_1_10_100 = self.__get_mass_accident(1, 10, mass_in_dev_and_pipe, type_hole=1)
-        context['C1_1_10_100'] = C1_1_10_100
-        context['C2_1_10_100'] = C1_1_10_100
-        context['C3_1_10_100'] = C1_1_10_100
-        context['C4_1_10_100'] = C1_1_10_100
-        C1_2_10_100 = self.__get_mass_accident(2, 10, mass_in_dev_and_pipe, type_hole=1)
-        context['C1_2_10_100'] = C1_2_10_100
-        context['C2_2_10_100'] = C1_2_10_100
-        context['C3_2_10_100'] = C1_2_10_100
-        context['C4_2_10_100'] = C1_2_10_100
-        C1_3_10_100 = self.__get_mass_accident(3, 10, mass_in_dev_and_pipe, type_hole=1)
-        context['C1_3_10_100'] = C1_3_10_100
-        context['C2_3_10_100'] = C1_3_10_100
-        context['C3_3_10_100'] = C1_3_10_100
-        context['C4_3_10_100'] = C1_3_10_100
-        all_table_data.extend((C1_1_10_100, C1_2_10_100, C1_3_10_100))
-        # 50 мм
-        C1_1_10_50 = self.__get_mass_accident(1, 10, mass_in_dev_and_pipe, type_hole=2)
-        context['C1_1_10_50'] = C1_1_10_50
-        context['C2_1_10_50'] = C1_1_10_50
-        context['C3_1_10_50'] = C1_1_10_50
-        context['C4_1_10_50'] = C1_1_10_50
-        C1_2_10_50 = self.__get_mass_accident(2, 10, mass_in_dev_and_pipe, type_hole=2)
-        context['C1_2_10_50'] = C1_2_10_50
-        context['C2_2_10_50'] = C1_2_10_50
-        context['C3_2_10_50'] = C1_2_10_50
-        context['C4_2_10_50'] = C1_2_10_50
-        C1_3_10_50 = self.__get_mass_accident(3, 10, mass_in_dev_and_pipe, type_hole=2)
-        context['C1_3_10_50'] = C1_3_10_50
-        context['C2_3_10_50'] = C1_3_10_50
-        context['C3_3_10_50'] = C1_3_10_50
-        context['C4_3_10_50'] = C1_3_10_50
-        all_table_data.extend((C1_1_10_50, C1_2_10_50, C1_3_10_50))
-        # 25 мм
-        C1_1_10_25 = self.__get_mass_accident(1, 10, mass_in_dev_and_pipe, type_hole=3)
-        context['C1_1_10_25'] = C1_1_10_25
-        context['C2_1_10_25'] = C1_1_10_25
-        context['C3_1_10_25'] = C1_1_10_25
-        context['C4_1_10_25'] = C1_1_10_25
-        C1_2_10_25 = self.__get_mass_accident(2, 10, mass_in_dev_and_pipe, type_hole=3)
-        context['C1_2_10_25'] = C1_2_10_25
-        context['C2_2_10_25'] = C1_2_10_25
-        context['C3_2_10_25'] = C1_2_10_25
-        context['C4_2_10_25'] = C1_2_10_25
-        C1_3_10_25 = self.__get_mass_accident(3, 10, mass_in_dev_and_pipe, type_hole=3)
-        context['C1_3_10_25'] = C1_3_10_25
-        context['C2_3_10_25'] = C1_3_10_25
-        context['C3_3_10_25'] = C1_3_10_25
-        context['C4_3_10_25'] = C1_3_10_25
-        all_table_data.extend((C1_1_10_25, C1_2_10_25, C1_3_10_25))
+        # 10 мм
+        C1_1_10_10 = self.__get_mass_accident(1, 10, mass_in_dev_and_pipe, type_hole=1)
+        context['C1_1_10_10'] = C1_1_10_10
+        context['C2_1_10_10'] = C1_1_10_10
+        context['C3_1_10_10'] = C1_1_10_10
+        context['C4_1_10_10'] = C1_1_10_10
+        C1_2_10_10 = self.__get_mass_accident(2, 10, mass_in_dev_and_pipe, type_hole=1)
+        context['C1_2_10_10'] = C1_2_10_10
+        context['C2_2_10_10'] = C1_2_10_10
+        context['C3_2_10_10'] = C1_2_10_10
+        context['C4_2_10_10'] = C1_2_10_10
+        C1_3_10_10 = self.__get_mass_accident(3, 10, mass_in_dev_and_pipe, type_hole=1)
+        context['C1_3_10_10'] = C1_3_10_10
+        context['C2_3_10_10'] = C1_3_10_10
+        context['C3_3_10_10'] = C1_3_10_10
+        context['C4_3_10_10'] = C1_3_10_10
+        all_table_data.extend((C1_1_10_10, C1_2_10_10, C1_3_10_10))
 
         self.__save_fn_fg_chart(all_table_data)
 
@@ -487,54 +383,30 @@ class Report:
         context['C2_1_max_dP'] = C1_1_max
         context['C2_2_max_dP'] = C1_2_max
         context['C2_3_max_dP'] = C1_3_max
-        # 100мм
-        context['C2_1_max_100_dP'] = C1_1_max_100
-        context['C2_2_max_100_dP'] = C1_2_max_100
-        context['C2_3_max_100_dP'] = C1_3_max_100
-        # 50мм
-        context['C2_1_max_50_dP'] = C1_1_max_50
-        context['C2_2_max_50_dP'] = C1_2_max_50
-        context['C2_3_max_50_dP'] = C1_3_max_50
-        # 25мм
-        context['C2_1_max_25_dP'] = C1_1_max_25
-        context['C2_2_max_25_dP'] = C1_2_max_25
-        context['C2_3_max_25_dP'] = C1_3_max_25
+        # 10мм
+        context['C2_1_max_10_dP'] = C1_1_max_10
+        context['C2_2_max_10_dP'] = C1_2_max_10
+        context['C2_3_max_10_dP'] = C1_3_max_10
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         # Т=20 С
         # Полная
         context['C2_1_20_dP'] = C1_1_20
         context['C2_2_20_dP'] = C1_2_20
         context['C2_3_20_dP'] = C1_3_20
-        # 100мм
-        context['C2_1_20_100_dP'] = C1_1_20_100
-        context['C2_2_20_100_dP'] = C1_2_20_100
-        context['C2_3_20_100_dP'] = C1_3_20_100
-        # 50мм
-        context['C2_1_20_50_dP'] = C1_1_20_50
-        context['C2_2_20_50_dP'] = C1_2_20_50
-        context['C2_3_20_50_dP'] = C1_3_20_50
-        # 25мм
-        context['C2_1_20_25_dP'] = C1_1_20_25
-        context['C2_2_20_25_dP'] = C1_2_20_25
-        context['C2_3_20_25_dP'] = C1_3_20_25
+        # 10мм
+        context['C2_1_20_10_dP'] = C1_1_20_10
+        context['C2_2_20_10_dP'] = C1_2_20_10
+        context['C2_3_20_10_dP'] = C1_3_20_10
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         # Т=10 С
         # Полная
         context['C2_1_10_dP'] = C1_1_10
         context['C2_2_10_dP'] = C1_2_10
         context['C2_3_10_dP'] = C1_3_10
-        # 100мм
-        context['C2_1_10_100_dP'] = C1_1_10_100
-        context['C2_2_10_100_dP'] = C1_2_10_100
-        context['C2_3_10_100_dP'] = C1_3_10_100
-        # 50мм
-        context['C2_1_10_50_dP'] = C1_1_10_50
-        context['C2_2_10_50_dP'] = C1_2_10_50
-        context['C2_3_10_50_dP'] = C1_3_10_50
-        # 25мм
-        context['C2_1_10_25_dP'] = C1_1_10_25
-        context['C2_2_10_25_dP'] = C1_2_10_25
-        context['C2_3_10_25_dP'] = C1_3_10_25
+        # 10мм
+        context['C2_1_10_10_dP'] = C1_1_10_10
+        context['C2_2_10_10_dP'] = C1_2_10_10
+        context['C2_3_10_10_dP'] = C1_3_10_10
 
         # Таблица пожаров
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
@@ -543,54 +415,30 @@ class Report:
         context['C1_1_max_Q'] = C1_1_max
         context['C1_2_max_Q'] = C1_2_max
         context['C1_3_max_Q'] = C1_3_max
-        # 100 мм
-        context['C1_1_max_100_Q'] = C1_1_max_100
-        context['C1_2_max_100_Q'] = C1_2_max_100
-        context['C1_3_max_100_Q'] = C1_3_max_100
-        # 50 мм
-        context['C1_1_max_50_Q'] = C1_1_max_50
-        context['C1_2_max_50_Q'] = C1_2_max_50
-        context['C1_3_max_50_Q'] = C1_3_max_50
-        # 25 мм
-        context['C1_1_max_25_Q'] = C1_1_max_25
-        context['C1_2_max_25_Q'] = C1_2_max_25
-        context['C1_3_max_25_Q'] = C1_3_max_25
+        # 10 мм
+        context['C1_1_max_10_Q'] = C1_1_max_10
+        context['C1_2_max_10_Q'] = C1_2_max_10
+        context['C1_3_max_10_Q'] = C1_3_max_10
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         # Т=20 С
         # Полная
         context['C1_1_20_Q'] = C1_1_20
         context['C1_2_20_Q'] = C1_2_20
         context['C1_3_20_Q'] = C1_3_20
-        # 100 мм
-        context['C1_1_20_100_Q'] = C1_1_20_100
-        context['C1_2_20_100_Q'] = C1_2_20_100
-        context['C1_3_20_100_Q'] = C1_3_20_100
-        # 50 мм
-        context['C1_1_20_50_Q'] = C1_1_20_50
-        context['C1_2_20_50_Q'] = C1_2_20_50
-        context['C1_3_20_50_Q'] = C1_3_20_50
-        # 25 мм
-        context['C1_1_20_25_Q'] = C1_1_20_25
-        context['C1_2_20_25_Q'] = C1_2_20_25
-        context['C1_3_20_25_Q'] = C1_3_20_25
+        # 10 мм
+        context['C1_1_20_10_Q'] = C1_1_20_10
+        context['C1_2_20_10_Q'] = C1_2_20_10
+        context['C1_3_20_10_Q'] = C1_3_20_10
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         # Т=10 С
         # Полная
         context['C1_1_10_Q'] = C1_1_10
         context['C1_2_10_Q'] = C1_2_10
         context['C1_3_10_Q'] = C1_3_10
-        # 100 мм
-        context['C1_1_10_100_Q'] = C1_1_10_100
-        context['C1_2_10_100_Q'] = C1_2_10_100
-        context['C1_3_10_100_Q'] = C1_3_10_100
-        # 50 мм
-        context['C1_1_10_50_Q'] = C1_1_10_50
-        context['C1_2_10_50_Q'] = C1_2_10_50
-        context['C1_3_10_50_Q'] = C1_3_10_50
-        # 25 мм
-        context['C1_1_10_25_Q'] = C1_1_10_25
-        context['C1_2_10_25_Q'] = C1_2_10_25
-        context['C1_3_10_25_Q'] = C1_3_10_25
+        # 10 мм
+        context['C1_1_10_10_Q'] = C1_1_10_10
+        context['C1_2_10_10_Q'] = C1_2_10_10
+        context['C1_3_10_10_Q'] = C1_3_10_10
 
         # Таблица вспышек
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
@@ -599,52 +447,28 @@ class Report:
         context['C3_1_max_NKPR'] = C1_1_max
         context['C3_2_max_NKPR'] = C1_2_max
         context['C3_3_max_NKPR'] = C1_3_max
-        # 100 мм
-        context['C3_1_max_100_NKPR'] = C1_1_max_100
-        context['C3_2_max_100_NKPR'] = C1_2_max_100
-        context['C3_3_max_100_NKPR'] = C1_3_max_100
-        # 50 мм
-        context['C3_1_max_50_NKPR'] = C1_1_max_50
-        context['C3_2_max_50_NKPR'] = C1_2_max_50
-        context['C3_3_max_50_NKPR'] = C1_3_max_50
-        # 25 мм
-        context['C3_1_max_25_NKPR'] = C1_1_max_25
-        context['C3_2_max_25_NKPR'] = C1_2_max_25
-        context['C3_3_max_25_NKPR'] = C1_3_max_25
+        # 10 мм
+        context['C3_1_max_10_NKPR'] = C1_1_max_10
+        context['C3_2_max_10_NKPR'] = C1_2_max_10
+        context['C3_3_max_10_NKPR'] = C1_3_max_10
         # Т=20 С
         # Полная
         context['C3_1_20_NKPR'] = C1_1_20
         context['C3_2_20_NKPR'] = C1_2_20
         context['C3_3_20_NKPR'] = C1_3_20
-        # 100 мм
-        context['C3_1_20_100_NKPR'] = C1_1_20_100
-        context['C3_2_20_100_NKPR'] = C1_2_20_100
-        context['C3_3_20_100_NKPR'] = C1_3_20_100
-        # 50 мм
-        context['C3_1_20_50_NKPR'] = C1_1_20_50
-        context['C3_2_20_50_NKPR'] = C1_2_20_50
-        context['C3_3_20_50_NKPR'] = C1_3_20_50
-        # 25 мм
-        context['C3_1_20_25_NKPR'] = C1_1_20_25
-        context['C3_2_20_25_NKPR'] = C1_2_20_25
-        context['C3_3_20_25_NKPR'] = C1_3_20_25
+        # 10 мм
+        context['C3_1_20_10_NKPR'] = C1_1_20_10
+        context['C3_2_20_10_NKPR'] = C1_2_20_10
+        context['C3_3_20_10_NKPR'] = C1_3_20_10
         # Т=20 С
         # Полная
         context['C3_1_10_NKPR'] = C1_1_10
         context['C3_2_10_NKPR'] = C1_2_10
         context['C3_3_10_NKPR'] = C1_3_10
-        # 100 мм
-        context['C3_1_10_100_NKPR'] = C1_1_10_100
-        context['C3_2_10_100_NKPR'] = C1_2_10_100
-        context['C3_3_10_100_NKPR'] = C1_3_10_100
-        # 50 мм
-        context['C3_1_10_50_NKPR'] = C1_1_10_50
-        context['C3_2_10_50_NKPR'] = C1_2_10_50
-        context['C3_3_10_50_NKPR'] = C1_3_10_50
-        # 25 мм
-        context['C3_1_10_25_NKPR'] = C1_1_10_25
-        context['C3_2_10_25_NKPR'] = C1_2_10_25
-        context['C3_3_10_25_NKPR'] = C1_3_10_25
+        # 10 мм
+        context['C3_1_10_10_NKPR'] = C1_1_10_10
+        context['C3_2_10_10_NKPR'] = C1_2_10_10
+        context['C3_3_10_10_NKPR'] = C1_3_10_10
 
         # Таблица ущерба
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
@@ -654,51 +478,27 @@ class Report:
         context['C1_2_max_damage'] = C1_2_max
         context['C1_3_max_damage'] = C1_3_max
         # 100мм
-        context['C1_1_max_100_damage'] = C1_1_max_100
-        context['C1_2_max_100_damage'] = C1_2_max_100
-        context['C1_3_max_100_damage'] = C1_3_max_100
-        # 50мм
-        context['C1_1_max_50_damage'] = C1_1_max_50
-        context['C1_2_max_50_damage'] = C1_2_max_50
-        context['C1_3_max_50_damage'] = C1_3_max_50
-        # 25мм
-        context['C1_1_max_25_damage'] = C1_1_max_25
-        context['C1_2_max_25_damage'] = C1_2_max_25
-        context['C1_3_max_25_damage'] = C1_3_max_25
+        context['C1_1_max_10_damage'] = C1_1_max_10
+        context['C1_2_max_10_damage'] = C1_2_max_10
+        context['C1_3_max_10_damage'] = C1_3_max_10
         # Т=20 С
         # Полная
         context['C1_1_20_damage'] = C1_1_20
         context['C1_2_20_damage'] = C1_2_20
         context['C1_3_20_damage'] = C1_3_20
         # 100мм
-        context['C1_1_20_100_damage'] = C1_1_20_100
-        context['C1_2_20_100_damage'] = C1_2_20_100
-        context['C1_3_20_100_damage'] = C1_3_20_100
-        # 50мм
-        context['C1_1_20_50_damage'] = C1_1_20_50
-        context['C1_2_20_50_damage'] = C1_2_20_50
-        context['C1_3_20_50_damage'] = C1_3_20_50
-        # 25мм
-        context['C1_1_20_25_damage'] = C1_1_20_25
-        context['C1_2_20_25_damage'] = C1_2_20_25
-        context['C1_3_20_25_damage'] = C1_3_20_25
+        context['C1_1_20_10_damage'] = C1_1_20_10
+        context['C1_2_20_10_damage'] = C1_2_20_10
+        context['C1_3_20_10_damage'] = C1_3_20_10
         # Т=10 С
         # Полная
         context['C1_1_10_damage'] = C1_1_10
         context['C1_2_10_damage'] = C1_2_10
         context['C1_3_10_damage'] = C1_3_10
         # 100мм
-        context['C1_1_10_100_damage'] = C1_1_10_100
-        context['C1_2_10_100_damage'] = C1_2_10_100
-        context['C1_3_10_100_damage'] = C1_3_10_100
-        # 50мм
-        context['C1_1_10_50_damage'] = C1_1_10_50
-        context['C1_2_10_50_damage'] = C1_2_10_50
-        context['C1_3_10_50_damage'] = C1_3_10_50
-        # 25мм
-        context['C1_1_10_25_damage'] = C1_1_10_25
-        context['C1_2_10_25_damage'] = C1_2_10_25
-        context['C1_3_10_25_damage'] = C1_3_10_25
+        context['C1_1_10_10_damage'] = C1_1_10_10
+        context['C1_2_10_10_damage'] = C1_2_10_10
+        context['C1_3_10_10_damage'] = C1_3_10_10
 
         # Таблица риска
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
@@ -751,149 +551,53 @@ class Report:
         context['C3_3_10_risk'] = C1_3_10
         context['C4_3_10_risk'] = C1_3_10
         # Т=30 С
-        # 100мм 1 м/с
-        context['C1_1_max_100_risk'] = C1_1_max_100
-        context['C2_1_max_100_risk'] = C1_1_max_100
-        context['C3_1_max_100_risk'] = C1_1_max_100
-        context['C4_1_max_100_risk'] = C1_1_max_100
-        # 100мм 2 м/с
-        context['C1_2_max_100_risk'] = C1_2_max_100
-        context['C2_2_max_100_risk'] = C1_2_max_100
-        context['C3_2_max_100_risk'] = C1_2_max_100
-        context['C4_2_max_100_risk'] = C1_2_max_100
-        # 100мм 3 м/с
-        context['C1_3_max_100_risk'] = C1_3_max_100
-        context['C2_3_max_100_risk'] = C1_3_max_100
-        context['C3_3_max_100_risk'] = C1_3_max_100
-        context['C4_3_max_100_risk'] = C1_3_max_100
+        # 10мм 1 м/с
+        context['C1_1_max_10_risk'] = C1_1_max_10
+        context['C2_1_max_10_risk'] = C1_1_max_10
+        context['C3_1_max_10_risk'] = C1_1_max_10
+        context['C4_1_max_10_risk'] = C1_1_max_10
+        # 10мм 2 м/с
+        context['C1_2_max_10_risk'] = C1_2_max_10
+        context['C2_2_max_10_risk'] = C1_2_max_10
+        context['C3_2_max_10_risk'] = C1_2_max_10
+        context['C4_2_max_10_risk'] = C1_2_max_10
+        # 10мм 3 м/с
+        context['C1_3_max_10_risk'] = C1_3_max_10
+        context['C2_3_max_10_risk'] = C1_3_max_10
+        context['C3_3_max_10_risk'] = C1_3_max_10
+        context['C4_3_max_10_risk'] = C1_3_max_10
         # Т=20 С
-        # 100мм 1 м/с
-        context['C1_1_20_100_risk'] = C1_1_20_100
-        context['C2_1_20_100_risk'] = C1_1_20_100
-        context['C3_1_20_100_risk'] = C1_1_20_100
-        context['C4_1_20_100_risk'] = C1_1_20_100
-        # 100мм 2 м/с
-        context['C1_2_20_100_risk'] = C1_2_20_100
-        context['C2_2_20_100_risk'] = C1_2_20_100
-        context['C3_2_20_100_risk'] = C1_2_20_100
-        context['C4_2_20_100_risk'] = C1_2_20_100
-        # 100мм 3 м/с
-        context['C1_3_20_100_risk'] = C1_3_20_100
-        context['C2_3_20_100_risk'] = C1_3_20_100
-        context['C3_3_20_100_risk'] = C1_3_20_100
-        context['C4_3_20_100_risk'] = C1_3_20_100
+        # 10мм 1 м/с
+        context['C1_1_20_10_risk'] = C1_1_20_10
+        context['C2_1_20_10_risk'] = C1_1_20_10
+        context['C3_1_20_10_risk'] = C1_1_20_10
+        context['C4_1_20_10_risk'] = C1_1_20_10
+        # 10мм 2 м/с
+        context['C1_2_20_10_risk'] = C1_2_20_10
+        context['C2_2_20_10_risk'] = C1_2_20_10
+        context['C3_2_20_10_risk'] = C1_2_20_10
+        context['C4_2_20_10_risk'] = C1_2_20_10
+        # 10мм 3 м/с
+        context['C1_3_20_10_risk'] = C1_3_20_10
+        context['C2_3_20_10_risk'] = C1_3_20_10
+        context['C3_3_20_10_risk'] = C1_3_20_10
+        context['C4_3_20_10_risk'] = C1_3_20_10
         # Т=10 С
-        # 100мм 1 м/с
-        context['C1_1_10_100_risk'] = C1_1_10_100
-        context['C2_1_10_100_risk'] = C1_1_10_100
-        context['C3_1_10_100_risk'] = C1_1_10_100
-        context['C4_1_10_100_risk'] = C1_1_10_100
-        # 100мм 2 м/с
-        context['C1_2_10_100_risk'] = C1_2_10_100
-        context['C2_2_10_100_risk'] = C1_2_10_100
-        context['C3_2_10_100_risk'] = C1_2_10_100
-        context['C4_2_10_100_risk'] = C1_2_10_100
-        # 100мм 3 м/с
-        context['C1_3_10_100_risk'] = C1_3_10_100
-        context['C2_3_10_100_risk'] = C1_3_10_100
-        context['C3_3_10_100_risk'] = C1_3_10_100
-        context['C4_3_10_100_risk'] = C1_3_10_100
-        # Т=30 С
-        # 50мм 1 м/с
-        context['C1_1_max_50_risk'] = C1_1_max_50
-        context['C2_1_max_50_risk'] = C1_1_max_50
-        context['C3_1_max_50_risk'] = C1_1_max_50
-        context['C4_1_max_50_risk'] = C1_1_max_50
-        # 50мм 2 м/с
-        context['C1_2_max_50_risk'] = C1_2_max_50
-        context['C2_2_max_50_risk'] = C1_2_max_50
-        context['C3_2_max_50_risk'] = C1_2_max_50
-        context['C4_2_max_50_risk'] = C1_2_max_50
-        # 50мм 3 м/с
-        context['C1_3_max_50_risk'] = C1_3_max_50
-        context['C2_3_max_50_risk'] = C1_3_max_50
-        context['C3_3_max_50_risk'] = C1_3_max_50
-        context['C4_3_max_50_risk'] = C1_3_max_50
-        # Т=20 С
-        # 50мм 1 м/с
-        context['C1_1_20_50_risk'] = C1_1_20_50
-        context['C2_1_20_50_risk'] = C1_1_20_50
-        context['C3_1_20_50_risk'] = C1_1_20_50
-        context['C4_1_20_50_risk'] = C1_1_20_50
-        # 50мм 2 м/с
-        context['C1_2_20_50_risk'] = C1_2_20_50
-        context['C2_2_20_50_risk'] = C1_2_20_50
-        context['C3_2_20_50_risk'] = C1_2_20_50
-        context['C4_2_20_50_risk'] = C1_2_20_50
-        # 50мм 3 м/с
-        context['C1_3_20_50_risk'] = C1_3_20_50
-        context['C2_3_20_50_risk'] = C1_3_20_50
-        context['C3_3_20_50_risk'] = C1_3_20_50
-        context['C4_3_20_50_risk'] = C1_3_20_50
-        # Т=10 С
-        # 50мм 1 м/с
-        context['C1_1_10_50_risk'] = C1_1_10_50
-        context['C2_1_10_50_risk'] = C1_1_10_50
-        context['C3_1_10_50_risk'] = C1_1_10_50
-        context['C4_1_10_50_risk'] = C1_1_10_50
-        # 50мм 2 м/с
-        context['C1_2_10_50_risk'] = C1_2_10_50
-        context['C2_2_10_50_risk'] = C1_2_10_50
-        context['C3_2_10_50_risk'] = C1_2_10_50
-        context['C4_2_10_50_risk'] = C1_2_10_50
-        # 100мм 3 м/с
-        context['C1_3_10_50_risk'] = C1_3_10_50
-        context['C2_3_10_50_risk'] = C1_3_10_50
-        context['C3_3_10_50_risk'] = C1_3_10_50
-        context['C4_3_10_50_risk'] = C1_3_10_50
-        # Т=30 С
-        # 25мм 1 м/с
-        context['C1_1_max_25_risk'] = C1_1_max_25
-        context['C2_1_max_25_risk'] = C1_1_max_25
-        context['C3_1_max_25_risk'] = C1_1_max_25
-        context['C4_1_max_25_risk'] = C1_1_max_25
-        # 25мм 2 м/с
-        context['C1_2_max_25_risk'] = C1_2_max_25
-        context['C2_2_max_25_risk'] = C1_2_max_25
-        context['C3_2_max_25_risk'] = C1_2_max_25
-        context['C4_2_max_25_risk'] = C1_2_max_25
-        # 25мм 3 м/с
-        context['C1_3_max_25_risk'] = C1_3_max_25
-        context['C2_3_max_25_risk'] = C1_3_max_25
-        context['C3_3_max_25_risk'] = C1_3_max_25
-        context['C4_3_max_25_risk'] = C1_3_max_25
-        # Т=20 С
-        # 25мм 1 м/с
-        context['C1_1_20_25_risk'] = C1_1_20_25
-        context['C2_1_20_25_risk'] = C1_1_20_25
-        context['C3_1_20_25_risk'] = C1_1_20_25
-        context['C4_1_20_25_risk'] = C1_1_20_25
-        # 25мм 2 м/с
-        context['C1_2_20_25_risk'] = C1_2_20_25
-        context['C2_2_20_25_risk'] = C1_2_20_25
-        context['C3_2_20_25_risk'] = C1_2_20_25
-        context['C4_2_20_25_risk'] = C1_2_20_25
-        # 25мм 3 м/с
-        context['C1_3_20_25_risk'] = C1_3_20_25
-        context['C2_3_20_25_risk'] = C1_3_20_25
-        context['C3_3_20_25_risk'] = C1_3_20_25
-        context['C4_3_20_25_risk'] = C1_3_20_25
-        # Т=10 С
-        # 25мм 1 м/с
-        context['C1_1_10_25_risk'] = C1_1_10_25
-        context['C2_1_10_25_risk'] = C1_1_10_25
-        context['C3_1_10_25_risk'] = C1_1_10_25
-        context['C4_1_10_25_risk'] = C1_1_10_25
-        # 25мм 2 м/с
-        context['C1_2_10_25_risk'] = C1_2_10_25
-        context['C2_2_10_25_risk'] = C1_2_10_25
-        context['C3_2_10_25_risk'] = C1_2_10_25
-        context['C4_2_10_25_risk'] = C1_2_10_25
-        # 25мм 3 м/с
-        context['C1_3_10_25_risk'] = C1_3_10_25
-        context['C2_3_10_25_risk'] = C1_3_10_25
-        context['C3_3_10_25_risk'] = C1_3_10_25
-        context['C4_3_10_25_risk'] = C1_3_10_25
+        # 10мм 1 м/с
+        context['C1_1_10_10_risk'] = C1_1_10_10
+        context['C2_1_10_10_risk'] = C1_1_10_10
+        context['C3_1_10_10_risk'] = C1_1_10_10
+        context['C4_1_10_10_risk'] = C1_1_10_10
+        # 10мм 2 м/с
+        context['C1_2_10_10_risk'] = C1_2_10_10
+        context['C2_2_10_10_risk'] = C1_2_10_10
+        context['C3_2_10_10_risk'] = C1_2_10_10
+        context['C4_2_10_10_risk'] = C1_2_10_10
+        # 10мм 3 м/с
+        context['C1_3_10_10_risk'] = C1_3_10_10
+        context['C2_3_10_10_risk'] = C1_3_10_10
+        context['C3_3_10_10_risk'] = C1_3_10_10
+        context['C4_3_10_10_risk'] = C1_3_10_10
 
         # Индивидуальный и коллективный риск
         risk = self.__calc_ind_risk(all_table_data)
@@ -905,11 +609,11 @@ class Report:
         context['fg'] = InlineImage(doc, f'{self.path_template}\\report\\templates\\fg.jpg', width=Mm(160))
 
         context['most_dangerous'] = self.__most_dangerous(C1_1_max)
-        context['most_possible'] = self.__most_possible(C1_3_10_25)
+        context['most_possible'] = self.__most_possible(C1_3_10_10)
 
         doc.render(context)
         text = str(int(time.time()))
-        doc.save(f'{DESKTOP_PATH}\\{text}_{project_info["Project_code"]}_all_table.docx')
+        doc.save(f'{DESKTOP_PATH}\\{text}_{project_info["Project_code"]}_all_table_rtn.docx')
 
     def __save_fn_fg_chart(self, data: list):
         pr = []  # вероятности
@@ -953,7 +657,7 @@ class Report:
                 frequency = item['Frequency_C4']
                 dmg = item['Dsum_C4']
 
-        str_ = f'''наиболее вероятным сценарием является сценарий частичной разгерметизации С4_3_10град_25 для обрудования (диаметр деффектного отверстия 25 мм): {dev.split()[0].replace(',', '')} с вероятностью возникновения {frequency} 1/год при метеоусловиях:  скорость ветра 3 м/с, температура воздуха воздуха 10 град.С. Ущерб при реализации данного сценария составляет: {dmg} млн.руб'''
+        str_ = f'''наиболее вероятным сценарием является сценарий частичной разгерметизации С4_3_10град_част для обрудования (диаметр деффектного отверстия 10 мм, при длительном истечении): {dev.split()[0].replace(',', '')} с вероятностью возникновения {frequency} 1/год при метеоусловиях:  скорость ветра 3 м/с, температура воздуха воздуха 10 град.С. Ущерб при реализации данного сценария составляет: {dmg} млн.руб'''
         return str_
 
     def __most_dangerous(self, data: list):
@@ -1005,7 +709,7 @@ class Report:
             dev_dict['Sigma'] = float(sub['Sigma'].replace(",", "."))
             dev_dict['Steam_pressure'] = float(sub['Steam_pressure'].replace(",", "."))
             dev_dict['Boiling_temperature'] = float(sub['Boiling_temperature'].replace(",", "."))
-            dev_dict['Type_device'] = 0 if float(item['Pressure'])>0.15 else 1
+            dev_dict['Type_device'] = item['Type_device']
             dev_dict['Death_person'] = int(item['Death_person'])
             dev_dict['Injured_person'] = int(item['Injured_person'])
             dev_dict['View_space'] = int(item['View_space'])
@@ -1100,9 +804,7 @@ class Report:
         :param characteristics: характеристики оборудования и вещества в нем
         :param type_hole: тип разгерметизации
                             0 - полная
-                            1 - 100 мм
-                            2 - 50 мм
-                            3 - 25 мм
+                            1 - 10мм продолжительный выброс
 
         :return: список словарей с характеристиками оборудования и испарившейся массы
         """
@@ -1118,7 +820,7 @@ class Report:
             steam_pressure = steam_arr[wind_index][temperature_index]
             item['Steam_pressure'] = steam_pressure  # заменим давление пара на расчетное
             # Определим коэф.участия в зависимости от типа разгерметизации
-            k = (1, 0.9, 0.8, 0.6)
+            k = (1, 0.45)
             item['Emergency_weight'] = round(
                 (item['Quantity'] + (item['Flow'] * CUT_OFF_TIME) / (DAY_TO_HOUR * HOUR_TO_SECONDS)) * k[
                     type_hole] * TONN_TO_KG, 2)
@@ -1138,15 +840,13 @@ class Report:
             wind_speed, temperature, _, _ = weather.Weather.get_statistic_weather(
                 self.object_info['Address_opo'].split()[0])
             if item['Type_device'] == -1:
-                probability = pr.Probability().probability_mchs_tube(
+                probability = pr.Probability().probability_rosteh_tube(
                     int(float(item['Length'].replace(",", ".")) * KM_TO_M),
                     int(item['Diameter'].replace(",", ".")))
             else:
-                probability = pr.Probability().probability_mchs_device(
-                    0 if float(item['Pressure'].replace(",", ".")) else 1)
+                probability = pr.Probability().probability_rosteh_device(int(item['Type_device']))
 
-            poz_ = 4 - type_hole
-            chance = float(probability[poz_]) * wind_speed[wind_index] * temperature[temperature_index]
+            chance = float(probability[type_hole]) * wind_speed[wind_index] * temperature[temperature_index]
             tree_arr = tree.Event_tree.mchs_liquid(float(item['Flash_temperature']), item['Flow'], chance)
 
             item['Frequency_C1'] = tree_arr[0]
@@ -1180,19 +880,13 @@ class Report:
             # 6. Расчитаем погибших и пострадавших
 
             tuple_dead_people = (
-                (item['Death_person'], item['Death_person'], 0, 0, 0),
-                (item['Death_person'], item['Death_person'], 0, 0, 0),
-                (0, 0, 0, 0, 0),
-                (0, 0, 0, 0, 0),
-                (0, 0, 0, 0, 0)
+                (item['Death_person'], 0),
+                (0, 0)
             )[type_hole]
 
             tuple_injured_people = (
-                (item['Injured_person'], item['Injured_person'], 1, 1, 1),
-                (item['Injured_person'], item['Injured_person'], 1, 1, 1),
-                (1, 1, 1, 1, 1),
-                (1, 1, 1, 1, 1),
-                (0, 0, 0, 0, 0)
+                (item['Injured_person'], 1),
+                (1, 1)
             )[type_hole]
 
             item['Death_person_C1'] = tuple_dead_people[type_hole]
