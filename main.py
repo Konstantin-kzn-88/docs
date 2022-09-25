@@ -1,6 +1,6 @@
 import sys
 import os
-import re
+
 from pathlib import Path
 from PySide2.QtSql import QSqlDatabase, QSqlQuery, QSqlRelationalTableModel, QSqlRelation
 from PySide2.QtWidgets import QApplication, QMainWindow, QComboBox, QMessageBox, QWidget, QGridLayout, \
@@ -10,6 +10,8 @@ from PySide2.QtGui import QIcon
 from PySide2.QtCore import Qt
 from itertools import count
 from pprint import pprint
+from report import report_word_rtn
+from report import report_word
 
 db = QSqlDatabase.addDatabase("QMYSQL")
 db.setHostName("server167.hosting.reg.ru")
@@ -505,7 +507,7 @@ class MainWindow(QMainWindow):
         query = QSqlQuery(f'SELECT * FROM Devices WHERE ProjectsId = {project_info["Id"]}')
         while query.next():
             dict_dev = {}
-            for i in range(len(self.field_dict_in_db['Devices'])+1):
+            for i in range(len(self.field_dict_in_db['Devices']) + 1):
                 if i == 0:
                     dict_dev['Id'] = query.value(i)
                 else:
@@ -517,7 +519,7 @@ class MainWindow(QMainWindow):
         query = QSqlQuery(f'SELECT * FROM Pipelines WHERE ProjectsId = {project_info["Id"]}')
         while query.next():
             dict_pipe = {}
-            for i in range(len(self.field_dict_in_db['Pipelines'])+1):
+            for i in range(len(self.field_dict_in_db['Pipelines']) + 1):
                 if i == 0:
                     dict_pipe['Id'] = query.value(i)
                 else:
@@ -528,7 +530,7 @@ class MainWindow(QMainWindow):
         query = QSqlQuery(f'SELECT * FROM Substances')
         while query.next():
             dict_sub = {}
-            for i in range(len(self.field_dict_in_db['Substances'])+1):
+            for i in range(len(self.field_dict_in_db['Substances']) + 1):
                 if i == 0:
                     dict_sub['Id'] = query.value(i)
                 else:
@@ -536,6 +538,9 @@ class MainWindow(QMainWindow):
             sub_info.append(dict_sub)
         pprint(sub_info)
         query.exec_()
+        #  Отчеты по таблицам
+        report_word_rtn.Report(project_info, object_info, org_info, doc_info, dev_info, pipe_info, sub_info).all_table()
+        report_word.Report(project_info, object_info, org_info, doc_info, dev_info, pipe_info, sub_info).all_table()
 
     def set_ico(self):
         path_ico = str(Path(os.getcwd()))
