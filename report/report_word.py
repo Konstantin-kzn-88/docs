@@ -28,7 +28,19 @@ DAY_TO_HOUR = 24  # 1сут = 1*DAY_TO_HOUR = 24 ч
 
 class Report:
     def __init__(self, project_info: dict, object_info: dict, org_info: dict, doc_info: dict, dev_info: list,
-                 pipe_info: list, sub_info: list):
+                 pipe_info: list, sub_info: list, sender_call: int):
+        """
+        Класс отчета
+        :param project_info: словарь данных проекта
+        :param object_info: словарь данных объекта
+        :param org_info: словарь данных организации
+        :param doc_info: словарь данных томов
+        :param dev_info: словарь данных оборудования
+        :param pipe_info: словарь данных трубопроводов
+        :param sub_info: словарь данных веществ
+        :param sender_call: номер вызова, определяет то какой шаблон заполнять
+        0 - общий шаблон с таблицами МЧС
+        """
         self.project_info = project_info
         self.object_info = object_info
         self.org_info = org_info
@@ -36,10 +48,14 @@ class Report:
         self.dev_info = dev_info
         self.pipe_info = pipe_info
         self.sub_info = sub_info
+        self.sender_call = sender_call
 
     def all_table(self):
         self.path_template = Path(__file__).parents[1]
-        doc = DocxTemplate(f'{self.path_template}\\report\\templates\\all_table.docx')
+        if self.sender_call == 0:
+            doc = DocxTemplate(f'{self.path_template}\\report\\templates\\all_table.docx')
+        else:
+            doc = DocxTemplate(f'{self.path_template}\\report\\templates\\all_table.docx')
         context = {}
         context.update(self.org_info)
         context.update(self.object_info)

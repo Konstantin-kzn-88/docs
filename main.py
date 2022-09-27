@@ -190,7 +190,7 @@ class MainWindow(QMainWindow):
         doc_menu = QMenu('Разделы', self)
         doc_menu.setIcon(self.word_ico)
         doc_prom_bez = QAction(self.book_ico, 'Декларация ПБ', self)
-        # doc_prom_bez.triggered.connect(self.add_data_in_db)
+        doc_prom_bez.triggered.connect(self.get_report_table)
         doc_menu.addAction(doc_prom_bez)
         doc_gochs = QAction(self.book_ico, 'ПМ ГОЧС', self)
         # doc_gochs.triggered.connect(self.add_data_in_db)
@@ -445,7 +445,6 @@ class MainWindow(QMainWindow):
     # Отчеты
     # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
     def get_report_table(self):
-
         # 1. Вызываем диалог добавления
         get_report_dialog = Get_report()
         # 1.1. Получаем ответ от Диалога
@@ -539,8 +538,16 @@ class MainWindow(QMainWindow):
         pprint(sub_info)
         query.exec_()
         #  Отчеты по таблицам
-        report_word_rtn.Report(project_info, object_info, org_info, doc_info, dev_info, pipe_info, sub_info).all_table()
-        report_word.Report(project_info, object_info, org_info, doc_info, dev_info, pipe_info, sub_info).all_table()
+        sender = self.sender()
+        if sender.text() == 'Сводный отчет':
+            report_word_rtn.Report(project_info, object_info, org_info, doc_info, dev_info, pipe_info,
+                                   sub_info, sender_call=0).all_table()
+            report_word.Report(project_info, object_info, org_info, doc_info, dev_info, pipe_info, sub_info,
+                               sender_call=0).all_table()
+        elif sender.text() == 'Декларация ПБ':
+            print('1111')
+            report_word_rtn.Report(project_info, object_info, org_info, doc_info, dev_info, pipe_info,
+                                   sub_info, sender_call=1).all_table()
 
     def set_ico(self):
         path_ico = str(Path(os.getcwd()))

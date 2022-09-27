@@ -28,7 +28,20 @@ DAY_TO_HOUR = 24  # 1сут = 1*DAY_TO_HOUR = 24 ч
 
 class Report:
     def __init__(self, project_info: dict, object_info: dict, org_info: dict, doc_info: dict, dev_info: list,
-                 pipe_info: list, sub_info: list):
+                 pipe_info: list, sub_info: list, sender_call: int):
+        """
+        Класс отчета
+        :param project_info: словарь данных проекта
+        :param object_info: словарь данных объекта
+        :param org_info: словарь данных организации
+        :param doc_info: словарь данных томов
+        :param dev_info: словарь данных оборудования
+        :param pipe_info: словарь данных трубопроводов
+        :param sub_info: словарь данных веществ
+        :param sender_call: номер вызова, определяет то какой шаблон заполнять
+        0 - общий шаблон с таблицами РТН
+        1 - декларация промышленной безопасности
+        """
         self.project_info = project_info
         self.object_info = object_info
         self.org_info = org_info
@@ -36,10 +49,11 @@ class Report:
         self.dev_info = dev_info
         self.pipe_info = pipe_info
         self.sub_info = sub_info
+        self.sender_call = sender_call
 
     def all_table(self):
         self.path_template = Path(__file__).parents[1]
-        doc = DocxTemplate(f'{self.path_template}\\report\\templates\\all_table_rtn.docx')
+
         context = {}
         context.update(self.org_info)
         context.update(self.object_info)
@@ -402,17 +416,47 @@ class Report:
         risk = self.__calc_ind_risk(all_table_data)
         context['Ind_risk'] = "{:.2e}".format(risk[0])
         context['Group_risk'] = "{:.2e}".format(risk[1])
-
-        # FN FG диаграммы
-        context['fn'] = InlineImage(doc, f'{self.path_template}\\report\\templates\\fn.jpg', width=Mm(160))
-        context['fg'] = InlineImage(doc, f'{self.path_template}\\report\\templates\\fg.jpg', width=Mm(160))
-
+        # Наиболее опасные и вероятные
         context['most_dangerous'] = self.__most_dangerous(C1_1_max)
         context['most_possible'] = self.__most_possible(C1_3_10_10)
 
-        doc.render(context)
-        text = str(int(time.time()))
-        doc.save(f'{DESKTOP_PATH}\\{text}_{self.project_info["Project_code"]}_all_table_rtn.docx')
+
+        if self.sender_call == 0:
+            doc = DocxTemplate(f'{self.path_template}\\report\\templates\\all_table_rtn.docx')
+            # FN FG диаграммы
+            context['fn'] = InlineImage(doc, f'{self.path_template}\\report\\templates\\fn.jpg', width=Mm(160))
+            context['fg'] = InlineImage(doc, f'{self.path_template}\\report\\templates\\fg.jpg', width=Mm(160))
+            # Заполним из словаря
+            doc.render(context)
+            text = str(int(time.time()))
+            # Сохраним
+            doc.save(f'{DESKTOP_PATH}\\{text}_{self.project_info["Project_code"]}_all_table_rtn.docx')
+        elif self.sender_call == 1:
+            print('ddsf')
+            rpz = DocxTemplate(f'{self.path_template}\\report\\templates\\temp_rpz.docx')
+            # FN FG диаграммы
+            context['fn'] = InlineImage(rpz, f'{self.path_template}\\report\\templates\\fn.jpg', width=Mm(160))
+            context['fg'] = InlineImage(rpz, f'{self.path_template}\\report\\templates\\fg.jpg', width=Mm(160))
+            # Заполним из словаря
+            rpz.render(context)
+            text = str(int(time.time()))
+            # Сохраним
+            rpz.save(f'{DESKTOP_PATH}\\{text}_{self.project_info["Project_code"]}_rpz.docx')
+        else:
+            doc = DocxTemplate(f'{self.path_template}\\report\\templates\\all_table_rtn.docx')
+            # FN FG диаграммы
+            context['fn'] = InlineImage(doc, f'{self.path_template}\\report\\templates\\fn.jpg', width=Mm(160))
+            context['fg'] = InlineImage(doc, f'{self.path_template}\\report\\templates\\fg.jpg', width=Mm(160))
+            # Заполним из словаря
+            doc.render(context)
+            text = str(int(time.time()))
+            # Сохраним
+            doc.save(f'{DESKTOP_PATH}\\{text}_{self.project_info["Project_code"]}_all_table_rtn.docx')
+
+
+
+
+
 
     def __save_fn_fg_chart(self, data: list):
         pr = []  # вероятности
@@ -638,6 +682,9 @@ class Report:
             # 2. Определим сценарии аварии
             wind_speed, temperature, _, _ = weather.Weather.get_statistic_weather(
                 self.object_info['Address_opo'].split()[0])
+
+
+
             if item['Type_device'] == -1:
                 probability = pr.Probability().probability_rosteh_tube(
                     int(float(item['Length'].replace(",", ".")) * KM_TO_M),
