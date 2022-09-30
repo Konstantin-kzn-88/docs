@@ -1,4 +1,5 @@
 from docxtpl import DocxTemplate, InlineImage
+import datetime
 from docx.shared import Mm
 from pathlib import Path
 import time
@@ -61,6 +62,7 @@ class Report:
         context.update(self.object_info)
         context.update(self.project_info)
         context.update(self.doc_info)
+        context['year'] = datetime.date.today().year
         # Таблица с оборудованием
         context['dev_table'] = self.dev_info
         context['pipe_table'] = self.pipe_info
