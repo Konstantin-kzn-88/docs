@@ -434,7 +434,7 @@ class Report:
             # Сохраним
             doc.save(f'{DESKTOP_PATH}\\{text}_{self.project_info["Project_code"]}_all_table_rtn.docx')
         elif self.sender_call == 1:
-            print('ddsf')
+            # РПЗ
             rpz = DocxTemplate(f'{self.path_template}\\report\\templates\\temp_rpz.docx')
             # FN FG диаграммы
             context['fn'] = InlineImage(rpz, f'{self.path_template}\\report\\templates\\fn.jpg', width=Mm(160))
@@ -444,6 +444,16 @@ class Report:
             text = str(int(time.time()))
             # Сохраним
             rpz.save(f'{DESKTOP_PATH}\\{text}_{self.project_info["Project_code"]}_rpz.docx')
+            # ДПБ
+            dpb = DocxTemplate(f'{self.path_template}\\report\\templates\\temp_dpb.docx')
+            # FN FG диаграммы
+            context['fn'] = InlineImage(dpb, f'{self.path_template}\\report\\templates\\fn.jpg', width=Mm(160))
+            context['fg'] = InlineImage(dpb, f'{self.path_template}\\report\\templates\\fg.jpg', width=Mm(160))
+            # Заполним из словаря
+            dpb.render(context)
+            text = str(int(time.time()))
+            # Сохраним
+            dpb.save(f'{DESKTOP_PATH}\\{text}_{self.project_info["Project_code"]}_dpb.docx')
         else:
             doc = DocxTemplate(f'{self.path_template}\\report\\templates\\all_table_rtn.docx')
             # FN FG диаграммы
