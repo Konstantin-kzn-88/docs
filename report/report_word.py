@@ -53,10 +53,7 @@ class Report:
 
     def all_table(self):
         self.path_template = Path(__file__).parents[1]
-        if self.sender_call == 0:
-            doc = DocxTemplate(f'{self.path_template}\\report\\templates\\all_table.docx')
-        else:
-            doc = DocxTemplate(f'{self.path_template}\\report\\templates\\all_table.docx')
+
         context = {}
         context.update(self.org_info)
         context.update(self.object_info)
@@ -717,16 +714,22 @@ class Report:
         context['Ind_risk'] = "{:.2e}".format(risk[0])
         context['Group_risk'] = "{:.2e}".format(risk[1])
 
-        # FN FG диаграммы
-        context['fn'] = InlineImage(doc, f'{self.path_template}\\report\\templates\\fn.jpg', width=Mm(160))
-        context['fg'] = InlineImage(doc, f'{self.path_template}\\report\\templates\\fg.jpg', width=Mm(160))
-
         context['most_dangerous'] = self.__most_dangerous(C1_1_max)
         context['most_possible'] = self.__most_possible(C1_3_10_25)
 
-        doc.render(context)
         text = str(int(time.time()))
-        doc.save(f'{DESKTOP_PATH}\\{text}_{self.project_info["Project_code"]}_all_table.docx')
+        if self.sender_call == 0:
+            doc = DocxTemplate(f'{self.path_template}\\report\\templates\\all_table.docx')
+            # FN FG диаграммы
+            context['fn'] = InlineImage(doc, f'{self.path_template}\\report\\templates\\fn.jpg', width=Mm(160))
+            context['fg'] = InlineImage(doc, f'{self.path_template}\\report\\templates\\fg.jpg', width=Mm(160))
+            doc.render(context)
+            doc.save(f'{DESKTOP_PATH}\\{text}_{self.project_info["Project_code"]}_all_table.docx')
+        if self.sender_call == 1:
+            # Пожарный риск
+            doc = DocxTemplate(f'{self.path_template}\\report\\templates\\temp_pozh_risk.docx')
+            doc.render(context)
+            doc.save(f'{DESKTOP_PATH}\\{text}_{self.project_info["Project_code"]}_pozh_risk.docx')
 
     def __save_fn_fg_chart(self, data: list):
         pr = []  # вероятности

@@ -223,6 +223,9 @@ class MainWindow(QMainWindow):
         doc_pb = QAction(self.book_ico, 'Пожарная безопасность', self)
         # doc_pb.triggered.connect(self.add_data_in_db)
         doc_menu.addAction(doc_pb)
+        doc_pozh_risk = QAction(self.book_ico, 'Пожарный риск', self)
+        doc_pozh_risk.triggered.connect(self.get_report_table)
+        doc_menu.addAction(doc_pozh_risk)
         # 2.3. Расчет
         calc_menu = QMenu('Расчет', self)
         calc_menu.setIcon(self.calc_ico)
@@ -564,25 +567,27 @@ class MainWindow(QMainWindow):
         query.exec_()
         #  Отчеты по таблицам
         sender = self.sender()
-        if sender.text() == 'Сводный отчет':
 
-            report_word_rtn.TIME_EVAPORATION = self.time_evaporation.value()
-            report_word_rtn.CUT_OFF_TIME = self.cut_time.value()
-            report_word_rtn.LAYER_THICKNESS = self.layer_thickness.value()
+        report_word_rtn.TIME_EVAPORATION = self.time_evaporation.value()
+        report_word_rtn.CUT_OFF_TIME = self.cut_time.value()
+        report_word_rtn.LAYER_THICKNESS = self.layer_thickness.value()
+
+        report_word.TIME_EVAPORATION = self.time_evaporation.value()
+        report_word.CUT_OFF_TIME = self.cut_time.value()
+        report_word.LAYER_THICKNESS = self.layer_thickness.value()
+
+        if sender.text() == 'Сводный отчет':
             report_word_rtn.Report(project_info, object_info, org_info, doc_info, dev_info, pipe_info,
                                    sub_info, sender_call=0).all_table()
 
-            report_word.TIME_EVAPORATION = self.time_evaporation.value()
-            report_word.CUT_OFF_TIME = self.cut_time.value()
-            report_word.LAYER_THICKNESS = self.layer_thickness.value()
             report_word.Report(project_info, object_info, org_info, doc_info, dev_info, pipe_info, sub_info,
                                sender_call=0).all_table()
         elif sender.text() == 'Декларация ПБ':
-            report_word_rtn.TIME_EVAPORATION = self.time_evaporation.value()
-            report_word_rtn.CUT_OFF_TIME = self.cut_time.value()
-            report_word_rtn.LAYER_THICKNESS = self.layer_thickness.value()
             report_word_rtn.Report(project_info, object_info, org_info, doc_info, dev_info, pipe_info,
                                    sub_info, sender_call=1).all_table()
+        elif sender.text() == 'Пожарный риск':
+            report_word.Report(project_info, object_info, org_info, doc_info, dev_info, pipe_info,
+                               sub_info, sender_call=1).all_table()
 
     def set_ico(self):
         path_ico = str(Path(os.getcwd()))
