@@ -1,12 +1,7 @@
-# a, b, c = map(int, input().split())
+CONST = 2
 
-a = int(input())
-b = int(input())
-c = int(input())
-
-if a > b and a > c:
-    print(a)
-elif b > a and b > c:
-    print(b)
-else:
-    print(c)
+class my_pow:
+    def __init__(self, var: int):
+        self.var = var
+    def var_in_pow(self):
+        return pow(self.var, CONST)

@@ -5,7 +5,8 @@ from pathlib import Path
 from PySide2.QtSql import QSqlDatabase, QSqlQuery, QSqlRelationalTableModel, QSqlRelation
 from PySide2.QtWidgets import QApplication, QMainWindow, QComboBox, QMessageBox, QWidget, QGridLayout, \
     QFormLayout, QGroupBox, QTableView, QStyleFactory, QStyledItemDelegate, QHeaderView, QMenu, QAction, QDialog, \
-    QDialogButtonBox, QLineEdit, QPushButton, QHBoxLayout, QVBoxLayout, QTableWidget, QTableWidgetItem, QLabel
+    QDialogButtonBox, QLineEdit, QPushButton, QHBoxLayout, QVBoxLayout, QTableWidget, QTableWidgetItem, QLabel, \
+    QSpinBox
 from PySide2.QtGui import QIcon
 from PySide2.QtCore import Qt
 from itertools import count
@@ -115,19 +116,36 @@ class MainWindow(QMainWindow):
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         # Рамка
         layout_select = QFormLayout(self)
-        GB_select = QGroupBox('Таблицы и поиск')
+        GB_select = QGroupBox('Настройки')
         GB_select.setStyleSheet("QGroupBox { font-weight : bold; }")
+
         self.select_table = QComboBox()
         self.select_table.addItems(self.table_list)
         for count, value in enumerate(self.list_ico):
             self.select_table.setItemIcon(count, value)
         self.select_table.currentIndexChanged.connect(self.show_table)
+
         self.search_line_edit = QLineEdit()
-        self.search_line_edit.setPlaceholderText("Введите строку для поиска")
+        self.search_line_edit.setPlaceholderText("Поиск...")
         self.search_line_edit.setToolTip("Подсказка для поиска")
         self.search_line_edit.textChanged.connect(self.__update_filter)
+
+        self.layer_thickness = QSpinBox()
+        self.layer_thickness.setRange(5, 150)
+        self.layer_thickness.setSingleStep(5)
+        self.layer_thickness.setSuffix(" (1/м)")
+        self.layer_thickness.setToolTip("Толщина свободного пролива")
+
+        self.time_evaporation = QSpinBox()
+        self.time_evaporation.setRange(900, 3600)
+        self.time_evaporation.setSingleStep(100)
+        self.time_evaporation.setSuffix(" (сек)")
+        self.time_evaporation.setToolTip("Время испарения опасного вещества")
+
         layout_select.addRow("", self.select_table)
         layout_select.addRow("", self.search_line_edit)
+        layout_select.addRow("", self.layer_thickness)
+        layout_select.addRow("", self.time_evaporation)
         GB_select.setLayout(layout_select)
 
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
@@ -540,12 +558,19 @@ class MainWindow(QMainWindow):
         #  Отчеты по таблицам
         sender = self.sender()
         if sender.text() == 'Сводный отчет':
+
+            report_word_rtn.TIME_EVAPORATION = self.time_evaporation.value()
+            report_word_rtn.LAYER_THICKNESS = self.layer_thickness.value()
             report_word_rtn.Report(project_info, object_info, org_info, doc_info, dev_info, pipe_info,
                                    sub_info, sender_call=0).all_table()
+
+            report_word.TIME_EVAPORATION = self.time_evaporation.value()
+            report_word.LAYER_THICKNESS = self.layer_thickness.value()
             report_word.Report(project_info, object_info, org_info, doc_info, dev_info, pipe_info, sub_info,
                                sender_call=0).all_table()
         elif sender.text() == 'Декларация ПБ':
-            print('1111')
+            report_word_rtn.TIME_EVAPORATION = self.time_evaporation.value()
+            report_word_rtn.LAYER_THICKNESS = self.layer_thickness.value()
             report_word_rtn.Report(project_info, object_info, org_info, doc_info, dev_info, pipe_info,
                                    sub_info, sender_call=1).all_table()
 
