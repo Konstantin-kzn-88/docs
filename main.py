@@ -136,6 +136,12 @@ class MainWindow(QMainWindow):
         self.layer_thickness.setSuffix(" (1/м)")
         self.layer_thickness.setToolTip("Толщина свободного пролива")
 
+        self.cut_time = QSpinBox()
+        self.cut_time.setRange(0, 24)
+        self.cut_time.setSingleStep(1)
+        self.cut_time.setSuffix(" (час)")
+        self.cut_time.setToolTip("Время отсечения потока")
+
         self.time_evaporation = QSpinBox()
         self.time_evaporation.setRange(900, 3600)
         self.time_evaporation.setSingleStep(100)
@@ -145,6 +151,7 @@ class MainWindow(QMainWindow):
         layout_select.addRow("", self.select_table)
         layout_select.addRow("", self.search_line_edit)
         layout_select.addRow("", self.layer_thickness)
+        layout_select.addRow("", self.cut_time)
         layout_select.addRow("", self.time_evaporation)
         GB_select.setLayout(layout_select)
 
@@ -560,16 +567,19 @@ class MainWindow(QMainWindow):
         if sender.text() == 'Сводный отчет':
 
             report_word_rtn.TIME_EVAPORATION = self.time_evaporation.value()
+            report_word_rtn.CUT_OFF_TIME = self.cut_time.value()
             report_word_rtn.LAYER_THICKNESS = self.layer_thickness.value()
             report_word_rtn.Report(project_info, object_info, org_info, doc_info, dev_info, pipe_info,
                                    sub_info, sender_call=0).all_table()
 
             report_word.TIME_EVAPORATION = self.time_evaporation.value()
+            report_word.CUT_OFF_TIME = self.cut_time.value()
             report_word.LAYER_THICKNESS = self.layer_thickness.value()
             report_word.Report(project_info, object_info, org_info, doc_info, dev_info, pipe_info, sub_info,
                                sender_call=0).all_table()
         elif sender.text() == 'Декларация ПБ':
             report_word_rtn.TIME_EVAPORATION = self.time_evaporation.value()
+            report_word_rtn.CUT_OFF_TIME = self.cut_time.value()
             report_word_rtn.LAYER_THICKNESS = self.layer_thickness.value()
             report_word_rtn.Report(project_info, object_info, org_info, doc_info, dev_info, pipe_info,
                                    sub_info, sender_call=1).all_table()
