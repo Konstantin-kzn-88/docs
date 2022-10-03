@@ -803,6 +803,8 @@ class Report:
             dev_dict = {}
             dev_dict['Locations'] = item['Locations']
             dev_dict['Spill_square'] = float(item['Spill_square'])
+            if dev_dict['Spill_square'] < 10:
+                dev_dict['Spill_square'] = 10
             dev_dict['Flow'] = 0  # допущение что для емкостного оборудования притока нет
             sub = self.__get_sub(sub_info, item['SubId'])
             dev_dict['Poz_sub'] = f"{item['Pozition']}, {sub['Name_sub']}"
@@ -844,9 +846,11 @@ class Report:
             volume = self.__get_volume_pipe(diametr, lenght)
 
             pipe_dict['Flow'] = float(item['Flow'].replace(",", "."))
-            part = (((pipe_dict['Flow'] * CUT_OFF_TIME) * TONN_TO_KG / (DAY_TO_HOUR * HOUR_TO_SECONDS)) / float(
+            part = (((pipe_dict['Flow'] * CUT_OFF_TIME) * TONN_TO_KG) / float(
                 sub['Density'].replace(",", "."))) * LAYER_THICKNESS
             pipe_dict['Spill_square'] = volume * LAYER_THICKNESS + part
+            if pipe_dict['Spill_square'] < 10:
+                pipe_dict['Spill_square'] = 10
             pipe_dict['Quantity'] = round((volume * density) / KG_TO_TONN, 2)  # M, т
             pipe_dict['State'] = 'ж.ф.'
             pipe_dict['Pressure'] = item['Pressure']
@@ -940,8 +944,7 @@ class Report:
             # Определим коэф.участия в зависимости от типа разгерметизации
             k = (1, 0.9, 0.8, 0.6)
             item['Emergency_weight'] = round(
-                (item['Quantity'] + (item['Flow'] * CUT_OFF_TIME) / (DAY_TO_HOUR * HOUR_TO_SECONDS)) * k[
-                    type_hole] * TONN_TO_KG, 2)
+                (item['Quantity'] + item['Flow'] * CUT_OFF_TIME) * k[type_hole] * TONN_TO_KG, 2)
 
             item['Spill_fire'] = int(item['Spill_square'] * k[type_hole])
 
@@ -951,8 +954,8 @@ class Report:
                                                                              item['Spill_fire'])[0]
 
             item['Evaporation'] = (
-                round(evaporation_mass * z, 2) if evaporation_mass / KG_TO_TONN < item['Quantity'] else item[
-                    'Quantity'])
+                round(evaporation_mass * z, 2) if evaporation_mass / KG_TO_TONN < item['Emergency_weight'] else item[
+                    'Emergency_weight'])
 
             # 2. Определим сценарии аварии
             wind_speed, temperature, _, _ = weather.Weather.get_statistic_weather(

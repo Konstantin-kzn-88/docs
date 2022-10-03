@@ -422,7 +422,6 @@ class Report:
         context['most_dangerous'] = self.__most_dangerous(C1_1_max)
         context['most_possible'] = self.__most_possible(C1_3_10_10)
 
-
         if self.sender_call == 0:
             doc = DocxTemplate(f'{self.path_template}\\report\\templates\\all_table_rtn.docx')
             # FN FG диаграммы
@@ -472,11 +471,6 @@ class Report:
             text = str(int(time.time()))
             # Сохраним
             doc.save(f'{DESKTOP_PATH}\\{text}_{self.project_info["Project_code"]}_all_table_rtn.docx')
-
-
-
-
-
 
     def __save_fn_fg_chart(self, data: list):
         pr = []  # вероятности
@@ -550,6 +544,8 @@ class Report:
             dev_dict = {}
             dev_dict['Locations'] = item['Locations']
             dev_dict['Spill_square'] = float(item['Spill_square'])
+            if dev_dict['Spill_square'] < 10:
+                dev_dict['Spill_square'] = 10
             dev_dict['Flow'] = 0  # допущение что для емкостного оборудования притока нет
             sub = self.__get_sub(sub_info, item['SubId'])
             dev_dict['Poz_sub'] = f"{item['Pozition']}, {sub['Name_sub']}"
@@ -591,9 +587,11 @@ class Report:
             volume = self.__get_volume_pipe(diametr, lenght)
 
             pipe_dict['Flow'] = float(item['Flow'].replace(",", "."))
-            part = (((pipe_dict['Flow'] * CUT_OFF_TIME) * TONN_TO_KG / (DAY_TO_HOUR * HOUR_TO_SECONDS)) / float(
+            part = (((pipe_dict['Flow'] * CUT_OFF_TIME) * TONN_TO_KG) / float(
                 sub['Density'].replace(",", "."))) * LAYER_THICKNESS
             pipe_dict['Spill_square'] = volume * LAYER_THICKNESS + part
+            if pipe_dict['Spill_square'] < 10:
+                pipe_dict['Spill_square'] = 10
             pipe_dict['Quantity'] = round((volume * density) / KG_TO_TONN, 2)  # M, т
             pipe_dict['State'] = 'ж.ф.'
             pipe_dict['Pressure'] = item['Pressure']
@@ -634,6 +632,7 @@ class Report:
             if item['Id'] == id:
                 return item
         # Если ничего не нашли, то вернем типовые свойства
+        print('вещество не нашли')
         item = {'Boiling_temperature': '330',
                 'Class_substance': '1',
                 'Cost': '60000',
@@ -685,8 +684,7 @@ class Report:
             # Определим коэф.участия в зависимости от типа разгерметизации
             k = (1, 0.45)
             item['Emergency_weight'] = round(
-                (item['Quantity'] + (item['Flow'] * CUT_OFF_TIME) / (DAY_TO_HOUR * HOUR_TO_SECONDS)) * k[
-                    type_hole] * TONN_TO_KG, 2)
+                (item['Quantity'] + item['Flow'] * CUT_OFF_TIME) * k[type_hole] * TONN_TO_KG, 2)
 
             item['Spill_fire'] = int(item['Spill_square'] * k[type_hole])
 
@@ -696,14 +694,12 @@ class Report:
                                                                              item['Spill_fire'])[0]
 
             item['Evaporation'] = (
-                round(evaporation_mass * z, 2) if evaporation_mass / KG_TO_TONN < item['Quantity'] else item[
-                    'Quantity'])
+                round(evaporation_mass * z, 2) if evaporation_mass / KG_TO_TONN < item['Emergency_weight'] else item[
+                    'Emergency_weight'])
 
             # 2. Определим сценарии аварии
             wind_speed, temperature, _, _ = weather.Weather.get_statistic_weather(
                 self.object_info['Address_opo'].split()[0])
-
-
 
             if item['Type_device'] == -1:
                 probability = pr.Probability().probability_rosteh_tube(
@@ -875,5 +871,3 @@ class Report:
 
 if __name__ == '__main__':
     pass
-
-

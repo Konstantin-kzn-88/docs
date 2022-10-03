@@ -162,7 +162,9 @@ class Explosion:
         radius_array = res_list[0]
 
         for CZA in classified_zone_array:
-            if CZA > delta_p_array[0]:
+            if len(delta_p_array) == 0:
+                radius_CZA.append(0)
+            elif CZA > delta_p_array[0]:
                 radius_CZA.append(0)
             else:
                 ind = delta_p_array.index(get_nearest_value(delta_p_array, CZA))

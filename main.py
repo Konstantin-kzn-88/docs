@@ -137,7 +137,7 @@ class MainWindow(QMainWindow):
         self.layer_thickness.setToolTip("Толщина свободного пролива")
 
         self.cut_time = QSpinBox()
-        self.cut_time.setRange(0, 24)
+        self.cut_time.setRange(0, 48)
         self.cut_time.setSingleStep(1)
         self.cut_time.setSuffix(" (час)")
         self.cut_time.setToolTip("Время отсечения потока")
@@ -498,7 +498,7 @@ class MainWindow(QMainWindow):
                 project_info['Id'] = query.value(i)
             else:
                 project_info[self.field_dict_in_db['Projects'][i - 1]] = query.value(i)
-        pprint(project_info)
+        # pprint(project_info)
         query.exec_()
         # 3. Получим по id  инфу из таблицы Objects
         query = QSqlQuery(f'SELECT * FROM Objects WHERE Id = {project_info["ObjectsId"]}')
@@ -508,7 +508,7 @@ class MainWindow(QMainWindow):
                 object_info['Id'] = query.value(i)
             else:
                 object_info[self.field_dict_in_db['Objects'][i - 1]] = query.value(i)
-        pprint(object_info)
+        # pprint(object_info)
         query.exec_()
         # 3. Получим по id  инфу из таблицы Organizations
         query = QSqlQuery(f'SELECT * FROM Organizations WHERE Id = {object_info["OrganizationId"]}')
@@ -518,7 +518,7 @@ class MainWindow(QMainWindow):
                 org_info['Id'] = query.value(i)
             else:
                 org_info[self.field_dict_in_db['Organizations'][i - 1]] = query.value(i)
-        pprint(org_info)
+        # pprint(org_info)
         query.exec_()
         # 4. Получим по id  инфу из таблицы Documents
         query = QSqlQuery(f'SELECT * FROM Documents WHERE ProjectsId = {project_info["Id"]}')
@@ -528,7 +528,7 @@ class MainWindow(QMainWindow):
                 doc_info['Id'] = query.value(i)
             else:
                 doc_info[self.field_dict_in_db['Documents'][i - 1]] = query.value(i)
-        pprint(doc_info)
+        # pprint(doc_info)
         query.exec_()
         # 5. Получим по id  инфу из таблицы Devices
         query = QSqlQuery(f'SELECT * FROM Devices WHERE ProjectsId = {project_info["Id"]}')
@@ -540,7 +540,7 @@ class MainWindow(QMainWindow):
                 else:
                     dict_dev[self.field_dict_in_db['Devices'][i - 1]] = query.value(i)
             dev_info.append(dict_dev)
-        pprint(dev_info)
+        # pprint(dev_info)
         query.exec_()
         # 6. Получим по id  инфу из таблицы Pipelines
         query = QSqlQuery(f'SELECT * FROM Pipelines WHERE ProjectsId = {project_info["Id"]}')
@@ -552,7 +552,7 @@ class MainWindow(QMainWindow):
                 else:
                     dict_pipe[self.field_dict_in_db['Pipelines'][i - 1]] = query.value(i)
             pipe_info.append(dict_pipe)
-        pprint(pipe_info)
+        # pprint(pipe_info)
         # 6. Получим все вещества
         query = QSqlQuery(f'SELECT * FROM Substances')
         while query.next():
@@ -563,7 +563,7 @@ class MainWindow(QMainWindow):
                 else:
                     dict_sub[self.field_dict_in_db['Substances'][i - 1]] = query.value(i)
             sub_info.append(dict_sub)
-        pprint(sub_info)
+        # pprint(sub_info)
         query.exec_()
         #  Отчеты по таблицам
         sender = self.sender()
