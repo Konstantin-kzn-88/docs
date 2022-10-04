@@ -6,7 +6,7 @@ from PySide2.QtSql import QSqlDatabase, QSqlQuery, QSqlRelationalTableModel, QSq
 from PySide2.QtWidgets import QApplication, QMainWindow, QComboBox, QMessageBox, QWidget, QGridLayout, \
     QFormLayout, QGroupBox, QTableView, QStyleFactory, QStyledItemDelegate, QHeaderView, QMenu, QAction, QDialog, \
     QDialogButtonBox, QLineEdit, QPushButton, QHBoxLayout, QVBoxLayout, QTableWidget, QTableWidgetItem, QLabel, \
-    QSpinBox
+    QSpinBox, QDoubleSpinBox
 from PySide2.QtGui import QIcon
 from PySide2.QtCore import Qt
 from itertools import count
@@ -136,9 +136,9 @@ class MainWindow(QMainWindow):
         self.layer_thickness.setSuffix(" (1/м)")
         self.layer_thickness.setToolTip("Толщина свободного пролива")
 
-        self.cut_time = QSpinBox()
+        self.cut_time = QDoubleSpinBox()
         self.cut_time.setRange(0, 48)
-        self.cut_time.setSingleStep(1)
+        self.cut_time.setSingleStep(0.1)
         self.cut_time.setSuffix(" (час)")
         self.cut_time.setToolTip("Время отсечения потока")
 
