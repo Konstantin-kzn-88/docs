@@ -1,35 +1,9 @@
-# https://help.reg.ru/hc/ru/articles/4408047401233-%D0%9E%D1%81%D0%BD%D0%BE%D0%B2%D1%8B-%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D1%8B-%D1%81-MySQL
 
-# 1. Установить mariaBD
-#     sudo apt-get install mariadb-server
-# 1.1. Разрешить внешнее управление
-# https://www.oslogic.ru/knowledge/1085/nastrojka-udalennogo-dostupa-mysql-i-mariadb-v-linux-ubuntu/
-
-# sudo nano /etc/mysql/mariadb.conf.d/50-server.cnf
-#     заменить 127.0.0.1 на 0.0.0.0
-# systemctl restart mariadb
-
-
-# 4.
-# https://dondub.com/2021/06/rabota-s-bazami-dannyh-i-polzovatelyami-v-mysql-i-mariadb/
-
-# 5. sudo apt-get purge mariadb-*    (удаление)
-
-# полное удаление mariaDB UBUNTU
-# (для Debian пути и команды могут отличаться)
-# sudo apt-get --purge remove mariadb*
-# sudo apt-get autoremove
-# sudo apt-get autoclean
-#
-# если возникают ошибки при удалении -
-# заходим в папку /var/lib/dpkg/info
-# и удаляем там всё что начинается на mariadb и на mysql
-# повторяем предыдущие три команды
-#
-# после желательно
-# sudo apt-get --purge remove mysql*
-# sudo apt-get autoremove
-# sudo apt-get autoclean
-
-# 6. sudo netstat -tlp (проверить удаленыли процессы)
-
+1. Добавление копирования объектов
+2. Подсказки по заголовкам таблицы
+3. Подсказки по таблицам, что где в какой таблице ищет (сортирует)
+4. Сделать корректное удаление вещества, что у оборудования не было NULL
+5. Запретить добалять в шифр проекта "/"
+6. Увеличить поля для шифров проекта
+7. Сделать в конце документа сохранение констант (что бы потом было понятно, с чем был расчет)
+8. Исправить тесты (написать еще)

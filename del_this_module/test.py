@@ -1,4 +1,4 @@
-from __del__ import del_
+from del_this_module import del_
 
 del_.CONST = 3
 expl=del_.my_pow(var=3)
