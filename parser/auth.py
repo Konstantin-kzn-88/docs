@@ -1,26 +1,24 @@
 import requests
-import fake_useragent
 
 session = requests.Session()
 
 link = 'https://fermer.ru/user'
-user = fake_useragent.UserAgent().random
-header = {'user-agent' : user}
+
 
 data = {
 	"name": "test_user",
 	"pass": "1501kZn1501!",
-	"remember_me": "1",
-	"form_id": "user_login_block",
-	"op": "Войти"
+
 }
 
-resp = session.post(link, data = data, headers = header)
-# print(resp)
+data['form_id']='user_login'
+data['op']='Войти'
+data['form_build_id']='form-dgI6znPk8kD3t5jDQL79Gl8BoC26t7-_l04wznp6cfQ'
 
-profile_info = 'https://fermer.ru/user'
-profile_resp = session.get(profile_info, headers = header).text
-print(profile_resp)
+resp = session.post(link, data = data,)
+
+print('Выйти' in resp.text)
+print('test_user' in resp.text)
 
 if __name__ == '__main__':
     ...
