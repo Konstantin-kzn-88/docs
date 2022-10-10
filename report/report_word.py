@@ -21,7 +21,7 @@ LAYER_THICKNESS = 20  # м^-1
 KG_TO_TONN = 1000  # 1000 кг = 1000/KG_TO_TONN = 1 тонна
 TONN_TO_KG = 1000  # 1т = 1*TONN_TO_KG = 1000 кг
 KM_TO_M = 1000  # 1км = 1*KM_TO_M = 1000 м
-CUT_OFF_TIME = 12 * 3600  # секунд
+CUT_OFF_TIME = 1  # сутки
 TIME_EVAPORATION = 3600  # секунд
 HOUR_TO_SECONDS = 3600  # 1ч = 1*HOUR_TO_SECONDS = 3600 с
 DAY_TO_HOUR = 24  # 1сут = 1*DAY_TO_HOUR = 24 ч
@@ -716,6 +716,11 @@ class Report:
 
         context['most_dangerous'] = self.__most_dangerous(C1_1_max)
         context['most_possible'] = self.__most_possible(C1_3_10_25)
+
+        # исходные данные
+        context['LAYER_THICKNESS'] = LAYER_THICKNESS
+        context['CUT_OFF_TIME'] = CUT_OFF_TIME
+        context['TIME_EVAPORATION'] = TIME_EVAPORATION
 
         text = str(int(time.time()))
         if self.sender_call == 0:

@@ -139,7 +139,7 @@ class MainWindow(QMainWindow):
         self.cut_time = QDoubleSpinBox()
         self.cut_time.setRange(0, 48)
         self.cut_time.setSingleStep(0.1)
-        self.cut_time.setSuffix(" (час)")
+        self.cut_time.setSuffix(" (сут.)")
         self.cut_time.setToolTip("Время отсечения потока")
 
         self.time_evaporation = QSpinBox()

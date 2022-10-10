@@ -41,9 +41,20 @@ browser.get('https://www.safety.ru/accidents/#/')
 #     time.sleep(3)
 #     print(i)
 
+select = browser.find_element(By.XPATH, '/html/body/section[2]/div/div/div/div/div/div[2]/form/fieldset[4]/div/fieldset[1]/legend/div/label/span').click()
+button = browser.find_element(By.XPATH, '/html/body/section[2]/div/div/div/div/div/div[2]/form/div[2]/button[1]').click()
+time.sleep(5)
+
 list_ = browser.find_elements(By.LINK_TEXT, f'Подробнее ...')
 for item in list_:
-    print(item.get_attribute('href'))
+    page = webdriver.Firefox()
+    page.get(item.get_attribute('href'))
+    elem = page.find_element(By.CLASS_NAME, 'col-md-8')
+    print(elem.text)
+    elem = page.find_element(By.CLASS_NAME, 'col-md-4')
+    print(elem.text)
+    page.close()
+    break
 
 
 browser.close()
