@@ -127,7 +127,15 @@ class MainWindow(QMainWindow):
 
         self.search_line_edit = QLineEdit()
         self.search_line_edit.setPlaceholderText("Поиск...")
-        self.search_line_edit.setToolTip("Подсказка для поиска")
+        self.search_line_edit.setToolTip(f"""
+        Сортировка:
+        Организации - название организации;
+        Объект      - название объекта;
+        Проект      - шифр проекта;
+        Документ    - название проекта;
+        Вещества    - наименование вещества;
+        Оборудование - шиифр проекта;
+        Трубопровод - шифр проекта.""")
         self.search_line_edit.textChanged.connect(self.__update_filter)
 
         self.layer_thickness = QSpinBox()
@@ -385,13 +393,14 @@ class MainWindow(QMainWindow):
         index = self.table.currentIndex()
         id = self.table.model().index(index.row(), 0).data()
         table_name = self.table_list_eng[self.select_table.currentIndex()]
-        db.transaction()
-        query = QSqlQuery()
-        sql_request = f'DELETE FROM {table_name} WHERE Id={id}'
-        query.prepare(sql_request)
-        query.exec_()
-        db.commit()
-        self.show_table(self.select_table.currentIndex())
+        if table_name != 'Substances':
+            db.transaction()
+            query = QSqlQuery()
+            sql_request = f'DELETE FROM {table_name} WHERE Id={id}'
+            query.prepare(sql_request)
+            query.exec_()
+            db.commit()
+            self.show_table(self.select_table.currentIndex())
 
     # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
     # Подфункции для add_data_in_db
@@ -449,7 +458,7 @@ class MainWindow(QMainWindow):
         data = []
         for row in range(table_widget.rowCount()):
             if table_widget.item(row, 1) is not None:
-                data.append(table_widget.item(row, 1).text())
+                data.append(table_widget.item(row, 1).text().replace('/','-'))
             else:
                 _ = QMessageBox.information(self, 'Внимание!',
                                             'Данные не заполнены. Добавление в базу данных не возможно!')
