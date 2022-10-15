@@ -10,12 +10,10 @@
 # -----------------------------------------------------------
 
 import math
-import string
-
-# weight_gas: int, temperature_gas: int,
 
 TEMP_TO_KELVIN = 273
-
+WIND_HEIGHT = 10 # высота определения характеристик ветра
+GRAVITY = 9.81 # ускорение свободного падения м/с2
 
 class Instantaneous_source:
 
@@ -37,8 +35,13 @@ class Instantaneous_source:
         self.is_night = is_night
         self.is_urban_area = is_urban_area
 
-    def pasquill_atmospheric_stability_classes(self):
-        # Table C5.2. Pasquill Atmospheric Stability Classes. p.222
+    def pasquill_atmospheric_stability_classes(self) -> str:
+        """
+        Классы стабильности атмосферы по Паскуиллу
+        Table C5.2. Pasquill Atmospheric Stability Classes. p.222
+        :@return: : pasquill_class: str: класс атмосферы
+        """
+
         table_data = (
             ('A', 'B', 'B', 'F', 'F'),
             ('B', 'B', 'C', 'E', 'F'),
@@ -69,17 +72,48 @@ class Instantaneous_source:
         else:
             cloud_ind = 4
 
-        return table_data[wind_ind][cloud_ind]
+        pasquill_class = table_data[wind_ind][cloud_ind]
+        return pasquill_class
 
     def wind_profile(self):
-        # Table C5.3. Wind Profile Exponent p, Eq. (C5.1).
+        """
+        Экспонента профиля ветра
+         Table C5.3. Wind Profile Exponent p, Eq. (C5.1).
+         :@return: : p: float: экспонента профиля ветра
+        """
         pasquill = ('A', 'B', 'C', 'D', 'E', 'F').index(self.pasquill_atmospheric_stability_classes())
         table_data = (
             (0.07, 0.07, 0.10, 0.15, 0.35, 0.55),
             (0.15, 0.15, 0.20, 0.25, 0.30, 0.30),
         )
+        p = table_data[int(self.is_urban_area)][pasquill]
+        return p
 
-        return table_data[int(self.is_urban_area)][pasquill]
+    def wind_power_law(self, ejection_height: int) -> float:
+        """
+        Зависимость закона силы ветра от высоты выброса
+        (C5.1) p.223
+        :papam: ejection_height - высота выброса, м
+        :@return: : us: float: закон силы ветра от высоты выброса
+        """
+        p = self.wind_profile()
+        us = self.wind_speed * math.pow(ejection_height / WIND_HEIGHT, p)
+        return us
+
+    def source_buoyancy_flux_parameter(self, gas_temperature: int, gas_weight: int):
+        """
+        Параметр плавучести
+        (C5.33) p.243
+        :papam: gas_temperature - температура газа, град.С
+        :papam: gas_weight - масса газа, кг
+        :@return: : Fbi: float: параметр плавучести газа, м4/с2
+        """
+        a = (GRAVITY*gas_weight)/(math.pi*self.density_air)
+        b = (gas_temperature+TEMP_TO_KELVIN-self.ambient_temperature)/self.ambient_temperature
+        Fbi = a*b
+        return Fbi
+
+
 
 
 # def atmospheric_stability(self, stability_class: str):
@@ -98,8 +132,10 @@ class Instantaneous_source:
 
 
 if __name__ == '__main__':
-    cls = Instantaneous_source(ambient_temperature=30, cloud=0,
+    cls = Instantaneous_source(ambient_temperature=25, cloud=0,
                                wind_speed=4, density_air=1.21,
                                is_night=False, is_urban_area=False)
     print(cls.pasquill_atmospheric_stability_classes())
     print(cls.wind_profile())
+    print(cls.wind_power_law(ejection_height=2))
+    print(cls.source_buoyancy_flux_parameter(147,500))

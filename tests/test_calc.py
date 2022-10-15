@@ -341,6 +341,22 @@ class ServerTest(TestCase):
                                                      is_night=True,
                                                      is_urban_area=True).wind_profile(), 0.30)
 
+    def test_wind_power_law(self):
+        self.assertEqual(
+            round(calc_light_gas_disp.Instantaneous_source(ambient_temperature=30, cloud=0,
+                                                           wind_speed=4, density_air=1.21,
+                                                           is_night=False, is_urban_area=False).wind_power_law(2),
+                  2), 3.57)
+
+    def test_source_buoyancy_flux_parameter(self):
+        self.assertEqual(
+            round(calc_light_gas_disp.Instantaneous_source(ambient_temperature=25, cloud=0,
+                                                           wind_speed=4, density_air=1.21,
+                                                           is_night=False,
+                                                           is_urban_area=False).source_buoyancy_flux_parameter(147,
+                                                                                                               500),
+                  0), 528)
+
         # END
 
         if __name__ == '__main__':
