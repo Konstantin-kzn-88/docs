@@ -201,7 +201,6 @@ class Instantaneous_source:
             he = ejection_height + math.pow(a + d, 1 / 4) - (r_cloud / C_CONST)
         return he
 
-
     def atmospheric_stability_param(self, pasquill: str) -> tuple:
         '''
         Параметры атмосферной стабильности
@@ -209,7 +208,7 @@ class Instantaneous_source:
         Function of Atmospheric Stability. p247
 
         :@papam: pasquill - класс атмосферы по Паскуиллу
-        :@return: he: tuple: кортеж параметров (a,b,c,d)
+        :@return: : tuple: кортеж параметров (a,b,c,d)
         '''
 
         # Table C5.11. Parameters of Eq. (C5.44) as a
@@ -225,18 +224,49 @@ class Instantaneous_source:
 
         return data[pasquill] if pasquill in data.keys() else data['F']
 
-    def dispersion_param(self, pasquill: str, x_dist:int):
+    def dispersion_param(self, pasquill: str, x_dist: int):
         '''
         Функция параметров дисперсии
         :@papam: pasquill - класс атмосферы по Паскуиллу
         :@papam: x_dist - дистанция м
         :@return: sigma: tuple: кортеж параметров (sigma_x, sigma_y, sigma_z)
         '''
-        a,b,c,d = self.atmospheric_stability_param(pasquill)
+        a, b, c, d = self.atmospheric_stability_param(pasquill)
         sigma_x = a * math.pow(x_dist / 1, b)
         sigma_y = sigma_x
         sigma_z = c * math.pow(x_dist / 1, d)
         return (sigma_x, sigma_y, sigma_z)
+
+    def mean_wind_speed(self, height_rise: float, height_rise_max: float, sigma_z: float) -> tuple:
+        '''
+        Функция средней скорости ветра
+        :@papam: height_rise - высота выброса, м (см. def gradual_puff_rise и final_puff_rise)
+        :@papam: height_rise_max - высота выброса при расстоянии для
+                                   максимального подъема, м (см. def gradual_puff_rise)
+        :@papam: sigma_z - коэф. дисперсии (см. def dispersion_param)
+
+        :@return: (z_b,z_t,u_with_streak): tuple: - средняя скорость ветра, м/с
+
+        '''
+        p = self.wind_profile()
+
+        if height_rise - 2.15 * sigma_z > 2:
+            z_b = height_rise - 2.15 * sigma_z
+        else:
+            z_b = 2
+
+        if height_rise + 2.15 * sigma_z < height_rise_max:
+            z_t = height_rise + 2.15 * sigma_z
+        else:
+            z_t = height_rise_max
+
+        a = (z_t - z_b) * math.pow(WIND_HEIGHT, p) * (1 + p)
+        b = self.wind_speed / a
+        c = math.pow(z_t, 1 + p) - math.pow(z_b, 1 + p)
+        u_with_streak = b * c
+
+        return (z_b, z_t, u_with_streak)
+
 
 if __name__ == '__main__':
     cls = Instantaneous_source(ambient_temperature=25, cloud=0,
@@ -246,11 +276,13 @@ if __name__ == '__main__':
     p = (cls.wind_profile())
     us = (cls.wind_power_law(ejection_height=2))
     Fbi = (cls.source_buoyancy_flux_parameter(147, 500))
-    # print(pasquill, us, Fbi)
-    # print(cls.maximum_distance_x(pasquill, us, Fbi))
-    # print(cls.gradual_puff_rise(ejection_height=2, pasquill=pasquill, us=us,
-    #                             Fbi=Fbi, gas_weight=500, po_gas=3.15, x_dist=100))
-    # print(cls.final_puff_rise(ejection_height=2, pasquill=pasquill, us=us,
-    #                           Fbi=Fbi, gas_weight=500, po_gas=3.15, x_dist=700))
+    x_max = cls.maximum_distance_x(pasquill, us, Fbi)
+    he_max = cls.gradual_puff_rise(ejection_height=2, pasquill=pasquill, us=us,
+                                Fbi=Fbi, gas_weight=500, po_gas=3.15, x_dist=x_max)
 
-    print(cls.dispersion_param(pasquill=pasquill, x_dist=100))
+    he_100 = cls.gradual_puff_rise(ejection_height=2, pasquill=pasquill, us=us,
+                                Fbi=Fbi, gas_weight=500, po_gas=3.15, x_dist=100)
+
+    sigma_z = cls.dispersion_param(pasquill=pasquill, x_dist=100)[2]
+
+    print(cls.mean_wind_speed(he_100, he_max, sigma_z))
