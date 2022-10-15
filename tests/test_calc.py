@@ -1,7 +1,7 @@
 import random
 from unittest import TestCase, main
 from calc import calc_strait_fire, calc_probit, calc_sp_explosion, calc_tvs_explosion, calc_fireball, \
-    calc_lower_concentration, calc_liguid_evaporation
+    calc_lower_concentration, calc_liguid_evaporation, calc_light_gas_disp
 
 
 class ServerTest(TestCase):
@@ -273,7 +273,8 @@ class ServerTest(TestCase):
     def test_evaporation(self):
         self.assertEqual(
             round(calc_liguid_evaporation.Liquid_evaporation().evaporation_in_moment(time=3600, steam_pressure=35,
-                                                                                     molar_mass=100, strait_area=200)[0],
+                                                                                     molar_mass=100, strait_area=200)[
+                      0],
                   0),
             252)
 
@@ -285,7 +286,6 @@ class ServerTest(TestCase):
             self.assertGreater(calc_liguid_evaporation.Liquid_evaporation().evaporation_in_moment(time, steam_pressure,
                                                                                                   molar_mass,
                                                                                                   strait_area)[0], 0)
-
 
     def test_evaporation_with_null_param(self):
         with self.assertRaises(ValueError) as e:
@@ -308,7 +308,40 @@ class ServerTest(TestCase):
 
     # END
 
+    # START 7. Тестирование рассеивания легкого газа
+    # 7.1. Table C5.2. Pasquill Atmospheric Stability Classes p.222
+    def test_pasquill(self):
+        self.assertEqual(
+            calc_light_gas_disp.Instantaneous_source(ambient_temperature=30, cloud=0, wind_speed=3, density_air=1.21,
+                                                     is_night=False,
+                                                     is_urban_area=False).pasquill_atmospheric_stability_classes(), 'B')
 
+        self.assertEqual(
+            calc_light_gas_disp.Instantaneous_source(ambient_temperature=30, cloud=8, wind_speed=7, density_air=1.21,
+                                                     is_night=False,
+                                                     is_urban_area=False).pasquill_atmospheric_stability_classes(), 'D')
 
-if __name__ == '__main__':
-    main()
+        self.assertEqual(
+            calc_light_gas_disp.Instantaneous_source(ambient_temperature=30, cloud=2, wind_speed=1, density_air=1.21,
+                                                     is_night=True,
+                                                     is_urban_area=False).pasquill_atmospheric_stability_classes(), 'F')
+
+        self.assertEqual(
+            calc_light_gas_disp.Instantaneous_source(ambient_temperature=30, cloud=7, wind_speed=4, density_air=1.21,
+                                                     is_night=True,
+                                                     is_urban_area=False).pasquill_atmospheric_stability_classes(), 'E')
+
+    def test_wind_profile(self):
+        self.assertEqual(
+            calc_light_gas_disp.Instantaneous_source(ambient_temperature=30, cloud=7, wind_speed=4, density_air=1.21,
+                                                     is_night=True,
+                                                     is_urban_area=False).wind_profile(), 0.35)
+        self.assertEqual(
+            calc_light_gas_disp.Instantaneous_source(ambient_temperature=30, cloud=2, wind_speed=1, density_air=1.21,
+                                                     is_night=True,
+                                                     is_urban_area=True).wind_profile(), 0.30)
+
+        # END
+
+        if __name__ == '__main__':
+            main()
