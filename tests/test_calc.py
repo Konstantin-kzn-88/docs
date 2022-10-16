@@ -377,12 +377,11 @@ class ServerTest(TestCase):
         us = (cls.wind_power_law(ejection_height=2))
         Fbi = (cls.source_buoyancy_flux_parameter(147, 500))
         self.assertEqual(round(cls.gradual_puff_rise(ejection_height=2, pasquill=pasquill, us=us,
-                                Fbi=Fbi, gas_weight=500, po_gas=3.15, x_dist=300), 0), 75)
+                                                     Fbi=Fbi, gas_weight=500, po_gas=3.15, x_dist=300), 0), 75)
         self.assertEqual(round(cls.gradual_puff_rise(ejection_height=2, pasquill=pasquill, us=us,
-                                Fbi=Fbi, gas_weight=500, po_gas=3.15, x_dist=100), 0), 44)
+                                                     Fbi=Fbi, gas_weight=500, po_gas=3.15, x_dist=100), 0), 44)
         self.assertEqual(round(cls.gradual_puff_rise(ejection_height=2, pasquill=pasquill, us=us,
-                                Fbi=Fbi, gas_weight=500, po_gas=3.15, x_dist=200), 0), 62)
-
+                                                     Fbi=Fbi, gas_weight=500, po_gas=3.15, x_dist=200), 0), 62)
 
     def test_final_puff_rise(self):
         cls = calc_light_gas_disp.Instantaneous_source(ambient_temperature=25, cloud=0, wind_speed=4, density_air=1.21,
@@ -391,12 +390,11 @@ class ServerTest(TestCase):
         us = (cls.wind_power_law(ejection_height=2))
         Fbi = (cls.source_buoyancy_flux_parameter(147, 500))
         self.assertEqual(round(cls.final_puff_rise(ejection_height=2, pasquill=pasquill, us=us,
-                                Fbi=Fbi, gas_weight=500, po_gas=3.15, x_dist=500), 0), 89)
+                                                   Fbi=Fbi, gas_weight=500, po_gas=3.15, x_dist=500), 0), 89)
         self.assertEqual(round(cls.final_puff_rise(ejection_height=2, pasquill=pasquill, us=us,
-                                Fbi=Fbi, gas_weight=500, po_gas=3.15, x_dist=600), 0), 89)
+                                                   Fbi=Fbi, gas_weight=500, po_gas=3.15, x_dist=600), 0), 89)
         self.assertEqual(round(cls.final_puff_rise(ejection_height=2, pasquill=pasquill, us=us,
-                                Fbi=Fbi, gas_weight=500, po_gas=3.15, x_dist=700), 0), 89)
-
+                                                   Fbi=Fbi, gas_weight=500, po_gas=3.15, x_dist=700), 0), 89)
 
     def test_dispersion_param(self):
         cls = calc_light_gas_disp.Instantaneous_source(ambient_temperature=25, cloud=0, wind_speed=4, density_air=1.21,
@@ -405,5 +403,72 @@ class ServerTest(TestCase):
         self.assertEqual(round(cls.dispersion_param(pasquill=pasquill, x_dist=100)[0], 0), 10)
         self.assertEqual(round(cls.dispersion_param(pasquill=pasquill, x_dist=100)[1], 0), 10)
         self.assertEqual(round(cls.dispersion_param(pasquill=pasquill, x_dist=100)[2], 0), 15)
+
+    def test_mean_wind_speed(self):
+        cls = calc_light_gas_disp.Instantaneous_source(ambient_temperature=25, cloud=0,
+                                                       wind_speed=4, density_air=1.21,
+                                                       is_night=False, is_urban_area=False)
+        pasquill = (cls.pasquill_atmospheric_stability_classes())
+        us = (cls.wind_power_law(ejection_height=2))
+        Fbi = (cls.source_buoyancy_flux_parameter(147, 500))
+        x_max = cls.maximum_distance_x(pasquill, us, Fbi)
+        he_max = cls.gradual_puff_rise(ejection_height=2, pasquill=pasquill, us=us,
+                                       Fbi=Fbi, gas_weight=500, po_gas=3.15, x_dist=x_max)
+
+        x = 100
+        he_r = cls.gradual_puff_rise(ejection_height=2, pasquill=pasquill, us=us,
+                                     Fbi=Fbi, gas_weight=500, po_gas=3.15, x_dist=x)
+
+        _, _, sigma_z = cls.dispersion_param(pasquill=pasquill, x_dist=100)
+        self.assertEqual(round(cls.mean_wind_speed(he_r, he_max, sigma_z)[0], 0), 11)
+        self.assertEqual(round(cls.mean_wind_speed(he_r, he_max, sigma_z)[1], 0), 77)
+        self.assertEqual(round(cls.mean_wind_speed(he_r, he_max, sigma_z)[2], 0), 4)
+
+    def test_time_in_out_peak(self):
+        cls = calc_light_gas_disp.Instantaneous_source(ambient_temperature=25, cloud=0,
+                                                       wind_speed=4, density_air=1.21,
+                                                       is_night=False, is_urban_area=False)
+        pasquill = (cls.pasquill_atmospheric_stability_classes())
+        us = (cls.wind_power_law(ejection_height=2))
+        Fbi = (cls.source_buoyancy_flux_parameter(147, 500))
+        x_max = cls.maximum_distance_x(pasquill, us, Fbi)
+        he_max = cls.gradual_puff_rise(ejection_height=2, pasquill=pasquill, us=us,
+                                       Fbi=Fbi, gas_weight=500, po_gas=3.15, x_dist=x_max)
+
+        x = 100
+        he_r = cls.gradual_puff_rise(ejection_height=2, pasquill=pasquill, us=us,
+                                     Fbi=Fbi, gas_weight=500, po_gas=3.15, x_dist=x)
+
+        sigma_x, _, sigma_z = cls.dispersion_param(pasquill=pasquill, x_dist=x)
+        u_mean = cls.mean_wind_speed(he_r, he_max, sigma_z)[2]
+        self.assertEqual(round(cls.time_in_out_peak(sigma_x,u_mean,x)[0], 0), 17)
+        self.assertEqual(round(cls.time_in_out_peak(sigma_x,u_mean,x)[1], 0), 28)
+        self.assertEqual(round(cls.time_in_out_peak(sigma_x,u_mean,x)[2], 0), 23)
+
+    def test_concentration(self):
+        cls = calc_light_gas_disp.Instantaneous_source(ambient_temperature=25, cloud=0,
+                                   wind_speed=4, density_air=1.21,
+                                   is_night=False, is_urban_area=False)
+        pasquill = (cls.pasquill_atmospheric_stability_classes())
+        us = (cls.wind_power_law(ejection_height=2))
+        Fbi = (cls.source_buoyancy_flux_parameter(147, 500))
+        x_max = cls.maximum_distance_x(pasquill, us, Fbi)
+        he_max = cls.gradual_puff_rise(ejection_height=2, pasquill=pasquill, us=us,
+                                       Fbi=Fbi, gas_weight=500, po_gas=3.15, x_dist=x_max)
+
+        x = 1000
+        he_r = cls.gradual_puff_rise(ejection_height=2, pasquill=pasquill, us=us, Fbi=Fbi, gas_weight=500, po_gas=3.15,
+                                     x_dist=x) if x <= he_max else cls.final_puff_rise(ejection_height=2,
+                                                                                       pasquill=pasquill,
+                                                                                       us=us, Fbi=Fbi, gas_weight=500,
+                                                                                       po_gas=3.15, x_dist=x)
+
+        sigma_x, sigma_y, sigma_z = cls.dispersion_param(pasquill=pasquill, x_dist=x)
+
+        u_mean = cls.mean_wind_speed(he_r, he_max, sigma_z)[2]
+
+        t_in, t_out, t_peak = cls.time_in_out_peak(sigma_x, u_mean, x)
+
+        self.assertEqual(round(cls.concentration(500, pasquill, u_mean, he_r, t_peak, x, 0, 2), 0), 133)
 
     # END

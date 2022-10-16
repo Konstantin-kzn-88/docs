@@ -14,6 +14,7 @@ import math
 TEMP_TO_KELVIN = 273
 WIND_HEIGHT = 10  # высота определения характеристик ветра
 GRAVITY = 9.81  # ускорение свободного падения м/с2
+MKG_TO_MG = 0.001  # мкг в мг
 
 
 class Instantaneous_source:
@@ -170,7 +171,7 @@ class Instantaneous_source:
         return he
 
     def final_puff_rise(self, ejection_height: int, pasquill: str, us: float,
-                        Fbi: float, gas_weight: int, po_gas: float, x_dist) -> float:
+                        Fbi: float, gas_weight: int, po_gas: float, x_dist: int) -> float:
         '''
         Функция финальной высоты выброса (he - параметр),
         после величины максимальной дистанции x_max (def maximum_distance_x)
@@ -245,7 +246,7 @@ class Instantaneous_source:
                                    максимального подъема, м (см. def gradual_puff_rise)
         :@papam: sigma_z - коэф. дисперсии (см. def dispersion_param)
 
-        :@return: (z_b,z_t,u_with_streak): tuple: - средняя скорость ветра, м/с
+        :@return: (z_b,z_t,u_with_streak): tuple: - эмп. коэфциенты расслоения, средняя скорость ветра, м/с
 
         '''
         p = self.wind_profile()
@@ -267,6 +268,46 @@ class Instantaneous_source:
 
         return (z_b, z_t, u_with_streak)
 
+    def time_in_out_peak(self, sigma_x: float, u_with_streak: float, x_dist: int) -> tuple:
+        '''
+        :@papam: sigma_x - коэф. дисперсии (см. def dispersion_param)
+        :@papam: u_with_streak - средняя скорость ветра (см. def mean_wind_speed)
+        :@papam: x_dist - дистанция м
+
+        :@return: (t_in,t_out,t_peak): tuple: - время приходо, ухода, максимального присутвия в точке, с
+
+        '''
+        t_in = (x_dist - 2.45 * sigma_x) / u_with_streak
+        t_out = (x_dist + 2.45 * sigma_x) / u_with_streak
+        t_peak = x_dist / u_with_streak
+        return (t_in, t_out, t_peak)
+
+    def concentration(self, gas_weight: int, pasquill: str, mean_wind_speed: float,
+                      height_rise: float, time: float, x_dist: int, y: int, z: int) -> float:
+        '''
+        :@papam: gas_weight - масса газа, кг
+        :@papam: pasquill - класс атмосферы по Паскуиллу
+        :@papam: u_with_streak - средняя скорость ветра (см. def mean_wind_speed)
+        :@papam: height_rise - высота выброса, м (см. def gradual_puff_rise и final_puff_rise)
+        :@papam: time - время с мщмента выброса, с (для максимального значения принять t_peak)
+        :@papam: x_dist, y, z - пространственные координаты, м
+
+        :@return: (concentration): float: - концентрация, мг/м3
+
+        '''
+
+        sigma_x, sigma_y, sigma_z = self.dispersion_param(pasquill, x_dist)
+
+        first_add = 2 * gas_weight * math.pow(10, 9)
+        second_add = math.pow(2 * math.pi, 3 / 2) * sigma_x * sigma_y * sigma_z
+        third_add = math.exp(-(math.pow(x_dist - mean_wind_speed * time, 2)) / (2 * math.pow(sigma_x, 2)))
+        fourth_add = math.exp(-(math.pow(y, 2)) / (2 * math.pow(sigma_y, 2)))
+        fifth_add = math.exp(-(math.pow(height_rise - z, 2)) / (2 * math.pow(sigma_z, 2)))
+        six_add = math.exp(-(math.pow(height_rise + z, 2)) / (2 * math.pow(sigma_z, 2)))
+
+        concentration = (first_add / second_add) * third_add * fourth_add * (fifth_add + six_add)
+        return concentration * MKG_TO_MG
+
 
 if __name__ == '__main__':
     cls = Instantaneous_source(ambient_temperature=25, cloud=0,
@@ -278,11 +319,18 @@ if __name__ == '__main__':
     Fbi = (cls.source_buoyancy_flux_parameter(147, 500))
     x_max = cls.maximum_distance_x(pasquill, us, Fbi)
     he_max = cls.gradual_puff_rise(ejection_height=2, pasquill=pasquill, us=us,
-                                Fbi=Fbi, gas_weight=500, po_gas=3.15, x_dist=x_max)
+                                   Fbi=Fbi, gas_weight=500, po_gas=3.15, x_dist=x_max)
 
-    he_100 = cls.gradual_puff_rise(ejection_height=2, pasquill=pasquill, us=us,
-                                Fbi=Fbi, gas_weight=500, po_gas=3.15, x_dist=100)
+    x = 1000
+    he_r = cls.gradual_puff_rise(ejection_height=2, pasquill=pasquill, us=us, Fbi=Fbi, gas_weight=500, po_gas=3.15,
+                                 x_dist=x) if x <= he_max else cls.final_puff_rise(ejection_height=2, pasquill=pasquill,
+                                                                                   us=us, Fbi=Fbi, gas_weight=500,
+                                                                                   po_gas=3.15, x_dist=x)
 
-    sigma_z = cls.dispersion_param(pasquill=pasquill, x_dist=100)[2]
+    sigma_x, sigma_y, sigma_z = cls.dispersion_param(pasquill=pasquill, x_dist=x)
 
-    print(cls.mean_wind_speed(he_100, he_max, sigma_z))
+    u_mean = cls.mean_wind_speed(he_r, he_max, sigma_z)[2]
+
+    t_in, t_out, t_peak = cls.time_in_out_peak(sigma_x, u_mean, x)
+
+    print(cls.concentration(500, pasquill, u_mean, he_r, t_peak, x, 0, 2))
