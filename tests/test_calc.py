@@ -322,14 +322,16 @@ class ServerTest(TestCase):
                                                      is_urban_area=False).pasquill_atmospheric_stability_classes(), 'D')
 
         self.assertEqual(
-            calc_light_gas_disp.Instantaneous_source(ambient_temperature=30, cloud=2, wind_speed=1, density_air=1.21,
-                                                     is_night=True,
-                                                     is_urban_area=False).pasquill_atmospheric_stability_classes(), 'F')
+            calc_light_gas_disp.Continuous_source(ambient_temperature=7, cloud=5,
+                                                  wind_speed=2, density_air=1.21,
+                                                  is_night=True,
+                                                  is_urban_area=False).pasquill_atmospheric_stability_classes(), 'F')
 
         self.assertEqual(
-            calc_light_gas_disp.Instantaneous_source(ambient_temperature=30, cloud=7, wind_speed=4, density_air=1.21,
-                                                     is_night=True,
-                                                     is_urban_area=False).pasquill_atmospheric_stability_classes(), 'E')
+            calc_light_gas_disp.Continuous_source(ambient_temperature=7, cloud=1,
+                                                  wind_speed=2, density_air=1.21,
+                                                  is_night=True,
+                                                  is_urban_area=False).pasquill_atmospheric_stability_classes(), 'E')
 
     def test_wind_profile(self):
         self.assertEqual(
@@ -337,9 +339,9 @@ class ServerTest(TestCase):
                                                      is_night=True,
                                                      is_urban_area=False).wind_profile(), 0.35)
         self.assertEqual(
-            calc_light_gas_disp.Instantaneous_source(ambient_temperature=30, cloud=2, wind_speed=1, density_air=1.21,
-                                                     is_night=True,
-                                                     is_urban_area=True).wind_profile(), 0.30)
+            calc_light_gas_disp.Continuous_source(ambient_temperature=7, cloud=5,
+                                                  wind_speed=2, density_air=1.21,
+                                                  is_night=True, is_urban_area=False).wind_profile(), 0.55)
 
     def test_wind_power_law(self):
         self.assertEqual(
@@ -347,6 +349,30 @@ class ServerTest(TestCase):
                                                            wind_speed=4, density_air=1.21,
                                                            is_night=False, is_urban_area=False).wind_power_law(2),
                   2), 3.57)
+
+        self.assertEqual(
+            round(calc_light_gas_disp.Continuous_source(ambient_temperature=7, cloud=5,
+                                                        wind_speed=2, density_air=1.21,
+                                                        is_night=True, is_urban_area=False).wind_power_law(25),
+                  2), 3.31)
+
+    def test_height_source_correction(self):
+        # Только вторичное облако
+        cls = calc_light_gas_disp.Continuous_source(ambient_temperature=7, cloud=5,
+                                                    wind_speed=2, density_air=1.21,
+                                                    is_night=True, is_urban_area=False)
+        us = (cls.wind_power_law(25))
+
+        self.assertEqual(round(cls.height_source_correction(us, 4, 1, 25), 1), 24.4)
+
+    def test_selecting_plume_rise(self):
+        # Только вторичное облако
+        cls = calc_light_gas_disp.Continuous_source(ambient_temperature=7, cloud=5,
+                                                    wind_speed=2, density_air=1.21,
+                                                    is_night=True, is_urban_area=False)
+        pasquill = (cls.pasquill_atmospheric_stability_classes())
+
+        self.assertEqual(round(cls.selecting_plume_rise(pasquill, 4, 127,1), 1), 1.1)
 
     def test_source_buoyancy_flux_parameter(self):
         self.assertEqual(
@@ -441,14 +467,14 @@ class ServerTest(TestCase):
 
         sigma_x, _, sigma_z = cls.dispersion_param(pasquill=pasquill, x_dist=x)
         u_mean = cls.mean_wind_speed(he_r, he_max, sigma_z)[2]
-        self.assertEqual(round(cls.time_in_out_peak(sigma_x,u_mean,x)[0], 0), 17)
-        self.assertEqual(round(cls.time_in_out_peak(sigma_x,u_mean,x)[1], 0), 28)
-        self.assertEqual(round(cls.time_in_out_peak(sigma_x,u_mean,x)[2], 0), 23)
+        self.assertEqual(round(cls.time_in_out_peak(sigma_x, u_mean, x)[0], 0), 17)
+        self.assertEqual(round(cls.time_in_out_peak(sigma_x, u_mean, x)[1], 0), 28)
+        self.assertEqual(round(cls.time_in_out_peak(sigma_x, u_mean, x)[2], 0), 23)
 
     def test_concentration(self):
         cls = calc_light_gas_disp.Instantaneous_source(ambient_temperature=25, cloud=0,
-                                   wind_speed=4, density_air=1.21,
-                                   is_night=False, is_urban_area=False)
+                                                       wind_speed=4, density_air=1.21,
+                                                       is_night=False, is_urban_area=False)
         pasquill = (cls.pasquill_atmospheric_stability_classes())
         us = (cls.wind_power_law(ejection_height=2))
         Fbi = (cls.source_buoyancy_flux_parameter(147, 500))

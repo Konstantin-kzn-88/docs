@@ -309,28 +309,204 @@ class Instantaneous_source:
         return concentration * MKG_TO_MG
 
 
+class Continuous_source:
+    def __init__(self, ambient_temperature: int, cloud: int,
+                 wind_speed: int, density_air: float,
+                 is_night: bool, is_urban_area: bool):
+        """
+        ambient_temperature - температура окружающего воздуха, град. С
+        cloud - облачность от 0 до 8, -
+        wind_speed - скорость ветра, м/с
+        density_air - плотность воздуха, кг/м3
+        is_night - ночное время суток, -
+        is_urban_area - городская застройка, -
+        """
+        self.ambient_temperature = ambient_temperature + TEMP_TO_KELVIN
+        self.cloud = cloud if cloud in [i for i in range(0, 9)] else 0
+        self.wind_speed = wind_speed
+        self.density_air = density_air
+        self.is_night = is_night
+        self.is_urban_area = is_urban_area
+
+    def pasquill_atmospheric_stability_classes(self) -> str:
+        """
+        Классы стабильности атмосферы по Паскуиллу
+        Table C5.2. Pasquill Atmospheric Stability Classes. p.222
+        :@return: : pasquill_class: str: класс атмосферы
+        """
+
+        table_data = (
+            ('A', 'B', 'B', 'F', 'F'),
+            ('B', 'B', 'C', 'E', 'F'),
+            ('B', 'B', 'C', 'D', 'E'),
+            ('C', 'D', 'D', 'D', 'D'),
+            ('C', 'D', 'D', 'D', 'D')
+        )
+
+        if self.wind_speed < 2:
+            wind_ind = 0
+        elif self.wind_speed >= 2 and self.wind_speed < 3:
+            wind_ind = 1
+        elif self.wind_speed >= 3 and self.wind_speed < 5:
+            wind_ind = 2
+        elif self.wind_speed >= 5 and self.wind_speed < 6:
+            wind_ind = 3
+        else:
+            wind_ind = 4
+
+        if self.cloud <= 2 and not self.is_night:
+            cloud_ind = 0
+        elif self.cloud <= 5 and self.cloud > 2 and not self.is_night:
+            cloud_ind = 1
+        elif self.cloud <= 8 and self.cloud > 5 and not self.is_night:
+            cloud_ind = 2
+        elif self.cloud <= 3 and self.is_night:
+            cloud_ind = 3
+        else:
+            cloud_ind = 4
+
+        pasquill_class = table_data[wind_ind][cloud_ind]
+        return pasquill_class
+
+    def wind_profile(self):
+        """
+        Экспонента профиля ветра
+         Table C5.3. Wind Profile Exponent p, Eq. (C5.1).
+         :@return: : p: float: экспонента профиля ветра
+        """
+        pasquill = ('A', 'B', 'C', 'D', 'E', 'F').index(self.pasquill_atmospheric_stability_classes())
+        table_data = (
+            (0.07, 0.07, 0.10, 0.15, 0.35, 0.55),
+            (0.15, 0.15, 0.20, 0.25, 0.30, 0.30),
+        )
+        p = table_data[int(self.is_urban_area)][pasquill]
+        return p
+
+    def wind_power_law(self, ejection_height: int) -> float:
+        """
+        Зависимость закона силы ветра от высоты выброса
+        (C5.1) p.223
+        :@papam: ejection_height - высота выброса, м
+        :@return: : us: float: закон силы ветра от высоты выброса
+        """
+        p = self.wind_profile()
+        us = self.wind_speed * math.pow(ejection_height / WIND_HEIGHT, p)
+        return us
+
+    def height_source_correction(self, us: float, gas_exit_speed: float,
+                                 ejection_diametr: int, ejection_height: int):
+        '''
+        Функция корректироваки высоты выброса
+
+        :@papam: us - сила ветра, м/с (см. def wind_power_law)
+        :@papam: gas_exit_speed - скорость выброса газа, м/с
+        :@papam: ejection_diametr - диаметр выброса, м
+        :@papam: hs_with_steak - корректированная высота выброса, м
+
+        :@return: : us: float: закон силы ветра от высоты выброса
+        '''
+        if gas_exit_speed / us < 1.5:
+            hs_with_steak = ejection_height + 2 * ejection_diametr * (gas_exit_speed / us - 1.5)
+        else:
+            hs_with_steak = ejection_height
+        return hs_with_steak
+
+    def selecting_plume_rise(self, pasquill: str, gas_exit_speed: float,
+                             gas_temperature: int, ejection_diametr: int) -> float:
+        '''
+        Функция для опредления, что больше воздействует импульс или плавучесть
+        Table C5.4. Equations for Selecting Plume Rise Because of Buoyancy or Momentum
+        :@papam: pasquill - класс атмосферы по Паскуиллу
+        :@papam: gas_exit_speed - скорость выброса газа, м/с
+        :@papam: gas_temperature - температура выброса газа, град.С
+        :@papam: ejection_diametr - диаметр выброса, м
+        :@return: delta_T_c: float: температура, К (для опредления, что больше воздействует импульс или плавучесть)
+        '''
+        gas_temperature = gas_temperature + TEMP_TO_KELVIN
+        Fb = GRAVITY * gas_exit_speed * math.pow(ejection_diametr, 2) * (
+                (gas_temperature - self.ambient_temperature) / (4 * gas_temperature))
+        if pasquill in ('A', 'B', 'C', 'D'):
+            if Fb < 55:
+                delta_T_c = 0.0297 * gas_temperature * math.pow(gas_exit_speed / math.pow(ejection_diametr, 2), 1 / 3)
+            else:
+                delta_T_c = 0.00575 * gas_temperature * math.pow(gas_exit_speed / math.pow(ejection_diametr, 2), 1 / 3)
+        else:
+            # 0.02  и 0.035 эмпирические коэф. p.245
+            k = 0.02 if pasquill == 'E' else 0.035
+            s = (GRAVITY / self.ambient_temperature) * k
+            delta_T_c = 0.019582 * gas_temperature * gas_exit_speed * math.sqrt(s)
+        return delta_T_c
+
+    def maximum_distance_x(self, pasquill: str, gas_exit_speed: float,
+                           gas_temperature: int, ejection_diametr: int, delta_T_c: float, us: float) -> float:
+        '''
+        Функция расчета максимальной дистанции
+        Table C5.5. Equations for Calculating Distance, xf, of Maximum Plume Rise
+        :@papam: pasquill - класс атмосферы по Паскуиллу
+        :@papam: gas_exit_speed - скорость выброса газа, м/с
+        :@papam: gas_temperature - температура выброса газа, град.С
+        :@papam: ejection_diametr - диаметр выброса, м
+        :@delta_T_c: nt - диаметр выброса, м
+        :@papam: us - сила ветра от высоты выброса (см. def wind_power_law)
+        :@return: x_max: float: расстояние, м
+        '''
+        gas_temperature = gas_temperature + TEMP_TO_KELVIN
+        Fb = GRAVITY * gas_exit_speed * math.pow(ejection_diametr, 2) * (
+                (gas_temperature - self.ambient_temperature) / (4 * gas_temperature))
+
+        if pasquill in ('A', 'B', 'C', 'D'):
+            if Fb < 55:
+                x_max = 49 * math.pow(Fb, 5 / 8)
+            else:
+                x_max = 119 * math.pow(Fb, 2 / 5)
+            if (gas_temperature - self.ambient_temperature) < delta_T_c and Fb == 0:
+                x_max = 4 * ejection_diametr * math.pow(gas_exit_speed + 3 * us, 2) / (gas_exit_speed * us)
+        else:
+            # 0.02  и 0.035 эмпирические коэф. p.245
+            k = 0.02 if pasquill == 'E' else 0.035
+            s = (GRAVITY / self.ambient_temperature) * k
+            if (gas_temperature - self.ambient_temperature) < delta_T_c:
+                x_max = math.pi * 0.50 * us / math.sqrt(s)
+            else:
+                x_max = 2.0715 * us / math.sqrt(s)
+        return x_max
+
+
 if __name__ == '__main__':
-    cls = Instantaneous_source(ambient_temperature=25, cloud=0,
-                               wind_speed=4, density_air=1.21,
-                               is_night=False, is_urban_area=False)
+    # #instantaneous_source
+    # cls = Instantaneous_source(ambient_temperature=25, cloud=0,
+    #                            wind_speed=4, density_air=1.21,
+    #                            is_night=False, is_urban_area=False)
+    # pasquill = (cls.pasquill_atmospheric_stability_classes())
+    # p = (cls.wind_profile())
+    # us = (cls.wind_power_law(ejection_height=2))
+    # Fbi = (cls.source_buoyancy_flux_parameter(147, 500))
+    # x_max = cls.maximum_distance_x(pasquill, us, Fbi)
+    # he_max = cls.gradual_puff_rise(ejection_height=2, pasquill=pasquill, us=us,
+    #                                Fbi=Fbi, gas_weight=500, po_gas=3.15, x_dist=x_max)
+    #
+    # x = 1000
+    # he_r = cls.gradual_puff_rise(ejection_height=2, pasquill=pasquill, us=us, Fbi=Fbi, gas_weight=500, po_gas=3.15,
+    #                              x_dist=x) if x <= he_max else cls.final_puff_rise(ejection_height=2, pasquill=pasquill,
+    #                                                                                us=us, Fbi=Fbi, gas_weight=500,
+    #                                                                                po_gas=3.15, x_dist=x)
+    #
+    # sigma_x, sigma_y, sigma_z = cls.dispersion_param(pasquill=pasquill, x_dist=x)
+    #
+    # u_mean = cls.mean_wind_speed(he_r, he_max, sigma_z)[2]
+    #
+    # t_in, t_out, t_peak = cls.time_in_out_peak(sigma_x, u_mean, x)
+    #
+    # print(cls.concentration(500, pasquill, u_mean, he_r, t_peak, x, 0, 2))
+
+    # Continuous
+    cls = Continuous_source(ambient_temperature=7, cloud=5,
+                            wind_speed=2, density_air=1.21,
+                            is_night=True, is_urban_area=False)
+
     pasquill = (cls.pasquill_atmospheric_stability_classes())
-    p = (cls.wind_profile())
-    us = (cls.wind_power_law(ejection_height=2))
-    Fbi = (cls.source_buoyancy_flux_parameter(147, 500))
-    x_max = cls.maximum_distance_x(pasquill, us, Fbi)
-    he_max = cls.gradual_puff_rise(ejection_height=2, pasquill=pasquill, us=us,
-                                   Fbi=Fbi, gas_weight=500, po_gas=3.15, x_dist=x_max)
-
-    x = 1000
-    he_r = cls.gradual_puff_rise(ejection_height=2, pasquill=pasquill, us=us, Fbi=Fbi, gas_weight=500, po_gas=3.15,
-                                 x_dist=x) if x <= he_max else cls.final_puff_rise(ejection_height=2, pasquill=pasquill,
-                                                                                   us=us, Fbi=Fbi, gas_weight=500,
-                                                                                   po_gas=3.15, x_dist=x)
-
-    sigma_x, sigma_y, sigma_z = cls.dispersion_param(pasquill=pasquill, x_dist=x)
-
-    u_mean = cls.mean_wind_speed(he_r, he_max, sigma_z)[2]
-
-    t_in, t_out, t_peak = cls.time_in_out_peak(sigma_x, u_mean, x)
-
-    print(cls.concentration(500, pasquill, u_mean, he_r, t_peak, x, 0, 2))
+    print(cls.wind_profile())
+    us = (cls.wind_power_law(25))
+    print(cls.height_source_correction(us, 4, 1, 25))
+    dt = cls.selecting_plume_rise(pasquill, 4, 127, 1)
+    print(cls.maximum_distance_x(pasquill, 4, 127, 1, dt, us))
