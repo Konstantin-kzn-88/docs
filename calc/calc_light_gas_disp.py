@@ -505,7 +505,6 @@ class Continuous_source:
 
         betta_j = (1 / 3) + us / gas_exit_speed
 
-
         if pasquill in ('A', 'B', 'C', 'D', 'E', 'F') and (gas_temperature - self.ambient_temperature) >= delta_T_c:
             a = 1.60 * math.pow(Fb * math.pow(x_dist, 2), 1 / 3) / us
             he = hs_with_steak + a
@@ -520,6 +519,55 @@ class Continuous_source:
                 c = math.pow(betta_j, 2) * us * math.sqrt(s)
 
                 he = hs_with_steak + math.pow(a * (b / c), 1 / 3)
+
+        return he
+
+    def final_puff_rise(self, pasquill: str, gas_exit_speed: float,
+                        gas_temperature: int, ejection_diametr: int,
+                        delta_T_c: float, us: float, hs_with_steak: float) -> float:
+        '''
+        Функция финальной высоты выброса (he - параметр),
+        после величины максимальной дистанции x_max (def maximum_distance_x)
+
+        :@papam: pasquill - класс атмосферы по Паскуиллу
+        :@papam: gas_exit_speed - скорость выброса газа, м/с
+        :@papam: gas_temperature - температура выброса газа, град.С
+        :@papam: ejection_diametr - диаметр выброса, м
+        :@delta_T_c: nt - диаметр выброса, м
+        :@papam: us - сила ветра от высоты выброса (см. def wind_power_law)
+        :@papam: hs_with_steak - откорректированная высота выброса, м (см. def height_source_correction)
+        :@return: he: float: подъем, м
+        '''
+        gas_temperature = gas_temperature + TEMP_TO_KELVIN
+
+        Fb = GRAVITY * gas_exit_speed * math.pow(ejection_diametr, 2) * (
+                (gas_temperature - self.ambient_temperature) / (4 * gas_temperature))
+
+        # 0.02  и 0.035 эмпирические коэф. p.245
+        k = 0.02 if pasquill == 'E' else 0.035
+        s = (GRAVITY / self.ambient_temperature) * k
+
+        Fm = math.pow(gas_exit_speed, 2) * math.pow(ejection_diametr, 2) * (
+                self.ambient_temperature / (4 * gas_temperature))
+
+        if pasquill in ('A', 'B', 'C', 'D') and (gas_temperature - self.ambient_temperature) >= delta_T_c:
+            if Fb < 55:
+                a = 21.425 * math.pow(Fb, 3 / 4) / us
+                he = hs_with_steak + a
+            else:
+                a = 38.710 * math.pow(Fb, 3 / 5) / us
+                he = hs_with_steak + a
+        elif pasquill in ('E', 'F') and (gas_temperature - self.ambient_temperature) >= delta_T_c:
+            a = 2.60 * math.pow(Fb / (us * s), 1 / 3)
+            he = hs_with_steak + a
+        else:
+            if pasquill in ('A', 'B', 'C', 'D'):
+                a = 3*ejection_diametr*(gas_exit_speed/us)
+                he = hs_with_steak + a
+            else:
+                a = 3*ejection_diametr*(gas_exit_speed/us)
+                b = 1.5*math.pow(Fm/(us*math.sqrt(s)),1/3)
+                he = hs_with_steak + min(a,b)
 
         return he
 
@@ -563,3 +611,4 @@ if __name__ == '__main__':
     dt = cls.selecting_plume_rise(pasquill, 4, 127, 1)
     x_max = cls.maximum_distance_x(pasquill, 4, 127, 1, dt, us)
     print(cls.gradual_puff_rise(pasquill, 4, 127, 1, dt, us, hs_with_steak, 50))
+    print(cls.final_puff_rise(pasquill, 4, 127, 1, dt, us, hs_with_steak))

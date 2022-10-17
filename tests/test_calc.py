@@ -401,7 +401,6 @@ class ServerTest(TestCase):
         dt = cls.selecting_plume_rise(pasquill, 4, 127, 1)
         self.assertEqual(round(cls.maximum_distance_x(pasquill, 4, 127, 1, dt, us), 0), 196)
 
-
     def test_gradual_puff_rise(self):
         cls = calc_light_gas_disp.Instantaneous_source(ambient_temperature=25, cloud=0, wind_speed=4, density_air=1.21,
                                                        is_night=False, is_urban_area=False)
@@ -428,6 +427,7 @@ class ServerTest(TestCase):
         self.assertEqual(round(cls.gradual_puff_rise(pasquill, 4, 127, 1, dt, us, hs_with_steak, 100), 2), 39.34)
 
     def test_final_puff_rise(self):
+        # первичное облако
         cls = calc_light_gas_disp.Instantaneous_source(ambient_temperature=25, cloud=0, wind_speed=4, density_air=1.21,
                                                        is_night=False, is_urban_area=False)
         pasquill = (cls.pasquill_atmospheric_stability_classes())
@@ -439,6 +439,16 @@ class ServerTest(TestCase):
                                                    Fbi=Fbi, gas_weight=500, po_gas=3.15, x_dist=600), 0), 89)
         self.assertEqual(round(cls.final_puff_rise(ejection_height=2, pasquill=pasquill, us=us,
                                                    Fbi=Fbi, gas_weight=500, po_gas=3.15, x_dist=700), 0), 89)
+        # вторичное облако
+        cls = calc_light_gas_disp.Continuous_source(ambient_temperature=7, cloud=5,
+                                                    wind_speed=2, density_air=1.21,
+                                                    is_night=True, is_urban_area=False)
+
+        pasquill = (cls.pasquill_atmospheric_stability_classes())
+        us = (cls.wind_power_law(25))
+        hs_with_steak = cls.height_source_correction(us, 4, 1, 25)
+        dt = cls.selecting_plume_rise(pasquill, 4, 127, 1)
+        self.assertEqual(round(cls.final_puff_rise(pasquill, 4, 127, 1, dt, us, hs_with_steak), 0), 48)
 
     def test_dispersion_param(self):
         cls = calc_light_gas_disp.Instantaneous_source(ambient_temperature=25, cloud=0, wind_speed=4, density_air=1.21,
