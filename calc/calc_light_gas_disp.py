@@ -41,7 +41,7 @@ class Instantaneous_source:
         """
         Классы стабильности атмосферы по Паскуиллу
         Table C5.2. Pasquill Atmospheric Stability Classes. p.222
-        :@return: : pasquill_class: str: класс атмосферы
+        :return: : pasquill_class: str: класс атмосферы
         """
 
         table_data = (
@@ -81,7 +81,7 @@ class Instantaneous_source:
         """
         Экспонента профиля ветра
          Table C5.3. Wind Profile Exponent p, Eq. (C5.1).
-         :@return: : p: float: экспонента профиля ветра
+         :return: : p: float: экспонента профиля ветра
         """
         pasquill = ('A', 'B', 'C', 'D', 'E', 'F').index(self.pasquill_atmospheric_stability_classes())
         table_data = (
@@ -95,8 +95,8 @@ class Instantaneous_source:
         """
         Зависимость закона силы ветра от высоты выброса
         (C5.1) p.223
-        :@papam: ejection_height - высота выброса, м
-        :@return: : us: float: закон силы ветра от высоты выброса
+        :param ejection_height - высота выброса, м
+        :return: : us: float: закон силы ветра от высоты выброса
         """
         p = self.wind_profile()
         us = self.wind_speed * math.pow(ejection_height / WIND_HEIGHT, p)
@@ -106,9 +106,9 @@ class Instantaneous_source:
         """
         Параметр плавучести
         (C5.33) p.243
-        :@papam: gas_temperature - температура газа, град.С
-        :@papam: gas_weight - масса газа, кг
-        :@return: : Fbi: float: параметр плавучести газа, м4/с2
+        :param gas_temperature - температура газа, град.С
+        :param gas_weight - масса газа, кг
+        :return: : Fbi: float: параметр плавучести газа, м4/с2
         """
         a = (GRAVITY * gas_weight) / (math.pi * self.density_air)
         b = (gas_temperature + TEMP_TO_KELVIN - self.ambient_temperature) / self.ambient_temperature
@@ -118,10 +118,10 @@ class Instantaneous_source:
     def maximum_distance_x(self, pasquill: str, us: float, Fbi: float) -> float:
         '''
         Функция расчета максимальной дистанции
-        :@papam: pasquill - класс атмосферы по Паскуиллу
-        :@papam: us - сила ветра от высоты выброса (см. def wind_power_law)
-        :@papam: Fbi - параметр плавучести (см. def source_buoyancy_flux_parameter)
-        :@return: x_max: float: расстояние, м
+        :param pasquill - класс атмосферы по Паскуиллу
+        :param us - сила ветра от высоты выброса (см. def wind_power_law)
+        :param Fbi - параметр плавучести (см. def source_buoyancy_flux_parameter)
+        :return: x_max: float: расстояние, м
         '''
         if pasquill in ('A', 'B', 'C', 'D'):
             if Fbi <= 300 * math.pow(us, 2 / 3):
@@ -141,14 +141,14 @@ class Instantaneous_source:
         Функция постепенного подъема выброса (he - параметр),
         до величины максимальной дистанции x_max (def maximum_distance_x)
 
-        :@papam: ejection_height - высота выброса, м
-        :@papam: pasquill - класс атмосферы по Паскуиллу
-        :@papam: us - сила ветра от высоты выброса (см. def wind_power_law)
-        :@papam: Fbi - параметр плавучести (см. def source_buoyancy_flux_parameter)
-        :@papam: gas_weight - масса газа, кг
-        :@papam: po_gas - плотность газа, кг/м3
-        :@papam: x_dist - дистанция м
-        :@return: he: float: подъем, м
+        :param ejection_height - высота выброса, м
+        :param pasquill - класс атмосферы по Паскуиллу
+        :param us - сила ветра от высоты выброса (см. def wind_power_law)
+        :param Fbi - параметр плавучести (см. def source_buoyancy_flux_parameter)
+        :param gas_weight - масса газа, кг
+        :param po_gas - плотность газа, кг/м3
+        :param x_dist - дистанция м
+        :return: he: float: подъем, м
         '''
         x_max = self.maximum_distance_x(pasquill, us, Fbi)
         x_dist = x_dist if x_dist < x_max else x_max
@@ -176,14 +176,14 @@ class Instantaneous_source:
         Функция финальной высоты выброса (he - параметр),
         после величины максимальной дистанции x_max (def maximum_distance_x)
 
-        :@papam: ejection_height - высота выброса, м
-        :@papam: pasquill - класс атмосферы по Паскуиллу
-        :@papam: us - сила ветра от высоты выброса (см. def wind_power_law)
-        :@papam: Fbi - параметр плавучести (см. def source_buoyancy_flux_parameter)
-        :@papam: gas_weight - масса газа, кг
-        :@papam: po_gas - плотность газа, кг/м3
-        :@papam: x_dist - дистанция м
-        :@return: he: float: подъем, м
+        :param ejection_height - высота выброса, м
+        :param pasquill - класс атмосферы по Паскуиллу
+        :param us - сила ветра от высоты выброса (см. def wind_power_law)
+        :param Fbi - параметр плавучести (см. def source_buoyancy_flux_parameter)
+        :param gas_weight - масса газа, кг
+        :param po_gas - плотность газа, кг/м3
+        :param x_dist - дистанция м
+        :return: he: float: подъем, м
         '''
         x_max = self.maximum_distance_x(pasquill, us, Fbi)
         x_dist = x_dist if x_dist < x_max else x_max
@@ -208,8 +208,8 @@ class Instantaneous_source:
         Table C5.11. Parameters of Eq. (C5.44) as a
         Function of Atmospheric Stability. p247
 
-        :@papam: pasquill - класс атмосферы по Паскуиллу
-        :@return: : tuple: кортеж параметров (a,b,c,d)
+        :param pasquill - класс атмосферы по Паскуиллу
+        :return: : tuple: кортеж параметров (a,b,c,d)
         '''
 
         # Table C5.11. Parameters of Eq. (C5.44) as a
@@ -228,9 +228,9 @@ class Instantaneous_source:
     def dispersion_param(self, pasquill: str, x_dist: int):
         '''
         Функция параметров дисперсии
-        :@papam: pasquill - класс атмосферы по Паскуиллу
-        :@papam: x_dist - дистанция м
-        :@return: sigma: tuple: кортеж параметров (sigma_x, sigma_y, sigma_z)
+        :param pasquill - класс атмосферы по Паскуиллу
+        :param x_dist - дистанция м
+        :return: sigma: tuple: кортеж параметров (sigma_x, sigma_y, sigma_z)
         '''
         a, b, c, d = self.atmospheric_stability_param(pasquill)
         sigma_x = a * math.pow(x_dist / 1, b)
@@ -241,12 +241,12 @@ class Instantaneous_source:
     def mean_wind_speed(self, height_rise: float, height_rise_max: float, sigma_z: float) -> tuple:
         '''
         Функция средней скорости ветра
-        :@papam: height_rise - высота выброса, м (см. def gradual_puff_rise и final_puff_rise)
-        :@papam: height_rise_max - высота выброса при расстоянии для
+        :param height_rise - высота выброса, м (см. def gradual_puff_rise и final_puff_rise)
+        :param height_rise_max - высота выброса при расстоянии для
                                    максимального подъема, м (см. def gradual_puff_rise)
-        :@papam: sigma_z - коэф. дисперсии (см. def dispersion_param)
+        :param sigma_z - коэф. дисперсии (см. def dispersion_param)
 
-        :@return: (z_b,z_t,u_with_streak): tuple: - эмп. коэфциенты расслоения, средняя скорость ветра, м/с
+        :return: (z_b,z_t,u_with_streak): tuple: - эмп. коэфциенты расслоения, средняя скорость ветра, м/с
 
         '''
         p = self.wind_profile()
@@ -270,11 +270,11 @@ class Instantaneous_source:
 
     def time_in_out_peak(self, sigma_x: float, u_with_streak: float, x_dist: int) -> tuple:
         '''
-        :@papam: sigma_x - коэф. дисперсии (см. def dispersion_param)
-        :@papam: u_with_streak - средняя скорость ветра (см. def mean_wind_speed)
-        :@papam: x_dist - дистанция м
+        :param sigma_x - коэф. дисперсии (см. def dispersion_param)
+        :param u_with_streak - средняя скорость ветра (см. def mean_wind_speed)
+        :param x_dist - дистанция м
 
-        :@return: (t_in,t_out,t_peak): tuple: - время приходо, ухода, максимального присутвия в точке, с
+        :return: (t_in,t_out,t_peak): tuple: - время приходо, ухода, максимального присутвия в точке, с
 
         '''
         t_in = (x_dist - 2.45 * sigma_x) / u_with_streak
@@ -285,14 +285,14 @@ class Instantaneous_source:
     def concentration(self, gas_weight: int, pasquill: str, mean_wind_speed: float,
                       height_rise: float, time: float, x_dist: int, y: int, z: int) -> float:
         '''
-        :@papam: gas_weight - масса газа, кг
-        :@papam: pasquill - класс атмосферы по Паскуиллу
-        :@papam: u_with_streak - средняя скорость ветра (см. def mean_wind_speed)
-        :@papam: height_rise - высота выброса, м (см. def gradual_puff_rise и final_puff_rise)
-        :@papam: time - время с мщмента выброса, с (для максимального значения принять t_peak)
-        :@papam: x_dist, y, z - пространственные координаты, м
+        :param gas_weight - масса газа, кг
+        :param pasquill - класс атмосферы по Паскуиллу
+        :param u_with_streak - средняя скорость ветра (см. def mean_wind_speed)
+        :param height_rise - высота выброса, м (см. def gradual_puff_rise и final_puff_rise)
+        :param time - время с мщмента выброса, с (для максимального значения принять t_peak)
+        :param x_dist, y, z - пространственные координаты, м
 
-        :@return: (concentration): float: - концентрация, мг/м3
+        :return: (concentration): float: - концентрация, мг/м3
 
         '''
 
@@ -332,7 +332,7 @@ class Continuous_source:
         """
         Классы стабильности атмосферы по Паскуиллу
         Table C5.2. Pasquill Atmospheric Stability Classes. p.222
-        :@return: : pasquill_class: str: класс атмосферы
+        :return: : pasquill_class: str: класс атмосферы
         """
 
         table_data = (
@@ -372,7 +372,7 @@ class Continuous_source:
         """
         Экспонента профиля ветра
          Table C5.3. Wind Profile Exponent p, Eq. (C5.1).
-         :@return: : p: float: экспонента профиля ветра
+         :return: : p: float: экспонента профиля ветра
         """
         pasquill = ('A', 'B', 'C', 'D', 'E', 'F').index(self.pasquill_atmospheric_stability_classes())
         table_data = (
@@ -386,8 +386,8 @@ class Continuous_source:
         """
         Зависимость закона силы ветра от высоты выброса
         (C5.1) p.223
-        :@papam: ejection_height - высота выброса, м
-        :@return: : us: float: закон силы ветра от высоты выброса
+        :param ejection_height - высота выброса, м
+        :return: : us: float: закон силы ветра от высоты выброса
         """
         p = self.wind_profile()
         us = self.wind_speed * math.pow(ejection_height / WIND_HEIGHT, p)
@@ -398,12 +398,12 @@ class Continuous_source:
         '''
         Функция корректироваки высоты выброса
 
-        :@papam: us - сила ветра, м/с (см. def wind_power_law)
-        :@papam: gas_exit_speed - скорость выброса газа, м/с
-        :@papam: ejection_diametr - диаметр выброса, м
-        :@papam: hs_with_steak - корректированная высота выброса, м
+        :param us - сила ветра, м/с (см. def wind_power_law)
+        :param gas_exit_speed - скорость выброса газа, м/с
+        :param ejection_diametr - диаметр выброса, м
+        :param hs_with_steak - корректированная высота выброса, м
 
-        :@return: : us: float: закон силы ветра от высоты выброса
+        :return: : us: float: закон силы ветра от высоты выброса
         '''
         if gas_exit_speed / us < 1.5:
             hs_with_steak = ejection_height + 2 * ejection_diametr * (gas_exit_speed / us - 1.5)
@@ -416,11 +416,11 @@ class Continuous_source:
         '''
         Функция для опредления, что больше воздействует импульс или плавучесть
         Table C5.4. Equations for Selecting Plume Rise Because of Buoyancy or Momentum
-        :@papam: pasquill - класс атмосферы по Паскуиллу
-        :@papam: gas_exit_speed - скорость выброса газа, м/с
-        :@papam: gas_temperature - температура выброса газа, град.С
-        :@papam: ejection_diametr - диаметр выброса, м
-        :@return: delta_T_c: float: температура, К (для опредления, что больше воздействует импульс или плавучесть)
+        :param pasquill - класс атмосферы по Паскуиллу
+        :param gas_exit_speed - скорость выброса газа, м/с
+        :param gas_temperature - температура выброса газа, град.С
+        :param ejection_diametr - диаметр выброса, м
+        :return: delta_T_c: float: температура, К (для опредления, что больше воздействует импульс или плавучесть)
         '''
         gas_temperature = gas_temperature + TEMP_TO_KELVIN
         Fb = GRAVITY * gas_exit_speed * math.pow(ejection_diametr, 2) * (
@@ -442,13 +442,13 @@ class Continuous_source:
         '''
         Функция расчета максимальной дистанции
         Table C5.5. Equations for Calculating Distance, xf, of Maximum Plume Rise
-        :@papam: pasquill - класс атмосферы по Паскуиллу
-        :@papam: gas_exit_speed - скорость выброса газа, м/с
-        :@papam: gas_temperature - температура выброса газа, град.С
-        :@papam: ejection_diametr - диаметр выброса, м
+        :param pasquill - класс атмосферы по Паскуиллу
+        :param gas_exit_speed - скорость выброса газа, м/с
+        :param gas_temperature - температура выброса газа, град.С
+        :param ejection_diametr - диаметр выброса, м
         :@delta_T_c: nt - диаметр выброса, м
-        :@papam: us - сила ветра от высоты выброса (см. def wind_power_law)
-        :@return: x_max: float: расстояние, м
+        :param us - сила ветра от высоты выброса (см. def wind_power_law)
+        :return: x_max: float: расстояние, м
         '''
         gas_temperature = gas_temperature + TEMP_TO_KELVIN
         Fb = GRAVITY * gas_exit_speed * math.pow(ejection_diametr, 2) * (
@@ -478,15 +478,15 @@ class Continuous_source:
         Функция постепенного подъема выброса (he - параметр),
         до величины максимальной дистанции x_max (def maximum_distance_x)
 
-        :@papam: pasquill - класс атмосферы по Паскуиллу
-        :@papam: gas_exit_speed - скорость выброса газа, м/с
-        :@papam: gas_temperature - температура выброса газа, град.С
-        :@papam: ejection_diametr - диаметр выброса, м
+        :param pasquill - класс атмосферы по Паскуиллу
+        :param gas_exit_speed - скорость выброса газа, м/с
+        :param gas_temperature - температура выброса газа, град.С
+        :param ejection_diametr - диаметр выброса, м
         :@delta_T_c: nt - диаметр выброса, м
-        :@papam: us - сила ветра от высоты выброса (см. def wind_power_law)
-        :@papam: hs_with_steak - откорректированная высота выброса, м (см. def height_source_correction)
-        :@papam: x_dist - дистанция м
-        :@return: he: float: подъем, м
+        :param us - сила ветра от высоты выброса (см. def wind_power_law)
+        :param hs_with_steak - откорректированная высота выброса, м (см. def height_source_correction)
+        :param x_dist - дистанция м
+        :return: he: float: подъем, м
         '''
         gas_temperature = gas_temperature + TEMP_TO_KELVIN
 
@@ -529,14 +529,14 @@ class Continuous_source:
         Функция финальной высоты выброса (he - параметр),
         после величины максимальной дистанции x_max (def maximum_distance_x)
 
-        :@papam: pasquill - класс атмосферы по Паскуиллу
-        :@papam: gas_exit_speed - скорость выброса газа, м/с
-        :@papam: gas_temperature - температура выброса газа, град.С
-        :@papam: ejection_diametr - диаметр выброса, м
+        :param pasquill - класс атмосферы по Паскуиллу
+        :param gas_exit_speed - скорость выброса газа, м/с
+        :param gas_temperature - температура выброса газа, град.С
+        :param ejection_diametr - диаметр выброса, м
         :@delta_T_c: nt - диаметр выброса, м
-        :@papam: us - сила ветра от высоты выброса (см. def wind_power_law)
-        :@papam: hs_with_steak - откорректированная высота выброса, м (см. def height_source_correction)
-        :@return: he: float: подъем, м
+        :param us - сила ветра от высоты выброса (см. def wind_power_law)
+        :param hs_with_steak - откорректированная высота выброса, м (см. def height_source_correction)
+        :return: he: float: подъем, м
         '''
         gas_temperature = gas_temperature + TEMP_TO_KELVIN
 
@@ -562,14 +562,147 @@ class Continuous_source:
             he = hs_with_steak + a
         else:
             if pasquill in ('A', 'B', 'C', 'D'):
-                a = 3*ejection_diametr*(gas_exit_speed/us)
+                a = 3 * ejection_diametr * (gas_exit_speed / us)
                 he = hs_with_steak + a
             else:
-                a = 3*ejection_diametr*(gas_exit_speed/us)
-                b = 1.5*math.pow(Fm/(us*math.sqrt(s)),1/3)
-                he = hs_with_steak + min(a,b)
+                a = 3 * ejection_diametr * (gas_exit_speed / us)
+                b = 1.5 * math.pow(Fm / (us * math.sqrt(s)), 1 / 3)
+                he = hs_with_steak + min(a, b)
 
         return he
+
+    def a_b_param(self, pasquill: str, x_dist: int):
+        '''
+        Функция подбора параметров a,b
+        Table C5.8. Parameters of Eqs. (C5.26)-(C5.27) as a Function of Atmospheric Stability. p.238
+        :param pasquill: 
+        :param x_dist: 
+        :return: tuple (a,b)
+        '''
+        data = {
+            'A': {
+                '100': (122.800, 0.94470),
+                '150': (158.080, 1.05420),
+                '200': (170.220, 1.09320),
+                '250': (179.520, 1.12620),
+                '300': (217.410, 1.26440),
+                '400': (258.890, 1.40940),
+                '500': (346.750, 1.72830),
+                '3110': (453.850, 2.11660),
+                '60001': (0, 0),
+            },
+            'B': {
+                '210': (90.673, 0.93196),
+                '400': (98.483, 0.98332),
+                '60001': (109.300, 1.09710),  # для любых х>400
+            },
+            'C': {
+                '60001': (61.141, 0.91465),  # для любых х
+            },
+            'D': {
+                '310': (34.459, 0.86974),
+                '1000': (32.093, 0.81066),
+                '3000': (32.093, 0.64403),
+                '30000': (36.650, 1.09710),
+                '60001': (44.053, 0.51179),
+            },
+            'E': {
+                '100': (24.260, 0.83660),
+                '300': (23.331, 0.81956),
+                '1000': (21.628, 0.75660),
+                '2000': (21.628, 0.63077),
+                '4000': (22.540, 0.57154),
+                '10000': (24.703, 0.50527),
+                '20000': (26.970, 0.46713),
+                '40000': (34.420, 0.37615),
+                '60001': (47.618, 0.29592),
+            },
+            'F': {
+                '200': (15.209, 0.81558),
+                '700': (14.457, 0.78407),
+                '1000': (13.953, 0.68465),
+                '2000': (13.953, 0.63227),
+                '3000': (14.823, 0.54503),
+                '7000': (16.187, 0.46490),
+                '15000': (17.836, 0.41507),
+                '30000': (22.651, 0.32681),
+                '60001': (27.074, 0.27436),
+            },
+        }
+        pasquill = pasquill if pasquill in ('A', 'B', 'C', 'D', 'E', 'F') else 'F'
+        x_dist = x_dist if x_dist < 60000 else 60000
+        for item in data.keys():
+            if item == pasquill:
+                for i in data[pasquill].keys():
+                    if x_dist < int(i):
+                        a, b = data[pasquill][i]
+                        return (a, b)
+
+    def c_h_param(self, pasquill: str):
+        '''
+        Функция подбора параметров c-h
+        Table C5.8. Parameters of Eqs. (C5.26)-(C5.27) as a Function of Atmospheric Stability. p.238
+        :param pasquill:
+        :return: tuple (c,d,e,f,g,h)
+        '''
+        pasquill = pasquill if pasquill in ('A', 'B', 'C', 'D', 'E', 'F') else 'F'
+        data = {
+            'A': (24.1670, 2.5334, 0.32, 0.24, 0.001, 0.5),
+            'B': (18.3330, 1.8096, 0.32, 0.24, 0.001, 0.5),
+            'C': (12.5000, 1.0857, 0.22, 0.20, 0, 0),
+            'D': (8.3330, 0.7238, 0.16, 0.14, 0.0003, -0.5),
+            'E': (6.2500, 0.5428, 0.11, 0.08, 0.0015, -0.05),
+            'F': (4.1667, 0.3619, 0.11, 0.08, 0.0015, -0.05),
+        }
+
+        return data[pasquill]
+
+    def dispersion_param(self, pasquill: str, x_dist: int):
+        '''
+        Функция параметров дисперсии
+        :param pasquill - класс атмосферы по Паскуиллу
+        :param x_dist - дистанция м
+        :return: sigma: tuple: кортеж параметров (sigma_x, sigma_y, sigma_z)
+        '''
+        C1 = 0.0004
+        C2 = 0.4651
+        C3 = 0.001
+        C4 = 0.01745
+        c, d, e, f, g, h = self.c_h_param(pasquill)
+        a, b = self.a_b_param(pasquill, x_dist)
+        if self.is_urban_area:
+            sigma_y = e * x_dist * math.pow(1 + C1 * x_dist, -1 / 2)
+            sigma_z = f * x_dist * math.pow(1 + g * x_dist, h)
+        else:
+            TH = C4 * (c - d * math.log(C3 * x_dist))
+            sigma_y = C2 * x_dist * math.tan(TH)
+            sigma_z = a * math.pow(C3 * x_dist, b)
+
+        return (sigma_y, sigma_z)
+
+    def concentration(self, gas_emission: float, us: float, pasquill: str,
+                      height_rise: float, x_dist: int, y: int, z: int) -> float:
+        '''
+        :param gas_emission - выброс газа, кг/с
+        :param us закон силы ветра от высоты выброса
+        :param pasquill - класс атмосферы по Паскуиллу
+        :param height_rise - высота выброса, м (см. def gradual_puff_rise и final_puff_rise)
+        :param x_dist, y, z - пространственные координаты, м
+
+        :return: (concentration): float: - концентрация, мг/м3
+
+        '''
+
+        sigma_y, sigma_z = self.dispersion_param(pasquill, x_dist)
+
+        first_add = (gas_emission / us) * (math.pow(10, 9) / (2 * math.pi * sigma_y))
+        second_add = math.exp(-(y ** 2) / (2 * (sigma_y ** 2)))
+        third_add = 1 / sigma_z
+        fourth_add = math.exp(-((height_rise - z) ** 2) / (2 * sigma_z * sigma_z))
+        fifth_add = math.exp(-((height_rise + z) ** 2) / (2 * sigma_z * sigma_z))
+
+        concentration = first_add * second_add * third_add * (fourth_add + fifth_add)
+        return concentration * MKG_TO_MG
 
 
 if __name__ == '__main__':
@@ -605,10 +738,11 @@ if __name__ == '__main__':
                             is_night=True, is_urban_area=False)
 
     pasquill = (cls.pasquill_atmospheric_stability_classes())
-    print(cls.wind_profile())
     us = (cls.wind_power_law(25))
     hs_with_steak = cls.height_source_correction(us, 4, 1, 25)
     dt = cls.selecting_plume_rise(pasquill, 4, 127, 1)
     x_max = cls.maximum_distance_x(pasquill, 4, 127, 1, dt, us)
-    print(cls.gradual_puff_rise(pasquill, 4, 127, 1, dt, us, hs_with_steak, 50))
-    print(cls.final_puff_rise(pasquill, 4, 127, 1, dt, us, hs_with_steak))
+    he_1 = (cls.gradual_puff_rise(pasquill, 4, 127, 1, dt, us, hs_with_steak, 50))
+    he_2 = (cls.final_puff_rise(pasquill, 4, 127, 1, dt, us, hs_with_steak))
+
+    print(cls.concentration(0.02,us, pasquill, he_2,60000,0,2))

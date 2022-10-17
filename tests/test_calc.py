@@ -457,6 +457,15 @@ class ServerTest(TestCase):
         self.assertEqual(round(cls.dispersion_param(pasquill=pasquill, x_dist=100)[0], 0), 10)
         self.assertEqual(round(cls.dispersion_param(pasquill=pasquill, x_dist=100)[1], 0), 10)
         self.assertEqual(round(cls.dispersion_param(pasquill=pasquill, x_dist=100)[2], 0), 15)
+        # только вторичное облако (параметры a-h)
+        cls = calc_light_gas_disp.Continuous_source(ambient_temperature=7, cloud=5,
+                                                    wind_speed=2, density_air=1.21,
+                                                    is_night=True, is_urban_area=False)
+        self.assertEqual(cls.a_b_param('F', 350), (14.457, 0.78407))
+        self.assertEqual(cls.c_h_param('F'), (4.1667, 0.3619, 0.11, 0.08, 0.0015, -0.05))
+        # вторичное облако сигма x и сигма z
+        self.assertEqual(round(cls.dispersion_param('F', 50)[0], 2), 2.14)
+        self.assertEqual(round(cls.dispersion_param('F', 50)[1], 2), 1.32)
 
     def test_mean_wind_speed(self):
         cls = calc_light_gas_disp.Instantaneous_source(ambient_temperature=25, cloud=0,
@@ -509,20 +518,27 @@ class ServerTest(TestCase):
         x_max = cls.maximum_distance_x(pasquill, us, Fbi)
         he_max = cls.gradual_puff_rise(ejection_height=2, pasquill=pasquill, us=us,
                                        Fbi=Fbi, gas_weight=500, po_gas=3.15, x_dist=x_max)
-
         x = 1000
         he_r = cls.gradual_puff_rise(ejection_height=2, pasquill=pasquill, us=us, Fbi=Fbi, gas_weight=500, po_gas=3.15,
                                      x_dist=x) if x <= he_max else cls.final_puff_rise(ejection_height=2,
                                                                                        pasquill=pasquill,
                                                                                        us=us, Fbi=Fbi, gas_weight=500,
                                                                                        po_gas=3.15, x_dist=x)
-
         sigma_x, sigma_y, sigma_z = cls.dispersion_param(pasquill=pasquill, x_dist=x)
-
         u_mean = cls.mean_wind_speed(he_r, he_max, sigma_z)[2]
-
         t_in, t_out, t_peak = cls.time_in_out_peak(sigma_x, u_mean, x)
-
         self.assertEqual(round(cls.concentration(500, pasquill, u_mean, he_r, t_peak, x, 0, 2), 0), 133)
+        # Вторичное облако
+        cls = calc_light_gas_disp.Continuous_source(ambient_temperature=7, cloud=5,
+                                                      wind_speed=2, density_air=1.21,
+                                                      is_night=True, is_urban_area=False)
+
+        pasquill = (cls.pasquill_atmospheric_stability_classes())
+        us = (cls.wind_power_law(25))
+        hs_with_steak = cls.height_source_correction(us, 4, 1, 25)
+        dt = cls.selecting_plume_rise(pasquill, 4, 127, 1)
+        x_max = 60000
+        he_2 = (cls.final_puff_rise(pasquill, 4, 127, 1, dt, us, hs_with_steak))
+        self.assertEqual(round(cls.concentration(0.02, us, pasquill, he_2, x_max, 0, 2),3),0.015)
 
     # END
