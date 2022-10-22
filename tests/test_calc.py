@@ -545,16 +545,22 @@ class ServerTest(TestCase):
 
     # START 8. Тестирование рассеивания тяжелого газа
     def test_alpha_beta(self):
+        # первичное облако
         cls = calc_heavy_gas_disp.Instantaneous_source(1, 1.21)
         self.assertEqual(round(cls.alpha(6,10), 2), 0.96)
-        self.assertEqual(round(cls.alpha(2, 20), 2), 0.62)
-        self.assertEqual(round(cls.beta(0.96,0.6), 2), 1.79)
-        self.assertEqual(round(cls.beta(0.62, 0.6), 2), 1.88)
+        self.assertEqual(round(cls.beta(0.96, 0.6), 2), 1.79)
+        # второричное облако
+        cls = calc_heavy_gas_disp.Continuous_source(4, 1.21)
+        self.assertEqual(round(cls.alpha(6,1), 3), 0.034)
+        self.assertEqual(round(cls.beta(0.033,0.01), 2), 2.37)
 
     def test_find_distance(self):
+        # первичное облако
         cls = calc_heavy_gas_disp.Instantaneous_source(1, 1.21)
         self.assertEqual(round(cls.find_distance(1.79,10), 0), 133)
-        self.assertEqual(round(cls.find_distance(1.88, 10), 0), 163)
+        # второричное облако
+        cls = calc_heavy_gas_disp.Continuous_source(4, 1.21)
+        self.assertEqual(round(cls.find_distance(2.37,1), 0), 117)
 
     def test_find_time(self):
         cls = calc_heavy_gas_disp.Instantaneous_source(1, 1.21)
