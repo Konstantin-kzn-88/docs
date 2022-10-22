@@ -1,7 +1,7 @@
 import random
 from unittest import TestCase, main
 from calc import calc_strait_fire, calc_probit, calc_sp_explosion, calc_tvs_explosion, calc_fireball, \
-    calc_lower_concentration, calc_liguid_evaporation, calc_light_gas_disp
+    calc_lower_concentration, calc_liguid_evaporation, calc_light_gas_disp, calc_heavy_gas_disp
 
 
 class ServerTest(TestCase):
@@ -541,4 +541,25 @@ class ServerTest(TestCase):
         he_2 = (cls.final_puff_rise(pasquill, 4, 127, 1, dt, us, hs_with_steak))
         self.assertEqual(round(cls.concentration(0.02, us, pasquill, he_2, x_max, 0, 2),3),0.015)
 
+    # END
+
+    # START 8. Тестирование рассеивания тяжелого газа
+    def test_alpha_beta(self):
+        cls = calc_heavy_gas_disp.Instantaneous_source(1, 1.21)
+        self.assertEqual(round(cls.alpha(6,10), 2), 0.96)
+        self.assertEqual(round(cls.alpha(2, 20), 2), 0.62)
+        self.assertEqual(round(cls.beta(0.96,0.6), 2), 1.79)
+        self.assertEqual(round(cls.beta(0.62, 0.6), 2), 1.88)
+
+    def test_find_distance(self):
+        cls = calc_heavy_gas_disp.Instantaneous_source(1, 1.21)
+        self.assertEqual(round(cls.find_distance(1.79,10), 0), 133)
+        self.assertEqual(round(cls.find_distance(1.88, 10), 0), 163)
+
+    def test_find_time(self):
+        cls = calc_heavy_gas_disp.Instantaneous_source(1, 1.21)
+        self.assertEqual(round(cls.find_time(132,10,6,1)[0], 0), 171)
+        self.assertEqual(round(cls.find_time(163,10,6,1)[0], 0), 225)
+        self.assertEqual(round(cls.find_time(132,10,6,1)[1], 0), 64)
+        self.assertEqual(round(cls.find_time(163,10,6,1)[1], 0), 73)
     # END

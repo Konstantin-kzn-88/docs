@@ -33,7 +33,7 @@ class Instantaneous_source:
         :return: alpha_aprox - параметр для апроксимации графика (альфа-параметр)
         Figure C5.20. Britter and McQuaid diagram [Britter & McQuaid 1988]
         '''
-        g0 = (9.81 * (density_init - 1.21)) / 1.21
+        g0 = (GRAVITY * (density_init - self.density_air)) / self.density_air
         alpha_aprox = (1 / 2) * math.log10(g0 * math.pow(volume_gas, 1 / 3) / math.pow(self.wind_speed, 2))
         return alpha_aprox
 
@@ -185,4 +185,12 @@ class Instantaneous_source:
 
 if __name__ == '__main__':
     cls = Instantaneous_source(1, 1.21)
+    print(cls.alpha(6,10))
+    print(cls.alpha(2, 20))
+    print(cls.beta(0.96,0.6))
+    print(cls.beta(0.62, 0.6))
+    print(cls.find_distance(1.79,10))
+    print(cls.find_distance(1.88, 10))
+    print(cls.find_time(132,10,6,1))
+    print(cls.find_time(163,10,6,1))
     print(cls.concentration(10, 6, 5))
