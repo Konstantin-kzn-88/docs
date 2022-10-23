@@ -12,6 +12,7 @@
 import math
 
 GRAVITY = 9.81  # ускорение свободного падения м/с2
+KGM3_TO_MGLITER = 1000 # кг/м3 в мг/л
 
 
 class Instantaneous_source:
@@ -179,6 +180,16 @@ class Instantaneous_source:
 
         return (data_concentration, data_x_dist, data_width, data_time)
 
+    def toxic_dose(self, concentration: float, time: int, n=3):
+        '''
+        :param concentration - концентрация, кг/м3
+        :param time - время экспозиции, мин
+        :param n - эмпирический коэф., допускается принимать равным 3 (стр.266 Fires, explosions, and toxic gas...)
+
+        :return: (dose): float: - токсодоза, мг*мин/л
+        '''
+        dose = math.pow(concentration*KGM3_TO_MGLITER, n) * time
+        return dose
 
 class Continuous_source:
     def __init__(self, wind_speed: int, density_air: float):
@@ -329,6 +340,17 @@ class Continuous_source:
             data_width.append(widht_plume)
 
         return (data_concentration, data_x_dist, data_width)
+
+    def toxic_dose(self, concentration: float, time: int, n=3):
+        '''
+        :param concentration - концентрация, кг/м3
+        :param time - время экспозиции, мин
+        :param n - эмпирический коэф., допускается принимать равным 3 (стр.266 Fires, explosions, and toxic gas...)
+
+        :return: (dose): float: - токсодоза, мг*мин/л
+        '''
+        dose = math.pow(concentration*KGM3_TO_MGLITER, n) * time
+        return dose
 
 
 if __name__ == '__main__':

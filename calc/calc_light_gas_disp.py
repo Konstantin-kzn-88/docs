@@ -15,6 +15,7 @@ TEMP_TO_KELVIN = 273
 WIND_HEIGHT = 10  # высота определения характеристик ветра
 GRAVITY = 9.81  # ускорение свободного падения м/с2
 MKG_TO_MG = 0.001  # мкг в мг
+M3_TO_LITER = 1000  # м3 в литры
 
 
 class Instantaneous_source:
@@ -282,20 +283,19 @@ class Instantaneous_source:
         t_peak = x_dist / u_with_streak
         return (t_in, t_out, t_peak)
 
-    def concentration(self, gas_weight: int, pasquill: str, mean_wind_speed: float,
+    def concentration(self, gas_weight: int, mean_wind_speed: float,
                       height_rise: float, time: float, x_dist: int, y: int, z: int) -> float:
         '''
         :param gas_weight - масса газа, кг
-        :param pasquill - класс атмосферы по Паскуиллу
         :param u_with_streak - средняя скорость ветра (см. def mean_wind_speed)
         :param height_rise - высота выброса, м (см. def gradual_puff_rise и final_puff_rise)
-        :param time - время с мщмента выброса, с (для максимального значения принять t_peak)
+        :param time - время с момента выброса, с (для максимального значения принять t_peak)
         :param x_dist, y, z - пространственные координаты, м
 
         :return: (concentration): float: - концентрация, мг/м3
 
         '''
-
+        pasquill = self.pasquill_atmospheric_stability_classes()
         sigma_x, sigma_y, sigma_z = self.dispersion_param(pasquill, x_dist)
 
         first_add = 2 * gas_weight * math.pow(10, 9)
@@ -307,6 +307,17 @@ class Instantaneous_source:
 
         concentration = (first_add / second_add) * third_add * fourth_add * (fifth_add + six_add)
         return concentration * MKG_TO_MG
+
+    def toxic_dose(self, concentration: float, time: int, n=3):
+        '''
+        :param concentration - концентрация, мг/м3
+        :param time - время экспозиции, мин
+        :param n - эмпирический коэф., допускается принимать равным 3 (стр.266 Fires, explosions, and toxic gas...)
+
+        :return: (dose): float: - токсодоза, мг*мин/л
+        '''
+        dose = math.pow(concentration/M3_TO_LITER, n) * time
+        return dose
 
 
 class Continuous_source:
@@ -680,12 +691,11 @@ class Continuous_source:
 
         return (sigma_y, sigma_z)
 
-    def concentration(self, gas_emission: float, us: float, pasquill: str,
+    def concentration(self, gas_emission: float, us: float,
                       height_rise: float, x_dist: int, y: int, z: int) -> float:
         '''
         :param gas_emission - выброс газа, кг/с
         :param us закон силы ветра от высоты выброса
-        :param pasquill - класс атмосферы по Паскуиллу
         :param height_rise - высота выброса, м (см. def gradual_puff_rise и final_puff_rise)
         :param x_dist, y, z - пространственные координаты, м
 
@@ -693,6 +703,7 @@ class Continuous_source:
 
         '''
 
+        pasquill = self.pasquill_atmospheric_stability_classes()
         sigma_y, sigma_z = self.dispersion_param(pasquill, x_dist)
 
         first_add = (gas_emission / us) * (math.pow(10, 9) / (2 * math.pi * sigma_y))
@@ -703,6 +714,17 @@ class Continuous_source:
 
         concentration = first_add * second_add * third_add * (fourth_add + fifth_add)
         return concentration * MKG_TO_MG
+
+    def toxic_dose(self, concentration: float, time: int, n=3):
+        '''
+        :param concentration - концентрация, мг/м3
+        :param time - время экспозиции, мин
+        :param n - эмпирический коэф., допускается принимать равным 3 (стр.266 Fires, explosions, and toxic gas...)
+
+        :return: (dose): float: - токсодоза, мг*мин/л
+        '''
+        dose = math.pow(concentration/M3_TO_LITER, n) * time
+        return dose
 
 
 if __name__ == '__main__':
@@ -730,7 +752,7 @@ if __name__ == '__main__':
     #
     # t_in, t_out, t_peak = cls.time_in_out_peak(sigma_x, u_mean, x)
     #
-    # print(cls.concentration(500, pasquill, u_mean, he_r, t_peak, x, 0, 2))
+    # print(cls.concentration(500, u_mean, he_r, t_peak, x, 0, 2))
 
     # Continuous
     cls = Continuous_source(ambient_temperature=7, cloud=5,
@@ -745,4 +767,4 @@ if __name__ == '__main__':
     he_1 = (cls.gradual_puff_rise(pasquill, 4, 127, 1, dt, us, hs_with_steak, 50))
     he_2 = (cls.final_puff_rise(pasquill, 4, 127, 1, dt, us, hs_with_steak))
 
-    print(cls.concentration(0.02,us, pasquill, he_2,60000,0,2))
+    print(cls.concentration(0.02, us, he_2, 60000, 0, 2))

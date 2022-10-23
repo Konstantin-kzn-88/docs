@@ -527,7 +527,7 @@ class ServerTest(TestCase):
         sigma_x, sigma_y, sigma_z = cls.dispersion_param(pasquill=pasquill, x_dist=x)
         u_mean = cls.mean_wind_speed(he_r, he_max, sigma_z)[2]
         t_in, t_out, t_peak = cls.time_in_out_peak(sigma_x, u_mean, x)
-        self.assertEqual(round(cls.concentration(500, pasquill, u_mean, he_r, t_peak, x, 0, 2), 0), 133)
+        self.assertEqual(round(cls.concentration(500, u_mean, he_r, t_peak, x, 0, 2), 0), 133)
         # Вторичное облако
         cls = calc_light_gas_disp.Continuous_source(ambient_temperature=7, cloud=5,
                                                       wind_speed=2, density_air=1.21,
@@ -539,7 +539,7 @@ class ServerTest(TestCase):
         dt = cls.selecting_plume_rise(pasquill, 4, 127, 1)
         x_max = 60000
         he_2 = (cls.final_puff_rise(pasquill, 4, 127, 1, dt, us, hs_with_steak))
-        self.assertEqual(round(cls.concentration(0.02, us, pasquill, he_2, x_max, 0, 2),3),0.015)
+        self.assertEqual(round(cls.concentration(0.02, us, he_2, x_max, 0, 2),3),0.015)
 
     # END
 
