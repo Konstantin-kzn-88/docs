@@ -67,7 +67,7 @@ class Report:
         # Таблица с распределением ОВ
         mass_in_dev_and_pipe = self.__calc_mass_in_device(self.dev_info, self.pipe_info, self.sub_info)
         context['mass_sub_table'] = mass_in_dev_and_pipe
-        context['sum_sub'] = sum([float(i['Quantity']) for i in mass_in_dev_and_pipe])
+        context['sum_sub'] = round(sum([float(i['Quantity']) for i in mass_in_dev_and_pipe]),2)
         # Таблица с авариями
         if len(self.pipe_info) != 0:
             with open(f'{self.path_template}\\report\\templates\\oil_pipelines.txt', 'r', encoding="utf-8") as f:
@@ -414,10 +414,11 @@ class Report:
         context['C3_3_10_10_risk'] = C1_3_10_10
         context['C4_3_10_10_risk'] = C1_3_10_10
 
-        # Индивидуальный и коллективный риск
-        risk = self.__calc_ind_risk(all_table_data)
-        context['Ind_risk'] = "{:.2e}".format(risk[0])
-        context['Group_risk'] = "{:.2e}".format(risk[1])
+        # Индивидуальный, потенциальный и коллективный риск
+        risk = self.__calc_risk(all_table_data)
+        context['Pot_risk'] = "{:.2e}".format(risk[0])
+        context['Ind_risk'] = "{:.2e}".format(risk[1])
+        context['Group_risk'] = "{:.2e}".format(risk[2])
         # Наиболее опасные и вероятные
         context['most_dangerous'] = self.__most_dangerous(C1_1_max)
         context['most_possible'] = self.__most_possible(C1_3_10_10)
@@ -492,21 +493,25 @@ class Report:
         calc_fn_fg_chart.FN_FG_chart(f'{self.path_template}\\report\\templates').fn_chart([pr, ppl])
         calc_fn_fg_chart.FN_FG_chart(f'{self.path_template}\\report\\templates').fg_chart([pr, dmg])
 
-    def __calc_ind_risk(self, data: list):
+    def __calc_risk(self, data: list):
         group_risk = 0  # коллективный риск
-        ppl_sum = 0  # люди
+        potential_risk = 0  # индивидуальный риск
         for item in data:
             for dict_ in item:
-                ppl_sum += float(dict_['Death_person_C1']) + float(dict_['Death_person_C2'])
-                ppl_sum += float(dict_['Death_person_C3']) + float(dict_['Death_person_C4'])
+                potential_risk += float(dict_['P_risk_C1'])
+                potential_risk += float(dict_['P_risk_C2'])
+                potential_risk += float(dict_['P_risk_C3'])
+                potential_risk += float(dict_['P_risk_C4'])
 
                 group_risk += float(dict_['Frequency_C1']) * float(dict_['Death_person_C1'])
                 group_risk += float(dict_['Frequency_C2']) * float(dict_['Death_person_C2'])
                 group_risk += float(dict_['Frequency_C3']) * float(dict_['Death_person_C3'])
                 group_risk += float(dict_['Frequency_C4']) * float(dict_['Death_person_C4'])
 
-        individual_risk = group_risk / ppl_sum
-        return (individual_risk, group_risk)
+        individual_risk = potential_risk * 0.015
+
+        return (potential_risk, individual_risk, group_risk)
+
 
     def __most_possible(self, data: list):
         dev = data[0]['Poz_sub']
@@ -765,6 +770,16 @@ class Report:
             item['Injured_person_C2'] = round(tuple_injured_people[type_hole] / 2)
             item['Injured_person_C3'] = item['Injured_person_C2']
             item['Injured_person_C4'] = 0
+            # вероятность гибели людей
+            item['P_Death_person_C1'] = 0.01 if item['Death_person_C1'] != 0 else 0
+            item['P_Death_person_C2'] = 0.01 if item['Death_person_C2'] != 0 else 0
+            item['P_Death_person_C3'] = 1 if item['Death_person_C3'] != 0 else 0
+            item['P_Death_person_C4'] = 0
+            # потенциальный риск
+            item['P_risk_C1'] = "{:.2e}".format(float(item['P_Death_person_C1']) * float(item['Frequency_C1']))
+            item['P_risk_C2'] = "{:.2e}".format(float(item['P_Death_person_C2']) * float(item['Frequency_C2']))
+            item['P_risk_C3'] = "{:.2e}".format(float(item['P_Death_person_C3']) * float(item['Frequency_C3']))
+            item['P_risk_C4'] = 0
 
             # 7. Ущерб.
             if item['Type_device'] == -1:
