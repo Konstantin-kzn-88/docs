@@ -16,6 +16,7 @@ KMOL_TO_MOL = 0.001
 PRESSURE_ATM = 0.101325  # атмосферное давление, МПа
 R = 8.413  # газовая постоянная
 MPA_TO_PA = math.pow(10, 6)  # МПа в Па
+KM_TO_M = math.pow(10, 3)  # км в м
 VISCOSITY = 82  # Па*с (вязкость по пропану)
 
 
@@ -71,10 +72,12 @@ class Outflow:
         b = math.pow(math.fabs(self.mol_weight / (self.poisson_ratio * R * temperature)), 1 / 2)
         return float(a * b)
 
-    def u_sound(self):
+    def u_sound(self) -> float:
+        'Скорость звука, м/с'
         return math.pow(self.poisson_ratio * R * self.temperature / self.mol_weight, 1 / 2)
 
-    def reinolds(self):
+    def reinolds(self) -> float:
+        'Число Рейнольдса для истечения газа'
         square = (1 / 4) * math.pi * math.pow(self.pipe_diameter, 2)
         po = self.pressure * MPA_TO_PA * self.mol_weight / (R * self.temperature)
         m = self.flow_rate_init(self.pipe_diameter, self.pressure, self.temperature)
@@ -82,24 +85,59 @@ class Outflow:
 
         return (po * u * self.pipe_diameter / VISCOSITY) * math.pow(10, 6)
 
-    def fanning_factor(self):
+    def fanning_factor(self) -> float:
+        'Параметр Фаннинга'
         re = self.reinolds()
         if re < 2000:
             return 16 / re
         return 0.0791 * math.pow(re, -0.25)
 
-    def time_base(self):
+    def time_base(self) -> float:
+        'Определение времени истечения, с'
         us = self.u_sound()
         f = self.fanning_factor()
-        a = (4/3)*(self.pipe_length/us)
-        b = math.pow()
+        a = (4 / 3) * (self.pipe_length / us)
+        b = math.pow(self.poisson_ratio * f * self.pipe_length / self.pipe_diameter, 1 / 2)
+        tb = a * b
+        return tb
 
-# TODO!!!!!_____________________________________
+    def cross_sectional_area(self) -> float:
+        'Площадь отверстия истечения, м2'
+        return (1 / 4) * math.pi * math.pow(self.pipe_diameter, 2)
+
+    def mass_flow_rate_init(self) -> float:
+        'Определение мгновенного массового расхода при t = 0 сек'
+        s = self.cross_sectional_area()
+        k = self.coefficient_K()
+        m = DISCHARGE * s * self.pressure * MPA_TO_PA * k * math.pow(
+            self.mol_weight / (self.poisson_ratio * R * self.temperature), 1 / 2)
+        return m
+
+    def mass_flow_rate(self):
+        m = self.mass_flow_rate_init()
+        tb =self.time_base()
+        s = self.cross_sectional_area()
+        po = self.pressure * MPA_TO_PA * self.mol_weight / (R * self.temperature)
+        mass_gas = po*self.pipe_length*s
+        S = mass_gas/(m*tb)
+
+        u_s = self.u_sound()
+        time_valid = int(self.pipe_length / u_s)
+
+
+        print(S, u_s,time_valid)
+
+
+
+
 
 if __name__ == '__main__':
     cls = Outflow(1, 10000, 0.5, 15, 44, 1.19)
-    print(cls.coefficient_K())
-    print(cls.flow_rate_init(1, 0.5, 273))
-    print(cls.u_sound())
-    print(cls.reinolds())
-    print(cls.fanning_factor())
+    # print(cls.coefficient_K())
+    # print(cls.flow_rate_init(1, 0.5, 273))
+    # print(cls.u_sound())
+    # print(cls.reinolds())
+    # print(cls.fanning_factor())
+    # print(cls.time_base())
+    # print(cls.mass_flow_rate_init())
+    cls.mass_flow_rate()
