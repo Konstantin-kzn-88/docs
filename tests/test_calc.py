@@ -1,7 +1,8 @@
 import random
 from unittest import TestCase, main
 from calc import calc_strait_fire, calc_probit, calc_sp_explosion, calc_tvs_explosion, calc_fireball, \
-    calc_lower_concentration, calc_liguid_evaporation, calc_light_gas_disp, calc_heavy_gas_disp
+    calc_lower_concentration, calc_liguid_evaporation, calc_light_gas_disp, calc_heavy_gas_disp, \
+    calc_gas_outflow_big_hole, calc_gas_outflow_small_hole
 
 
 class ServerTest(TestCase):
@@ -530,8 +531,8 @@ class ServerTest(TestCase):
         self.assertEqual(round(cls.concentration(500, u_mean, he_r, t_peak, x, 0, 2), 0), 133)
         # Вторичное облако
         cls = calc_light_gas_disp.Continuous_source(ambient_temperature=7, cloud=5,
-                                                      wind_speed=2, density_air=1.21,
-                                                      is_night=True, is_urban_area=False)
+                                                    wind_speed=2, density_air=1.21,
+                                                    is_night=True, is_urban_area=False)
 
         pasquill = (cls.pasquill_atmospheric_stability_classes())
         us = (cls.wind_power_law(25))
@@ -539,7 +540,7 @@ class ServerTest(TestCase):
         dt = cls.selecting_plume_rise(pasquill, 4, 127, 1)
         x_max = 60000
         he_2 = (cls.final_puff_rise(pasquill, 4, 127, 1, dt, us, hs_with_steak))
-        self.assertEqual(round(cls.concentration(0.02, us, he_2, x_max, 0, 2),3),0.015)
+        self.assertEqual(round(cls.concentration(0.02, us, he_2, x_max, 0, 2), 3), 0.015)
 
     # END
 
@@ -547,25 +548,40 @@ class ServerTest(TestCase):
     def test_alpha_beta(self):
         # первичное облако
         cls = calc_heavy_gas_disp.Instantaneous_source(1, 1.21)
-        self.assertEqual(round(cls.alpha(6,10), 2), 0.96)
+        self.assertEqual(round(cls.alpha(6, 10), 2), 0.96)
         self.assertEqual(round(cls.beta(0.96, 0.6), 2), 1.79)
         # второричное облако
         cls = calc_heavy_gas_disp.Continuous_source(4, 1.21)
-        self.assertEqual(round(cls.alpha(6,1), 3), 0.034)
-        self.assertEqual(round(cls.beta(0.033,0.01), 2), 2.37)
+        self.assertEqual(round(cls.alpha(6, 1), 3), 0.034)
+        self.assertEqual(round(cls.beta(0.033, 0.01), 2), 2.37)
 
     def test_find_distance(self):
         # первичное облако
         cls = calc_heavy_gas_disp.Instantaneous_source(1, 1.21)
-        self.assertEqual(round(cls.find_distance(1.79,10), 0), 133)
+        self.assertEqual(round(cls.find_distance(1.79, 10), 0), 133)
         # второричное облако
         cls = calc_heavy_gas_disp.Continuous_source(4, 1.21)
-        self.assertEqual(round(cls.find_distance(2.37,1), 0), 117)
+        self.assertEqual(round(cls.find_distance(2.37, 1), 0), 117)
 
     def test_find_time(self):
         cls = calc_heavy_gas_disp.Instantaneous_source(1, 1.21)
-        self.assertEqual(round(cls.find_time(132,10,6,1)[0], 0), 171)
-        self.assertEqual(round(cls.find_time(163,10,6,1)[0], 0), 225)
-        self.assertEqual(round(cls.find_time(132,10,6,1)[1], 0), 64)
-        self.assertEqual(round(cls.find_time(163,10,6,1)[1], 0), 73)
+        self.assertEqual(round(cls.find_time(132, 10, 6, 1)[0], 0), 171)
+        self.assertEqual(round(cls.find_time(163, 10, 6, 1)[0], 0), 225)
+        self.assertEqual(round(cls.find_time(132, 10, 6, 1)[1], 0), 64)
+        self.assertEqual(round(cls.find_time(163, 10, 6, 1)[1], 0), 73)
+
+    # END
+
+    # START 9. Тестирование истечения газа из трубы
+    def test_init_flow_rate(self):
+        # Мгновенный массовый расход при t = 0 сек
+        cls = calc_gas_outflow_big_hole.Outflow(1, 10000, 0.5, 15, 44, 1.19)
+        self.assertEqual(round(cls.mass_flow_rate_init(), 0), 1082)
+    # END
+
+    # START 10. Тестирование истечения газа из трубы
+    def test_small_hole_flow_rate(self):
+        # Расход при небольшом отверстии
+        cls = calc_gas_outflow_small_hole.Outflow(50, 1.5, 15, 28, 1.4)
+        self.assertEqual(round(cls.result(0.1)[3][0], 0), 17)
     # END

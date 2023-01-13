@@ -157,8 +157,6 @@ class Outflow:
 
 
 if __name__ == '__main__':
-    cls = Outflow(50, 5, 15, 2, 1.4)
-    print(cls.density())
-    print(cls.coefficient_K())
-    for i in cls.result(0.2):
+    cls = Outflow(50, 1.5, 15, 28, 1.4)
+    for i in cls.result(0.1):
         print(i)

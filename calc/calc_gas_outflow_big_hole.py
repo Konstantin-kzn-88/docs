@@ -114,18 +114,25 @@ class Outflow:
         return m
 
     def mass_flow_rate(self):
-        m = self.mass_flow_rate_init()
+        'Определение расхода по времени от t = 0 сек до t = time_valid'
+        m = round(self.mass_flow_rate_init(),2)
         tb =self.time_base()
         s = self.cross_sectional_area()
         po = self.pressure * MPA_TO_PA * self.mol_weight / (R * self.temperature)
         mass_gas = po*self.pipe_length*s
         S = mass_gas/(m*tb)
-
         u_s = self.u_sound()
         time_valid = int(self.pipe_length / u_s)
 
-
-        print(S, u_s,time_valid)
+        mass_flow_rate = [m]
+        time = [0]
+        for t in range(0,time_valid,1):
+            a = m/(1+S)
+            b = S* math.exp(-t/tb)
+            c = math.exp(-t/(tb*math.pow(S,2)))
+            mass_flow_rate.append(round(a*(b+c)))
+            time.append(t)
+        return(time, mass_flow_rate)
 
 
 
@@ -133,11 +140,4 @@ class Outflow:
 
 if __name__ == '__main__':
     cls = Outflow(1, 10000, 0.5, 15, 44, 1.19)
-    # print(cls.coefficient_K())
-    # print(cls.flow_rate_init(1, 0.5, 273))
-    # print(cls.u_sound())
-    # print(cls.reinolds())
-    # print(cls.fanning_factor())
-    # print(cls.time_base())
-    # print(cls.mass_flow_rate_init())
     cls.mass_flow_rate()
