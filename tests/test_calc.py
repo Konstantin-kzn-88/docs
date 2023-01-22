@@ -2,7 +2,7 @@ import random
 from unittest import TestCase, main
 from calc import calc_strait_fire, calc_probit, calc_sp_explosion, calc_tvs_explosion, calc_fireball, \
     calc_lower_concentration, calc_liguid_evaporation, calc_light_gas_disp, calc_heavy_gas_disp, \
-    calc_gas_outflow_big_hole, calc_gas_outflow_small_hole
+    calc_gas_outflow_big_hole, calc_gas_outflow_small_hole, calc_liguid_outflow_tank
 
 
 class ServerTest(TestCase):
@@ -584,4 +584,11 @@ class ServerTest(TestCase):
         # Расход при небольшом отверстии
         cls = calc_gas_outflow_small_hole.Outflow(50, 1.5, 15, 28, 1.4)
         self.assertEqual(round(cls.result(0.1)[3][0], 0), 17)
+    # END
+
+    # START 11. Тестирование истечения жидкости из резервуара
+    def test_hole_flow_rate_liguid_tank(self):
+        # Расход при небольшом отверстии
+        cls = calc_liguid_outflow_tank.Outflow(6000, 15, 0, 14, 0.75, 100, 773, 3000)
+        self.assertEqual(round(cls.result()[5][0], 2), 55.92)
     # END
