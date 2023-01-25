@@ -1,37 +1,28 @@
-import sys
-from PySide2.QtWidgets import QApplication, QWidget, QPushButton
-from PIL import Image
-
-class App(QWidget):
-
-    def __init__(self):
-        super().__init__()
-        self.title = 'Пример'
-        self.initUI()
-
-    def initUI(self):
-        self.setWindowTitle(self.title)
-        self.setGeometry(100, 100, 100, 100)
-
-        button = QPushButton('PyQt5 button', self)
-        button.clicked.connect(self.on_click)
-
-        self.show()
-
-    def on_click(self):
-        print('Paste')
-
-        im1 = Image.open('img1.jpg')
-        im2 = Image.open('img2.jpg')
-
-        im1.paste(im2)
-        im1.save('pillow_paste.jpg', quality=95)
-
-        im1.close()
-        im2.close()
+from tkinter import *
 
 
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    ex = App()
-    sys.exit(app.exec_())
+def year():
+    print(ent)  # условно во первых надо посмотреть что пришло
+    print(ent.get())  # потом у entery надо что-то получить (значение методом get)
+    print(type(ent.get()))  # понять какого типа значение мы получили (тут строка)
+    # ... понять, что нам дальше делать
+    # помня что для математических действий строка не подходит
+    ent_num = int(ent.get())
+    k = ent_num % 10
+    l = (ent_num - 1900) % 12 + 1
+    # ...
+    x = f'{ent_num}, y. - year under the patronage, {k}, {l},'
+    label["text"] = x
+
+
+window = Tk()
+window.title('Hello World!')
+window.geometry('700x500')
+window.resizable(False, False)
+label = Label(window, text='Enter any year (from 1900):\n |\nV', fg='red', font='Times')
+label.pack()
+ent = Entry(window, width=20, bd=3)
+ent.pack()
+button = Button(text='input', fg='red', width=10, bd=5, command=year)
+button.pack()
+window.mainloop()
