@@ -145,8 +145,9 @@ class MainWindow(QMainWindow):
         self.layer_thickness.setToolTip("Толщина свободного пролива")
 
         self.cut_time = QDoubleSpinBox()
+        self.cut_time.setDecimals (3)
         self.cut_time.setRange(0, 48)
-        self.cut_time.setSingleStep(0.1)
+        self.cut_time.setSingleStep(0.001)
         self.cut_time.setSuffix(" (сут.)")
         self.cut_time.setToolTip("Время отсечения потока")
 
